@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studyhaus — Reading Space CRM</title>
+  <meta name="description" content="Premium management console for a single reading space: students, seats, memberships, payments, attendance and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">S</div>
+        <span class="logo-text">Studyhaus</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- Overview -->
+        <div class="nav-group">
+          <div class="nav-group-label">Overview</div>
+          <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </a>
+          <a class="nav-item" data-page="analytics" onclick="navigate('analytics')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Analytics
+          </a>
+          <a class="nav-item" data-page="reports" onclick="navigate('reports')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Reports
+          </a>
+        </div>
+
+        <!-- Operations -->
+        <div class="nav-group">
+          <div class="nav-group-label">Operations</div>
+          <a class="nav-item" data-page="students" onclick="navigate('students')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Students
+          </a>
+          <a class="nav-item" data-page="seats" onclick="navigate('seats')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M6 20h12"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg>
+            Seat Map
+          </a>
+          <a class="nav-item" data-page="memberships" onclick="navigate('memberships')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Memberships
+          </a>
+          <a class="nav-item" data-page="attendance" onclick="navigate('attendance')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Attendance
+          </a>
+          <a class="nav-item" data-page="admissions" onclick="navigate('admissions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            Admissions
+          </a>
+        </div>
+
+        <!-- Finance -->
+        <div class="nav-group">
+          <div class="nav-group-label">Finance</div>
+          <a class="nav-item" data-page="payments" onclick="navigate('payments')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Payments
+          </a>
+          <a class="nav-item" data-page="expenses" onclick="navigate('expenses')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Expenses
+          </a>
+        </div>
+
+        <!-- Management -->
+        <div class="nav-group">
+          <div class="nav-group-label">Management</div>
+          <a class="nav-item" data-page="staff" onclick="navigate('staff')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Staff
+          </a>
+          <a class="nav-item" data-page="tasks" onclick="navigate('tasks')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Tasks
+          </a>
+          <a class="nav-item" data-page="complaints" onclick="navigate('complaints')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Complaints
+          </a>
+          <a class="nav-item" data-page="visitors" onclick="navigate('visitors')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Visitors
+          </a>
+        </div>
+
+        <!-- Assets -->
+        <div class="nav-group">
+          <div class="nav-group-label">Assets</div>
+          <a class="nav-item" data-page="inventory" onclick="navigate('inventory')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Inventory
+          </a>
+          <a class="nav-item" data-page="maintenance" onclick="navigate('maintenance')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Maintenance
+          </a>
+          <a class="nav-item" data-page="documents" onclick="navigate('documents')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Documents
+          </a>
+        </div>
+
+        <!-- System -->
+        <div class="nav-group">
+          <div class="nav-group-label">System</div>
+          <a class="nav-item" data-page="notifications" onclick="navigate('notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notifications
+            <span class="nav-badge">3</span>
+          </a>
+          <a class="nav-item" data-page="settings" onclick="navigate('settings')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="avatar">R</div>
+          <div class="user-mini-info">
+            <div class="user-mini-name">Ravi Kumar</div>
+            <div class="user-mini-role">Admin</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search students, seats, receipts…" />
+        </div>
+        <div class="topbar-actions">
+          <!-- Open/Closed status badge -->
+          <button class="status-badge open" id="status-toggle" onclick="toggleStatus()">
+            <span class="status-dot"></span>
+            <span class="status-text">Open</span>
+          </button>
+          <!-- Notification bell -->
+          <button class="icon-btn" onclick="navigate('notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="dot-badge"></span>
+          </button>
+          <!-- Dark / Light mode toggle -->
+          <button class="icon-btn theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+            <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <!-- User avatar -->
+          <div class="topbar-user">
+            <div class="topbar-avatar">RS</div>
+            <span class="topbar-username">Ravi</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--text-muted)"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- Pages -->
+      <main class="page-content" id="page-content">
+        <!-- Dashboard Page -->
+        <div class="page active" id="page-dashboard">
+          <div class="page-header">
+            <div>
+              <h1>Good morning, Ravi</h1>
+              <p class="page-subtitle">Here's what's happening at Studyhaus today.</p>
+            </div>
+            <button class="btn btn-primary" onclick="navigate('admissions')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New admission
+            </button>
+          </div>
+
+          <!-- Metric Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Today's collection</div>
+                <div class="metric-value">₹12,400</div>
+                <div class="metric-change positive">↑ 8% from yesterday</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Monthly collection</div>
+                <div class="metric-value">₹71,000</div>
+                <div class="metric-change positive">↑ 12% from last month</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Active students</div>
+                <div class="metric-value">35</div>
+                <div class="metric-change positive">↑ 3 new this week</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M6 20h12"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Occupancy</div>
+                <div class="metric-value">60%</div>
+                <div class="metric-change neutral">36 / 60 seats taken</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Present today</div>
+                <div class="metric-value">21</div>
+                <div class="metric-change neutral">of 35 active students</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="metric-info">
+                <div class="metric-label">Pending dues</div>
+                <div class="metric-value">₹14,500</div>
+                <div class="metric-change negative">↑ 5 students overdue</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two column: Recent Payments + Attendance -->
+          <div class="dashboard-grid">
+            <!-- Recent Payments -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Recent Payments</h3>
+                <button class="btn-link" onclick="navigate('payments')">View all →</button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead><tr><th>Student</th><th>Plan</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-violet)">VV</div><div><div class="name">Vihaan Verma</div><div class="sub-text">RC-24000</div></div></div></td>
+                      <td>6 Hours Daily</td>
+                      <td><span class="method-badge">Cash</span></td>
+                      <td class="amount">₹700</td>
+                      <td><span class="badge badge-pending">Pending</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-emerald)">AP</div><div><div class="name">Ananya Patel</div><div class="sub-text">RC-24001</div></div></div></td>
+                      <td>12 Hours Daily</td>
+                      <td><span class="method-badge">UPI</span></td>
+                      <td class="amount">₹1,000</td>
+                      <td><span class="badge badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-blue)">NS</div><div><div class="name">Navya Singh</div><div class="sub-text">RC-24002</div></div></div></td>
+                      <td>Weekly Access</td>
+                      <td><span class="method-badge">Card</span></td>
+                      <td class="amount">₹2,700</td>
+                      <td><span class="badge badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-amber)">MN</div><div><div class="name">Meera Nair</div><div class="sub-text">RC-24003</div></div></div></td>
+                      <td>Quarterly Saver</td>
+                      <td><span class="method-badge">Bank Transfer</span></td>
+                      <td class="amount">₹250</td>
+                      <td><span class="badge badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-teal)">VK</div><div><div class="name">Vivaan Kapoor</div><div class="sub-text">RC-24004</div></div></div></td>
+                      <td>Yearly Champion</td>
+                      <td><span class="method-badge">UPI</span></td>
+                      <td class="amount">₹9,600</td>
+                      <td><span class="badge badge-paid">Paid</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Attendance Feed -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Today's Attendance</h3>
+                <button class="btn-link" onclick="navigate('attendance')">Open →</button>
+              </div>
+              <div class="attendance-list">
+                <div class="attendance-item">
+                  <div class="seat-tag ground">G-01</div>
+                  <div class="att-info">
+                    <div class="att-name">Vihaan Verma</div>
+                    <div class="att-time">In 08:00 · still in</div>
+                  </div>
+                  <span class="badge badge-absent">Absent</span>
+                </div>
+                <div class="attendance-item">
+                  <div class="seat-tag first">F-02</div>
+                  <div class="att-info">
+                    <div class="att-name">Ananya Patel</div>
+                    <div class="att-time">In 09:07 · 14:03</div>
+                  </div>
+                  <span class="badge badge-present">Present</span>
+                </div>
+                <div class="attendance-item">
+                  <div class="seat-tag second">S-03</div>
+                  <div class="att-info">
+                    <div class="att-name">Navya Singh</div>
+                    <div class="att-time">In 10:14 · 16:06</div>
+                  </div>
+                  <span class="badge badge-present">Present</span>
+                </div>
+                <div class="attendance-item">
+                  <div class="seat-tag ground">G-04</div>
+                  <div class="att-info">
+                    <div class="att-name">Meera Nair</div>
+                    <div class="att-time">In 11:21 · 18:09</div>
+                  </div>
+                  <span class="badge badge-present">Present</span>
+                </div>
+                <div class="attendance-item">
+                  <div class="seat-tag first">F-05</div>
+                  <div class="att-info">
+                    <div class="att-name">Vivaan Kapoor</div>
+                    <div class="att-time">In 12:28 · 20:12</div>
+                  </div>
+                  <span class="badge badge-present">Present</span>
+                </div>
+                <div class="attendance-item">
+                  <div class="seat-tag second">S-06</div>
+                  <div class="att-info">
+                    <div class="att-name">Ishaan Verma</div>
+                    <div class="att-time">In 13:35 · still in</div>
+                  </div>
+                  <span class="badge badge-present">Present</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Announcement Banner -->
+          <div class="announcement-card">
+            <div class="ann-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <div class="ann-content">
+              <div class="ann-title">Announcement scheduled</div>
+              <div class="ann-text">Diwali holiday notice will go out to all active students tomorrow at 8:00 AM.</div>
+            </div>
+            <button class="btn btn-ghost" onclick="navigate('notifications')">Manage notifications</button>
+          </div>
+        </div>
+
+        <!-- Students Page -->
+        <div class="page" id="page-students">
+          <div class="page-header">
+            <div>
+              <h1>Students</h1>
+              <p class="page-subtitle">35 active · 4 inactive · 2 pending</p>
+            </div>
+            <button class="btn btn-primary" onclick="navigate('admissions')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Student
+            </button>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search students…" />
+              </div>
+              <div class="filter-tabs">
+                <button class="filter-tab active">All</button>
+                <button class="filter-tab">Active</button>
+                <button class="filter-tab">Inactive</button>
+                <button class="filter-tab">Pending</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Seat</th><th>Plan</th><th>Joined</th><th>Due Date</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-violet)">VV</div><div><div class="name">Vihaan Verma</div><div class="sub-text">RC-24000 · vihaan@email.com</div></div></div></td><td>G-01</td><td>6 Hours Daily</td><td>Jan 5, 2024</td><td>Jul 5, 2024</td><td><span class="badge badge-pending">Pending</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-emerald)">AP</div><div><div class="name">Ananya Patel</div><div class="sub-text">RC-24001 · ananya@email.com</div></div></div></td><td>F-02</td><td>12 Hours Daily</td><td>Feb 10, 2024</td><td>Aug 10, 2024</td><td><span class="badge badge-paid">Active</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-blue)">NS</div><div><div class="name">Navya Singh</div><div class="sub-text">RC-24002 · navya@email.com</div></div></div></td><td>S-03</td><td>Weekly Access</td><td>Mar 1, 2024</td><td>Jul 8, 2024</td><td><span class="badge badge-paid">Active</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-amber)">MN</div><div><div class="name">Meera Nair</div><div class="sub-text">RC-24003 · meera@email.com</div></div></div></td><td>G-04</td><td>Quarterly Saver</td><td>Apr 15, 2024</td><td>Jul 15, 2024</td><td><span class="badge badge-paid">Active</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-teal)">VK</div><div><div class="name">Vivaan Kapoor</div><div class="sub-text">RC-24004 · vivaan@email.com</div></div></div></td><td>F-05</td><td>Yearly Champion</td><td>Jan 20, 2024</td><td>Jan 20, 2025</td><td><span class="badge badge-paid">Active</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:#6366f1">IV</div><div><div class="name">Ishaan Verma</div><div class="sub-text">RC-24005 · ishaan@email.com</div></div></div></td><td>S-06</td><td>12 Hours Daily</td><td>May 1, 2024</td><td>Aug 1, 2024</td><td><span class="badge badge-paid">Active</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:#f43f5e">PR</div><div><div class="name">Priya Reddy</div><div class="sub-text">RC-24006 · priya@email.com</div></div></div></td><td>G-07</td><td>6 Hours Daily</td><td>Jun 5, 2024</td><td>Jul 5, 2024</td><td><span class="badge badge-overdue">Overdue</span></td><td><button class="icon-btn-sm">⋯</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Seat Map Page -->
+        <div class="page" id="page-seats">
+          <div class="page-header">
+            <div>
+              <h1>Seat Map</h1>
+              <p class="page-subtitle">36 occupied · 18 available across 3 floors</p>
+            </div>
+            <div class="seat-legend">
+              <span class="legend-dot occupied"></span>Occupied
+              <span class="legend-dot available"></span>Available
+              <span class="legend-dot maintenance"></span>Maintenance
+              <span class="legend-dot reserved"></span>Reserved
+            </div>
+          </div>
+          <div class="seat-floors">
+            <div class="card floor-card">
+              <div class="floor-title">Ground Floor</div>
+              <div class="seat-grid">
+                <div class="seat occupied" title="G-01 - Vihaan Verma"><span>G-01</span></div>
+                <div class="seat occupied" title="G-02 - Ananya Patel"><span>G-02</span></div>
+                <div class="seat available" title="G-03 - Available"><span>G-03</span></div>
+                <div class="seat occupied" title="G-04 - Meera Nair"><span>G-04</span></div>
+                <div class="seat occupied" title="G-05 - Rohan Gupta"><span>G-05</span></div>
+                <div class="seat available" title="G-06 - Available"><span>G-06</span></div>
+                <div class="seat occupied" title="G-07 - Priya Reddy"><span>G-07</span></div>
+                <div class="seat maintenance" title="G-08 - Maintenance"><span>G-08</span></div>
+                <div class="seat available" title="G-09 - Available"><span>G-09</span></div>
+                <div class="seat occupied" title="G-10 - Arjun Mehta"><span>G-10</span></div>
+                <div class="seat available" title="G-11 - Available"><span>G-11</span></div>
+                <div class="seat occupied" title="G-12 - Sneha Kumar"><span>G-12</span></div>
+                <div class="seat occupied" title="G-13 - Akash Roy"><span>G-13</span></div>
+                <div class="seat available" title="G-14 - Available"><span>G-14</span></div>
+                <div class="seat reserved" title="G-15 - Reserved"><span>G-15</span></div>
+                <div class="seat occupied" title="G-16 - Deepa Nair"><span>G-16</span></div>
+                <div class="seat available" title="G-17 - Available"><span>G-17</span></div>
+                <div class="seat occupied" title="G-18 - Kiran Sharma"><span>G-18</span></div>
+                <div class="seat occupied" title="G-19 - Pooja Iyer"><span>G-19</span></div>
+                <div class="seat available" title="G-20 - Available"><span>G-20</span></div>
+              </div>
+            </div>
+            <div class="card floor-card">
+              <div class="floor-title">First Floor</div>
+              <div class="seat-grid">
+                <div class="seat occupied" title="F-01 - Aarav Singh"><span>F-01</span></div>
+                <div class="seat occupied" title="F-02 - Ananya Patel"><span>F-02</span></div>
+                <div class="seat occupied" title="F-03 - Vivek Sharma"><span>F-03</span></div>
+                <div class="seat available" title="F-04 - Available"><span>F-04</span></div>
+                <div class="seat occupied" title="F-05 - Vivaan Kapoor"><span>F-05</span></div>
+                <div class="seat available" title="F-06 - Available"><span>F-06</span></div>
+                <div class="seat occupied" title="F-07 - Riaan Bose"><span>F-07</span></div>
+                <div class="seat occupied" title="F-08 - Tara Singh"><span>F-08</span></div>
+                <div class="seat available" title="F-09 - Available"><span>F-09</span></div>
+                <div class="seat occupied" title="F-10 - Zara Khan"><span>F-10</span></div>
+                <div class="seat maintenance" title="F-11 - Maintenance"><span>F-11</span></div>
+                <div class="seat occupied" title="F-12 - Anika Patel"><span>F-12</span></div>
+                <div class="seat available" title="F-13 - Available"><span>F-13</span></div>
+                <div class="seat occupied" title="F-14 - Rohan Das"><span>F-14</span></div>
+                <div class="seat reserved" title="F-15 - Reserved"><span>F-15</span></div>
+                <div class="seat occupied" title="F-16 - Surya Rao"><span>F-16</span></div>
+                <div class="seat available" title="F-17 - Available"><span>F-17</span></div>
+                <div class="seat occupied" title="F-18 - Nila Iyer"><span>F-18</span></div>
+                <div class="seat occupied" title="F-19 - Vijay Menon"><span>F-19</span></div>
+                <div class="seat available" title="F-20 - Available"><span>F-20</span></div>
+              </div>
+            </div>
+            <div class="card floor-card">
+              <div class="floor-title">Second Floor</div>
+              <div class="seat-grid">
+                <div class="seat occupied" title="S-01 - Raj Patel"><span>S-01</span></div>
+                <div class="seat available" title="S-02 - Available"><span>S-02</span></div>
+                <div class="seat occupied" title="S-03 - Navya Singh"><span>S-03</span></div>
+                <div class="seat occupied" title="S-04 - Aman Gupta"><span>S-04</span></div>
+                <div class="seat available" title="S-05 - Available"><span>S-05</span></div>
+                <div class="seat occupied" title="S-06 - Ishaan Verma"><span>S-06</span></div>
+                <div class="seat available" title="S-07 - Available"><span>S-07</span></div>
+                <div class="seat occupied" title="S-08 - Kavya Reddy"><span>S-08</span></div>
+                <div class="seat maintenance" title="S-09 - Maintenance"><span>S-09</span></div>
+                <div class="seat occupied" title="S-10 - Lokesh Rao"><span>S-10</span></div>
+                <div class="seat available" title="S-11 - Available"><span>S-11</span></div>
+                <div class="seat occupied" title="S-12 - Mila Shah"><span>S-12</span></div>
+                <div class="seat occupied" title="S-13 - Nikhil Joshi"><span>S-13</span></div>
+                <div class="seat reserved" title="S-14 - Reserved"><span>S-14</span></div>
+                <div class="seat available" title="S-15 - Available"><span>S-15</span></div>
+                <div class="seat occupied" title="S-16 - Ojas Shetty"><span>S-16</span></div>
+                <div class="seat occupied" title="S-17 - Pari Desai"><span>S-17</span></div>
+                <div class="seat available" title="S-18 - Available"><span>S-18</span></div>
+                <div class="seat occupied" title="S-19 - Ria Mishra"><span>S-19</span></div>
+                <div class="seat available" title="S-20 - Available"><span>S-20</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Memberships Page -->
+        <div class="page" id="page-memberships">
+          <div class="page-header">
+            <div><h1>Memberships</h1><p class="page-subtitle">6 plans · 35 active subscriptions</p></div>
+            <button class="btn btn-primary">+ New Plan</button>
+          </div>
+          <div class="plan-grid">
+            <div class="plan-card">
+              <div class="plan-top">
+                <div class="plan-name">6 Hours Daily</div>
+                <div class="plan-price">₹700<span>/month</span></div>
+              </div>
+              <div class="plan-features">
+                <div class="plan-feature">✓ 6 hours per day</div>
+                <div class="plan-feature">✓ Fixed seat</div>
+                <div class="plan-feature">✓ Locker access</div>
+                <div class="plan-feature muted">✗ Overnight stay</div>
+              </div>
+              <div class="plan-stats">
+                <div class="plan-stat"><div class="plan-stat-val">12</div><div class="plan-stat-label">Students</div></div>
+                <div class="plan-stat"><div class="plan-stat-val">₹8,400</div><div class="plan-stat-label">Monthly</div></div>
+              </div>
+            </div>
+            <div class="plan-card featured">
+              <div class="plan-badge">Most Popular</div>
+              <div class="plan-top">
+                <div class="plan-name">12 Hours Daily</div>
+                <div class="plan-price">₹1,000<span>/month</span></div>
+              </div>
+              <div class="plan-features">
+                <div class="plan-feature">✓ 12 hours per day</div>
+                <div class="plan-feature">✓ Fixed seat</div>
+                <div class="plan-feature">✓ Locker access</div>
+                <div class="plan-feature">✓ Study room access</div>
+              </div>
+              <div class="plan-stats">
+                <div class="plan-stat"><div class="plan-stat-val">16</div><div class="plan-stat-label">Students</div></div>
+                <div class="plan-stat"><div class="plan-stat-val">₹16,000</div><div class="plan-stat-label">Monthly</div></div>
+              </div>
+            </div>
+            <div class="plan-card">
+              <div class="plan-top">
+                <div class="plan-name">Weekly Access</div>
+                <div class="plan-price">₹2,700<span>/month</span></div>
+              </div>
+              <div class="plan-features">
+                <div class="plan-feature">✓ Full week access</div>
+                <div class="plan-feature">✓ Flexible seat</div>
+                <div class="plan-feature">✓ Locker access</div>
+                <div class="plan-feature">✓ Printing credits</div>
+              </div>
+              <div class="plan-stats">
+                <div class="plan-stat"><div class="plan-stat-val">4</div><div class="plan-stat-label">Students</div></div>
+                <div class="plan-stat"><div class="plan-stat-val">₹10,800</div><div class="plan-stat-label">Monthly</div></div>
+              </div>
+            </div>
+            <div class="plan-card">
+              <div class="plan-top">
+                <div class="plan-name">Quarterly Saver</div>
+                <div class="plan-price">₹250<span>/week</span></div>
+              </div>
+              <div class="plan-features">
+                <div class="plan-feature">✓ 3 month plan</div>
+                <div class="plan-feature">✓ 15% discount</div>
+                <div class="plan-feature">✓ Premium seat</div>
+                <div class="plan-feature">✓ Locker + printing</div>
+              </div>
+              <div class="plan-stats">
+                <div class="plan-stat"><div class="plan-stat-val">2</div><div class="plan-stat-label">Students</div></div>
+                <div class="plan-stat"><div class="plan-stat-val">₹3,000</div><div class="plan-stat-label">Monthly</div></div>
+              </div>
+            </div>
+            <div class="plan-card">
+              <div class="plan-top">
+                <div class="plan-name">Yearly Champion</div>
+                <div class="plan-price">₹9,600<span>/year</span></div>
+              </div>
+              <div class="plan-features">
+                <div class="plan-feature">✓ Full year plan</div>
+                <div class="plan-feature">✓ 20% discount</div>
+                <div class="plan-feature">✓ Premium seat</div>
+                <div class="plan-feature">✓ All amenities included</div>
+              </div>
+              <div class="plan-stats">
+                <div class="plan-stat"><div class="plan-stat-val">1</div><div class="plan-stat-label">Students</div></div>
+                <div class="plan-stat"><div class="plan-stat-val">₹9,600</div><div class="plan-stat-label">Yearly</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Page -->
+        <div class="page" id="page-attendance">
+          <div class="page-header">
+            <div><h1>Attendance</h1><p class="page-subtitle">Tuesday, July 22, 2026 · 21 present · 14 absent</p></div>
+            <button class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Mark Attendance
+            </button>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search…" /></div>
+              <div class="filter-tabs">
+                <button class="filter-tab active">All</button>
+                <button class="filter-tab">Present</button>
+                <button class="filter-tab">Absent</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Seat</th><th>Student</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="seat-tag ground">G-01</span></td><td>Vihaan Verma</td><td>08:00 AM</td><td>still in</td><td>—</td><td><span class="badge badge-absent">Absent</span></td></tr>
+                <tr><td><span class="seat-tag first">F-02</span></td><td>Ananya Patel</td><td>09:07 AM</td><td>02:03 PM</td><td>4h 56m</td><td><span class="badge badge-present">Present</span></td></tr>
+                <tr><td><span class="seat-tag second">S-03</span></td><td>Navya Singh</td><td>10:14 AM</td><td>04:06 PM</td><td>5h 52m</td><td><span class="badge badge-present">Present</span></td></tr>
+                <tr><td><span class="seat-tag ground">G-04</span></td><td>Meera Nair</td><td>11:21 AM</td><td>06:09 PM</td><td>6h 48m</td><td><span class="badge badge-present">Present</span></td></tr>
+                <tr><td><span class="seat-tag first">F-05</span></td><td>Vivaan Kapoor</td><td>12:28 PM</td><td>08:12 PM</td><td>7h 44m</td><td><span class="badge badge-present">Present</span></td></tr>
+                <tr><td><span class="seat-tag second">S-06</span></td><td>Ishaan Verma</td><td>01:35 PM</td><td>still in</td><td>—</td><td><span class="badge badge-present">Present</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admissions Page -->
+        <div class="page" id="page-admissions">
+          <div class="page-header">
+            <div><h1>New Admission</h1><p class="page-subtitle">Enroll a new student in 4 steps</p></div>
+          </div>
+          <div class="card admission-form-card">
+            <!-- Stepper -->
+            <div class="stepper">
+              <div class="step active"><div class="step-circle">1</div><div class="step-label">Personal Info</div></div>
+              <div class="step-line"></div>
+              <div class="step"><div class="step-circle">2</div><div class="step-label">Plan Selection</div></div>
+              <div class="step-line"></div>
+              <div class="step"><div class="step-circle">3</div><div class="step-label">Seat Assignment</div></div>
+              <div class="step-line"></div>
+              <div class="step"><div class="step-circle">4</div><div class="step-label">Initial Payment</div></div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" placeholder="e.g. Arjun Sharma" />
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="+91 XXXXX XXXXX" />
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" placeholder="student@email.com" />
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" />
+              </div>
+              <div class="form-group full-width">
+                <label>Address</label>
+                <textarea placeholder="Enter full address…" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label>ID Type</label>
+                <select><option>Aadhaar Card</option><option>PAN Card</option><option>Passport</option><option>Voter ID</option></select>
+              </div>
+              <div class="form-group">
+                <label>ID Number</label>
+                <input type="text" placeholder="ID number" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-primary">Next: Plan Selection →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payments Page -->
+        <div class="page" id="page-payments">
+          <div class="page-header">
+            <div><h1>Payments</h1><p class="page-subtitle">₹71,000 collected this month · ₹14,500 pending</p></div>
+            <button class="btn btn-primary">+ Record Payment</button>
+          </div>
+          <div class="metrics-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom:1.5rem">
+            <div class="metric-card"><div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="metric-info"><div class="metric-label">Total Collected</div><div class="metric-value">₹71,000</div></div></div>
+            <div class="metric-card"><div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="metric-info"><div class="metric-label">Pending</div><div class="metric-value">₹14,500</div></div></div>
+            <div class="metric-card"><div class="metric-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="metric-info"><div class="metric-label">Overdue Students</div><div class="metric-value">5</div></div></div>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search payments…" /></div>
+              <div class="filter-tabs">
+                <button class="filter-tab active">All</button>
+                <button class="filter-tab">Paid</button>
+                <button class="filter-tab">Pending</button>
+                <button class="filter-tab">Overdue</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Plan</th><th>Method</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-violet)">VV</div><div><div class="name">Vihaan Verma</div><div class="sub-text">RC-24000</div></div></div></td><td>6 Hours Daily</td><td><span class="method-badge">Cash</span></td><td>Jul 1, 2024</td><td class="amount">₹700</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-xs">Collect</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-emerald)">AP</div><div><div class="name">Ananya Patel</div><div class="sub-text">RC-24001</div></div></div></td><td>12 Hours Daily</td><td><span class="method-badge">UPI</span></td><td>Jul 1, 2024</td><td class="amount">₹1,000</td><td><span class="badge badge-paid">Paid</span></td><td><button class="btn btn-xs">Receipt</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-blue)">NS</div><div><div class="name">Navya Singh</div><div class="sub-text">RC-24002</div></div></div></td><td>Weekly Access</td><td><span class="method-badge">Card</span></td><td>Jul 1, 2024</td><td class="amount">₹2,700</td><td><span class="badge badge-paid">Paid</span></td><td><button class="btn btn-xs">Receipt</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-amber)">MN</div><div><div class="name">Meera Nair</div><div class="sub-text">RC-24003</div></div></div></td><td>Quarterly Saver</td><td><span class="method-badge">Bank Transfer</span></td><td>Jul 1, 2024</td><td class="amount">₹250</td><td><span class="badge badge-paid">Paid</span></td><td><button class="btn btn-xs">Receipt</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:var(--accent-teal)">VK</div><div><div class="name">Vivaan Kapoor</div><div class="sub-text">RC-24004</div></div></div></td><td>Yearly Champion</td><td><span class="method-badge">UPI</span></td><td>Jan 20, 2024</td><td class="amount">₹9,600</td><td><span class="badge badge-paid">Paid</span></td><td><button class="btn btn-xs">Receipt</button></td></tr>
+                <tr><td><div class="student-cell"><div class="avatar-sm" style="background:#f43f5e">PR</div><div><div class="name">Priya Reddy</div><div class="sub-text">RC-24006</div></div></div></td><td>6 Hours Daily</td><td><span class="method-badge">Cash</span></td><td>Jun 5, 2024</td><td class="amount">₹700</td><td><span class="badge badge-overdue">Overdue</span></td><td><button class="btn btn-xs">Collect</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Expenses Page -->
+        <div class="page" id="page-expenses">
+          <div class="page-header">
+            <div><h1>Expenses</h1><p class="page-subtitle">₹18,400 spent this month</p></div>
+            <button class="btn btn-primary">+ Add Expense</button>
+          </div>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Category</th><th>Description</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8">Utilities</span></td><td>Electricity Bill – July</td><td>Jul 1, 2024</td><td class="amount">₹5,200</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                <tr><td><span class="badge" style="background:rgba(20,184,166,0.15);color:#2dd4bf">Maintenance</span></td><td>AC Servicing – Room 2</td><td>Jul 3, 2024</td><td class="amount">₹2,500</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                <tr><td><span class="badge" style="background:rgba(245,158,11,0.15);color:#fbbf24">Supplies</span></td><td>Stationery & Printing Paper</td><td>Jul 5, 2024</td><td class="amount">₹1,800</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                <tr><td><span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8">Utilities</span></td><td>Internet – Fiber Plan</td><td>Jul 7, 2024</td><td class="amount">₹3,000</td><td><span class="badge badge-paid">Paid</span></td></tr>
+                <tr><td><span class="badge" style="background:rgba(16,185,129,0.15);color:#34d399">Salaries</span></td><td>Staff Salaries – July</td><td>Jul 10, 2024</td><td class="amount">₹12,000</td><td><span class="badge badge-pending">Pending</span></td></tr>
+                <tr><td><span class="badge" style="background:rgba(244,63,94,0.15);color:#fb7185">Rent</span></td><td>Monthly Rent</td><td>Jul 15, 2024</td><td class="amount">₹25,000</td><td><span class="badge badge-pending">Pending</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Staff Page -->
+        <div class="page" id="page-staff">
+          <div class="page-header">
+            <div><h1>Staff</h1><p class="page-subtitle">5 staff members</p></div>
+            <button class="btn btn-primary">+ Add Staff</button>
+          </div>
+          <div class="staff-grid">
+            <div class="staff-card"><div class="staff-avatar" style="background:var(--accent-violet)">RK</div><div class="staff-name">Ravi Kumar</div><div class="staff-role">Admin / Owner</div><div class="staff-contact">+91 98765 43210</div><span class="badge badge-paid">Active</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:var(--accent-emerald)">SS</div><div class="staff-name">Shreya Sharma</div><div class="staff-role">Manager</div><div class="staff-contact">+91 98765 43211</div><span class="badge badge-paid">Active</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:var(--accent-blue)">AJ</div><div class="staff-name">Amit Joshi</div><div class="staff-role">Security Guard</div><div class="staff-contact">+91 98765 43212</div><span class="badge badge-paid">Active</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:var(--accent-amber)">MP</div><div class="staff-name">Maya Patel</div><div class="staff-role">Receptionist</div><div class="staff-contact">+91 98765 43213</div><span class="badge badge-paid">Active</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:#f43f5e">KR</div><div class="staff-name">Karan Rao</div><div class="staff-role">Cleaner</div><div class="staff-contact">+91 98765 43214</div><span class="badge badge-pending">Part-time</span></div>
+          </div>
+        </div>
+
+        <!-- Tasks Page -->
+        <div class="page" id="page-tasks">
+          <div class="page-header">
+            <div><h1>Tasks</h1><p class="page-subtitle">8 open · 3 completed today</p></div>
+            <button class="btn btn-primary">+ New Task</button>
+          </div>
+          <div class="card">
+            <div class="task-list">
+              <div class="task-item"><input type="checkbox" /><div class="task-info"><div class="task-title">Collect pending fees from Vihaan Verma</div><div class="task-meta">Due today · Assigned to Shreya</div></div><span class="badge badge-overdue">Urgent</span></div>
+              <div class="task-item"><input type="checkbox" /><div class="task-info"><div class="task-title">Send renewal reminder to 5 students</div><div class="task-meta">Due Jul 22 · Assigned to Maya</div></div><span class="badge badge-pending">Medium</span></div>
+              <div class="task-item"><input type="checkbox" /><div class="task-info"><div class="task-title">Check AC unit on Floor 1</div><div class="task-meta">Due Jul 23 · Assigned to Karan</div></div><span class="badge badge-pending">Low</span></div>
+              <div class="task-item"><input type="checkbox" checked /><div class="task-info done"><div class="task-title">Update seat map for Floor 2</div><div class="task-meta">Completed today · Ravi</div></div><span class="badge badge-paid">Done</span></div>
+              <div class="task-item"><input type="checkbox" checked /><div class="task-info done"><div class="task-title">Verify Navya Singh's Aadhaar</div><div class="task-meta">Completed today · Shreya</div></div><span class="badge badge-paid">Done</span></div>
+              <div class="task-item"><input type="checkbox" /><div class="task-info"><div class="task-title">Purchase new whiteboard markers</div><div class="task-meta">Due Jul 25 · Assigned to Maya</div></div><span class="badge badge-pending">Low</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complaints Page -->
+        <div class="page" id="page-complaints">
+          <div class="page-header">
+            <div><h1>Complaints</h1><p class="page-subtitle">3 open · 12 resolved this month</p></div>
+            <button class="btn btn-primary">+ Log Complaint</button>
+          </div>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Subject</th><th>Date</th><th>Priority</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Vihaan Verma</td><td>Chair is broken at seat G-01</td><td>Jul 20, 2024</td><td><span class="badge badge-overdue">High</span></td><td><span class="badge badge-pending">Open</span></td></tr>
+                <tr><td>Ananya Patel</td><td>WiFi slow on first floor</td><td>Jul 18, 2024</td><td><span class="badge badge-pending">Medium</span></td><td><span class="badge badge-pending">Open</span></td></tr>
+                <tr><td>Navya Singh</td><td>Locker key not working</td><td>Jul 15, 2024</td><td><span class="badge badge-pending">Medium</span></td><td><span class="badge badge-pending">Open</span></td></tr>
+                <tr><td>Meera Nair</td><td>Noise disturbance from outside</td><td>Jul 10, 2024</td><td><span class="badge" style="background:rgba(16,185,129,0.15);color:#34d399">Low</span></td><td><span class="badge badge-paid">Resolved</span></td></tr>
+                <tr><td>Vivaan Kapoor</td><td>AC not cooling properly</td><td>Jul 8, 2024</td><td><span class="badge badge-overdue">High</span></td><td><span class="badge badge-paid">Resolved</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Visitors Page -->
+        <div class="page" id="page-visitors">
+          <div class="page-header">
+            <div><h1>Visitors</h1><p class="page-subtitle">4 visits today</p></div>
+            <button class="btn btn-primary">+ Log Visitor</button>
+          </div>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Purpose</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Suresh Kumar</td><td>Enquiry about admission</td><td>09:30 AM</td><td>10:00 AM</td><td><span class="badge badge-paid">Left</span></td></tr>
+                <tr><td>Preethi Rao</td><td>Parent visit – Navya Singh</td><td>11:00 AM</td><td>11:45 AM</td><td><span class="badge badge-paid">Left</span></td></tr>
+                <tr><td>Delivery Agent</td><td>Stationery delivery</td><td>12:30 PM</td><td>12:45 PM</td><td><span class="badge badge-paid">Left</span></td></tr>
+                <tr><td>Aman Gupta</td><td>Trial session enquiry</td><td>02:00 PM</td><td>still in</td><td><span class="badge badge-present">Inside</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Inventory Page -->
+        <div class="page" id="page-inventory">
+          <div class="page-header">
+            <div><h1>Inventory</h1><p class="page-subtitle">42 items tracked</p></div>
+            <button class="btn btn-primary">+ Add Item</button>
+          </div>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Condition</th><th>Last Updated</th></tr></thead>
+              <tbody>
+                <tr><td>Study Chairs</td><td>Furniture</td><td>60</td><td><span class="badge badge-paid">Good</span></td><td>Jul 10, 2024</td></tr>
+                <tr><td>Study Tables</td><td>Furniture</td><td>60</td><td><span class="badge badge-paid">Good</span></td><td>Jul 10, 2024</td></tr>
+                <tr><td>Ceiling Fans</td><td>Electrical</td><td>18</td><td><span class="badge badge-pending">Fair</span></td><td>Jun 25, 2024</td></tr>
+                <tr><td>AC Units</td><td>Electrical</td><td>6</td><td><span class="badge badge-pending">Fair</span></td><td>Jul 3, 2024</td></tr>
+                <tr><td>Lockers</td><td>Storage</td><td>40</td><td><span class="badge badge-paid">Good</span></td><td>Jul 1, 2024</td></tr>
+                <tr><td>CCTV Cameras</td><td>Security</td><td>8</td><td><span class="badge badge-paid">Good</span></td><td>Jun 15, 2024</td></tr>
+                <tr><td>Whiteboards</td><td>Supplies</td><td>4</td><td><span class="badge badge-overdue">Poor</span></td><td>May 20, 2024</td></tr>
+                <tr><td>Fire Extinguishers</td><td>Safety</td><td>6</td><td><span class="badge badge-paid">Good</span></td><td>Jul 5, 2024</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Maintenance Page -->
+        <div class="page" id="page-maintenance">
+          <div class="page-header">
+            <div><h1>Maintenance</h1><p class="page-subtitle">2 active issues · 5 scheduled</p></div>
+            <button class="btn btn-primary">+ Log Issue</button>
+          </div>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Issue</th><th>Location</th><th>Reported</th><th>Technician</th><th>Priority</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Broken Chair</td><td>G-01</td><td>Jul 20, 2024</td><td>Karan Rao</td><td><span class="badge badge-overdue">High</span></td><td><span class="badge badge-pending">Open</span></td></tr>
+                <tr><td>AC Repair</td><td>First Floor</td><td>Jul 18, 2024</td><td>External Tech</td><td><span class="badge badge-overdue">High</span></td><td><span class="badge badge-pending">In Progress</span></td></tr>
+                <tr><td>Locker Key</td><td>S-06 Area</td><td>Jul 15, 2024</td><td>Amit Joshi</td><td><span class="badge badge-pending">Medium</span></td><td><span class="badge badge-pending">Open</span></td></tr>
+                <tr><td>Leaking Tap</td><td>Ground Floor WC</td><td>Jul 12, 2024</td><td>External Tech</td><td><span class="badge badge-pending">Medium</span></td><td><span class="badge badge-paid">Fixed</span></td></tr>
+                <tr><td>Tube Light</td><td>S-09</td><td>Jul 10, 2024</td><td>Karan Rao</td><td><span class="badge" style="background:rgba(16,185,129,0.15);color:#34d399">Low</span></td><td><span class="badge badge-paid">Fixed</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Documents Page -->
+        <div class="page" id="page-documents">
+          <div class="page-header">
+            <div><h1>Documents</h1><p class="page-subtitle">Student IDs, agreements and receipts</p></div>
+            <button class="btn btn-primary">+ Upload</button>
+          </div>
+          <div class="card">
+            <div class="docs-grid">
+              <div class="doc-item"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">Vihaan_Verma_Agreement.pdf</div><div class="doc-meta">Uploaded Jul 1 · 245 KB</div></div><button class="btn btn-xs">Download</button></div>
+              <div class="doc-item"><div class="doc-icon">🪪</div><div class="doc-info"><div class="doc-name">Ananya_Patel_Aadhaar.jpg</div><div class="doc-meta">Uploaded Feb 10 · 1.2 MB</div></div><button class="btn btn-xs">Download</button></div>
+              <div class="doc-item"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">Navya_Singh_Agreement.pdf</div><div class="doc-meta">Uploaded Mar 1 · 238 KB</div></div><button class="btn btn-xs">Download</button></div>
+              <div class="doc-item"><div class="doc-icon">📜</div><div class="doc-info"><div class="doc-name">July_2024_Receipt_Batch.pdf</div><div class="doc-meta">Uploaded Jul 5 · 542 KB</div></div><button class="btn btn-xs">Download</button></div>
+              <div class="doc-item"><div class="doc-icon">🪪</div><div class="doc-info"><div class="doc-name">Meera_Nair_PAN.jpg</div><div class="doc-meta">Uploaded Apr 15 · 780 KB</div></div><button class="btn btn-xs">Download</button></div>
+              <div class="doc-item"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">Studyhaus_Rules_2024.pdf</div><div class="doc-meta">Uploaded Jan 1 · 120 KB</div></div><button class="btn btn-xs">Download</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Page -->
+        <div class="page" id="page-notifications">
+          <div class="page-header">
+            <div><h1>Notifications</h1><p class="page-subtitle">3 unread · 12 sent this month</p></div>
+            <button class="btn btn-primary">+ Schedule Announcement</button>
+          </div>
+          <div class="card">
+            <div class="notif-list">
+              <div class="notif-item unread">
+                <div class="notif-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                <div class="notif-content"><div class="notif-title">Diwali holiday notice scheduled</div><div class="notif-body">Goes out to all active students tomorrow at 8:00 AM.</div><div class="notif-time">Scheduled for Jul 23, 8:00 AM</div></div>
+                <span class="dot-unread"></span>
+              </div>
+              <div class="notif-item unread">
+                <div class="notif-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="notif-content"><div class="notif-title">Overdue payment alert</div><div class="notif-body">Vihaan Verma and Priya Reddy have overdue payments.</div><div class="notif-time">Today, 10:00 AM</div></div>
+                <span class="dot-unread"></span>
+              </div>
+              <div class="notif-item unread">
+                <div class="notif-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                <div class="notif-content"><div class="notif-title">New student enrolled</div><div class="notif-body">Ishaan Verma has been successfully enrolled in 12 Hours Daily plan.</div><div class="notif-time">Today, 09:15 AM</div></div>
+                <span class="dot-unread"></span>
+              </div>
+              <div class="notif-item"><div class="notif-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="notif-content"><div class="notif-title">Renewal reminder sent</div><div class="notif-body">Monthly renewal SMS sent to 8 students due this week.</div><div class="notif-time">Yesterday, 9:00 AM</div></div></div>
+              <div class="notif-item"><div class="notif-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="notif-content"><div class="notif-title">Weekend closure notice</div><div class="notif-body">Reading space closed Saturday 2 PM – Sunday 10 AM. SMS sent to all.</div><div class="notif-time">Jul 19, 6:00 PM</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div class="page" id="page-analytics">
+          <div class="page-header">
+            <div><h1>Analytics</h1><p class="page-subtitle">July 2024 performance overview</p></div>
+            <div class="filter-tabs"><button class="filter-tab active">This Month</button><button class="filter-tab">Last Month</button><button class="filter-tab">Quarter</button></div>
+          </div>
+          <div class="metrics-grid" style="margin-bottom:1.5rem">
+            <div class="metric-card"><div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="metric-info"><div class="metric-label">Revenue</div><div class="metric-value">₹71,000</div><div class="metric-change positive">↑ 12%</div></div></div>
+            <div class="metric-card"><div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="metric-info"><div class="metric-label">New Students</div><div class="metric-value">8</div><div class="metric-change positive">↑ 3 vs last month</div></div></div>
+            <div class="metric-card"><div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg></div><div class="metric-info"><div class="metric-label">Avg Occupancy</div><div class="metric-value">68%</div><div class="metric-change positive">↑ 5%</div></div></div>
+            <div class="metric-card"><div class="metric-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/></svg></div><div class="metric-info"><div class="metric-label">Attendance Rate</div><div class="metric-value">72%</div><div class="metric-change neutral">Similar to last month</div></div></div>
+          </div>
+          <!-- Chart area (visual bar chart using CSS) -->
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header"><h3>Monthly Revenue</h3></div>
+              <div class="chart-area">
+                <div class="bar-chart">
+                  <div class="bar-group"><div class="bar" style="--h:45%"><span class="bar-label">Feb</span></div></div>
+                  <div class="bar-group"><div class="bar" style="--h:58%"><span class="bar-label">Mar</span></div></div>
+                  <div class="bar-group"><div class="bar" style="--h:50%"><span class="bar-label">Apr</span></div></div>
+                  <div class="bar-group"><div class="bar" style="--h:62%"><span class="bar-label">May</span></div></div>
+                  <div class="bar-group"><div class="bar" style="--h:75%"><span class="bar-label">Jun</span></div></div>
+                  <div class="bar-group"><div class="bar active-bar" style="--h:90%"><span class="bar-label">Jul</span></div></div>
+                </div>
+                <div class="chart-legend">
+                  <span class="legend-box emerald"></span> Revenue (₹ thousands)
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Plan Distribution</h3></div>
+              <div class="plan-dist">
+                <div class="dist-row"><div class="dist-label">12 Hours Daily</div><div class="dist-bar-wrap"><div class="dist-bar" style="width:46%; background: var(--accent-emerald)"></div></div><div class="dist-val">16</div></div>
+                <div class="dist-row"><div class="dist-label">6 Hours Daily</div><div class="dist-bar-wrap"><div class="dist-bar" style="width:34%; background:var(--accent-violet)"></div></div><div class="dist-val">12</div></div>
+                <div class="dist-row"><div class="dist-label">Weekly Access</div><div class="dist-bar-wrap"><div class="dist-bar" style="width:12%; background:var(--accent-blue)"></div></div><div class="dist-val">4</div></div>
+                <div class="dist-row"><div class="dist-label">Quarterly Saver</div><div class="dist-bar-wrap"><div class="dist-bar" style="width:6%; background:var(--accent-amber)"></div></div><div class="dist-val">2</div></div>
+                <div class="dist-row"><div class="dist-label">Yearly Champion</div><div class="dist-bar-wrap"><div class="dist-bar" style="width:3%; background:var(--accent-teal)"></div></div><div class="dist-val">1</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div class="page" id="page-reports">
+          <div class="page-header">
+            <div><h1>Reports</h1><p class="page-subtitle">Generate and download reports</p></div>
+          </div>
+          <div class="report-grid">
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="report-name">Monthly Revenue Report</div>
+              <div class="report-desc">All collections, dues, and breakdowns for the month</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div class="report-name">Student Summary</div>
+              <div class="report-desc">Active, inactive, and pending students list with details</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polyline points="9 11 12 14 22 4"/></svg></div>
+              <div class="report-name">Attendance Report</div>
+              <div class="report-desc">Daily and monthly attendance records for all students</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg></div>
+              <div class="report-name">Seat Utilization Report</div>
+              <div class="report-desc">Seat occupancy rates and floor-wise breakdown</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="report-name">Expense Report</div>
+              <div class="report-desc">Monthly expenses breakdown by category</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+            <div class="report-card" onclick="alert('Generating report…')">
+              <div class="report-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="report-name">Membership Report</div>
+              <div class="report-desc">Plan distribution and renewal tracking</div>
+              <button class="btn btn-ghost btn-sm">Generate PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page" id="page-settings">
+          <div class="page-header">
+            <div><h1>Settings</h1><p class="page-subtitle">Configure your reading space</p></div>
+            <button class="btn btn-primary">Save Changes</button>
+          </div>
+          <div class="settings-grid">
+            <div class="card settings-card">
+              <div class="settings-section-title">Reading Space Info</div>
+              <div class="form-grid">
+                <div class="form-group full-width"><label>Space Name</label><input type="text" value="Studyhaus" /></div>
+                <div class="form-group full-width"><label>Address</label><textarea rows="2">123, MG Road, Bangalore - 560001</textarea></div>
+                <div class="form-group"><label>Phone</label><input type="tel" value="+91 98765 43210" /></div>
+                <div class="form-group"><label>Email</label><input type="email" value="admin@studyhaus.com" /></div>
+                <div class="form-group"><label>GST Number</label><input type="text" value="29ABCDE1234F1Z5" /></div>
+                <div class="form-group"><label>Opening Time</label><input type="time" value="06:00" /></div>
+                <div class="form-group"><label>Closing Time</label><input type="time" value="23:00" /></div>
+              </div>
+            </div>
+            <div class="card settings-card">
+              <div class="settings-section-title">Preferences</div>
+              <div class="settings-toggle-list">
+                <div class="settings-toggle"><div><div class="toggle-label">Send SMS on payment</div><div class="toggle-desc">Auto-send SMS receipt after each payment</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label">Renewal reminders</div><div class="toggle-desc">Alert students 3 days before plan expiry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label">Attendance notifications</div><div class="toggle-desc">Notify admin if student absent 3+ days</div></div><label class="toggle"><input type="checkbox" /></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label">Visitor log</div><div class="toggle-desc">Require visitor log for every entry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
