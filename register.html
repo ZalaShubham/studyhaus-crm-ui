@@ -465,9 +465,37 @@
       bars.forEach((b, i) => {
         b.style.background = i <= sc && sc >= 0 ? colours[sc] : "rgba(255,255,255,0.08)";
       });
-      strLabel.textContent = pw.length === 0 ? "" : labels[sc] + " password";
-      strLabel.style.color = sc >= 0 ? colours[sc] : "#555d75";
+      // Guard: only show label when sc is a valid index (0-3)
+      if (pw.length === 0) {
+        strLabel.textContent = "";
+        strLabel.style.color = "#555d75";
+      } else {
+        const safeIdx = Math.max(0, Math.min(sc, labels.length - 1));
+        strLabel.textContent = labels[safeIdx] + " password";
+        strLabel.style.color = colours[safeIdx];
+      }
+      // Live confirm-match check
+      if (cpwInput.value.length > 0) checkConfirm();
     });
+
+    /* ── Live confirm-match feedback ── */
+    const matchMsg = document.createElement("div");
+    matchMsg.style.cssText = "font-size:0.78rem; margin-top:4px; min-height:16px;";
+    cpwInput.parentElement.insertAdjacentElement("afterend", matchMsg);
+
+    const checkConfirm = () => {
+      const pw  = pwInput.value;
+      const cpw = cpwInput.value;
+      if (cpw.length === 0) { matchMsg.textContent = ""; return; }
+      if (pw === cpw) {
+        matchMsg.textContent = "✓ Passwords match";
+        matchMsg.style.color = "#10b981";
+      } else {
+        matchMsg.textContent = "✗ Passwords do not match";
+        matchMsg.style.color = "#f43f5e";
+      }
+    };
+    cpwInput.addEventListener("input", checkConfirm);
 
     /* ── Toggle password visibility ── */
     const toggleVisibility = (input, btn) => {
@@ -494,7 +522,8 @@
       if (!role)     { showAlert("Please select a role."); return; }
       if (!email)    { showAlert("Please enter your email address."); return; }
       if (password.length < 6) { showAlert("Password must be at least 6 characters."); return; }
-      if (password !== confirm) { showAlert("Passwords do not match."); return; }
+      // Trim both sides to avoid invisible whitespace mismatch
+      if (password !== confirm) { showAlert("Passwords do not match. Please re-enter."); return; }
 
       loader.style.display = "flex";
       submitBtn.disabled = true;
