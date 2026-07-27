@@ -110,13 +110,19 @@ export const initAuthGuard = () => {
 
           // ── Update DOM ────────────────────────────────────────────────
           const nameEl    = document.getElementById("current-user-name");
+          const topbarNameEl = document.getElementById("topbar-user-name");
           const roleEl    = document.getElementById("current-user-role");
+          const topbarRoleEl = document.getElementById("topbar-user-role");
           const avatarEl  = document.getElementById("current-user-avatar");
+          const topbarAvatarEl = document.getElementById("topbar-user-avatar");
           const greetEl   = document.getElementById("dashboard-greeting");
 
           if (nameEl)   nameEl.textContent   = displayName;
+          if (topbarNameEl) topbarNameEl.textContent = displayName;
           if (roleEl)   roleEl.textContent   = role;
+          if (topbarRoleEl) topbarRoleEl.textContent = role;
           if (avatarEl) avatarEl.textContent = initials;
+          if (topbarAvatarEl) topbarAvatarEl.textContent = initials;
           if (greetEl)  greetEl.textContent  = `${timeGreeting}, ${displayName.split(" ")[0]}! 👋`;
 
           // If on a protected page, check permissions
