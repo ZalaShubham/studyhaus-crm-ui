@@ -27,6 +27,7 @@ export const initAuthGuard = () => {
         // Fetch role if not in localStorage or to ensure it's up to date
         let role = localStorage.getItem("userRole");
         if (!role) {
+          // Role not cached — fetch from Firestore
           let userDoc = await getDocument("users", user.uid);
           let docId = user.uid;
           
@@ -50,8 +51,14 @@ export const initAuthGuard = () => {
             localStorage.setItem("userRole", role);
             localStorage.setItem("userId", docId);
           } else {
-            // No role found in DB, sign out
+            // No role found in DB — sign out cleanly
             throw new Error("User role not found.");
+          }
+        } else {
+          // Role was already in localStorage (e.g. set right after registration).
+          // Ensure userId is also stored.
+          if (!localStorage.getItem("userId")) {
+            localStorage.setItem("userId", user.uid);
           }
         }
 
@@ -100,10 +107,14 @@ export const initAuthGuard = () => {
         }
       } catch (error) {
         console.error("Auth Guard Error:", error);
-        localStorage.removeItem("userRole");
-        localStorage.removeItem("userId");
+        // Only clear localStorage if this is a genuine "no role" error,
+        // not a transient Firestore permission/network error on a fresh doc.
+        if (error.message === "User role not found.") {
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userId");
+        }
         if (!isPublicPage) {
-          window.location.href = "/login.html";
+          window.location.href = "/unauthorized.html";
         } else if (loader) {
           loader.style.display = "none";
         }

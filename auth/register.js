@@ -1,6 +1,7 @@
 import { register as authServiceRegister, setSessionPersistence } from "../services/authService.js";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
+import { ROLES } from "./roles.js";
 
 /**
  * Convert Firebase registration errors into user-friendly messages
@@ -30,6 +31,19 @@ const toUserFriendlyRegisterError = (error) => {
  * @param {string} password
  * @param {string} role - Selected role from the form
  */
+/**
+ * Get dashboard URL based on role
+ */
+const getDashboardUrl = (role) => {
+  switch (role) {
+    case ROLES.OWNER:    return "/admin/dashboard.html";
+    case ROLES.MANAGER:  return "/manager/dashboard.html";
+    case ROLES.EMPLOYEE: return "/employee/dashboard.html";
+    case ROLES.STUDENT:  return "/student/dashboard.html";
+    default:             return "/login.html";
+  }
+};
+
 export const handleRegister = async (fullName, email, password, role) => {
   try {
     await setSessionPersistence();
@@ -47,10 +61,20 @@ export const handleRegister = async (fullName, email, password, role) => {
       createdAt: new Date().toISOString(),
     });
 
-    // 3. Redirect to login with success message
-    window.location.href = "/login.html?registered=1";
+    // 3. Store role and userId in localStorage immediately so the auth guard
+    //    does NOT need to re-fetch from Firestore (avoids race condition where
+    //    the freshly-written doc is not yet readable by security rules).
+    localStorage.setItem("userRole", role);
+    localStorage.setItem("userId", user.uid);
+
+    // 4. Redirect directly to the correct dashboard (skip login.html to
+    //    avoid the guard trying to read Firestore before the doc is available).
+    window.location.href = getDashboardUrl(role);
   } catch (error) {
     console.error("Registration Error:", error);
+    // Clean up localStorage if something went wrong mid-way
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
     throw new Error(toUserFriendlyRegisterError(error));
   }
 };
