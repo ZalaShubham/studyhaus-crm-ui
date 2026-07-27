@@ -1,0 +1,136 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.role != null ? userDoc.data.role : null;
+    }
+
+    function isOwnerOrAdmin() {
+      let role = getUserRole();
+      return isLoggedIn() && (role == "Owner" || role == "Admin" || role == "Owner/Admin");
+    }
+
+    function isManager() {
+      return isLoggedIn() && getUserRole() == "Manager";
+    }
+
+    function isEmployee() {
+      return isLoggedIn() && getUserRole() == "Employee";
+    }
+
+    function isStaff() {
+      return isOwnerOrAdmin() || isManager() || isEmployee();
+    }
+
+    function isOwnStudentRecord() {
+      return isLoggedIn() && (
+        request.auth.uid == studentId ||
+        resource.data.email == request.auth.token.email
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isStaff() || request.auth.uid == userId;
+      // Owner can write anything; a user can only CREATE their own doc
+      // and only if they are assigning themselves a non-privileged role
+      allow create: if isOwnerOrAdmin() ||
+        (request.auth.uid == userId &&
+         request.resource.data.role in ["Student", "Employee", "Manager"]);
+      allow update, delete: if isOwnerOrAdmin();
+    }
+
+    match /students/{studentId} {
+      allow read: if isStaff() || isOwnStudentRecord();
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /oldStudents/{studentId} {
+      allow read: if isStaff();
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /admissions/{admissionId} {
+      allow read, write: if isStaff();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isStaff() || (isLoggedIn() && resource.data.studentId == request.auth.uid);
+      allow create: if isStaff() || (isLoggedIn() && request.resource.data.studentId == request.auth.uid && request.resource.data.status == "pending");
+      allow update, delete: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /attendance/{attendanceId} {
+      allow read: if isStaff() || (isLoggedIn() && resource.data.studentId == request.auth.uid);
+      allow create, update: if isStaff() || (isLoggedIn() && request.resource.data.studentId == request.auth.uid);
+      allow delete: if isOwnerOrAdmin();
+    }
+
+    match /complaints/{complaintId} {
+      allow read: if isStaff() || (isLoggedIn() && resource.data.studentId == request.auth.uid);
+      allow create: if isStaff() || (isLoggedIn() && request.resource.data.studentId == request.auth.uid);
+      allow update: if isStaff();
+      allow delete: if isOwnerOrAdmin();
+    }
+
+    match /renewals/{renewalId} {
+      allow read: if isStaff() || (isLoggedIn() && resource.data.studentId == request.auth.uid);
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /reminders/{reminderId} {
+      allow read, write: if isStaff();
+    }
+
+    match /expenses/{expenseId} {
+      allow read: if isOwnerOrAdmin() || isManager();
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /expenseCategories/{categoryId} {
+      allow read: if isStaff();
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /visitors/{visitorId} {
+      allow read, write: if isStaff();
+    }
+
+    match /visitorPurposes/{purposeId} {
+      allow read, write: if isStaff();
+    }
+
+    match /seats/{seatId} {
+      allow read: if isLoggedIn();
+      allow write: if isOwnerOrAdmin() || isManager();
+    }
+
+    match /membershipPlans/{planId} {
+      allow read: if isLoggedIn();
+      allow write: if isOwnerOrAdmin();
+    }
+
+    match /messageTemplates/{templateId} {
+      allow read: if isStaff();
+      allow write: if isOwnerOrAdmin();
+    }
+
+    match /messageLogs/{logId} {
+      allow read, write: if isStaff();
+    }
+
+    match /test_connection/{docId} {
+      allow read, write: if isLoggedIn();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

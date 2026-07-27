@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Studyhaus CRM</title>
+  <meta name="description" content="Create a new Studyhaus CRM account to manage your study space." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0c0f16;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+      position: relative;
+    }
+
+    /* Animated background blobs */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float1 8s ease-in-out infinite;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float2 10s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(40px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.03); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Loader */
+    #global-loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(12,15,22,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .loader-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .loader-text { color: #e8eaf0; font-size: 14px; font-weight: 500; }
+
+    /* Card wrapper */
+    .register-wrapper {
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp 0.5s ease both;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Logo */
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 auto 1rem;
+      box-shadow: 0 8px 32px rgba(139,92,246,0.35);
+    }
+    .brand-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #e8eaf0;
+      letter-spacing: -0.02em;
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: #8b91a8;
+      margin-top: 4px;
+    }
+
+    /* Card */
+    .register-card {
+      background: rgba(19,23,32,0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 2.2rem 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.06) inset;
+    }
+
+    .card-heading {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #e8eaf0;
+      margin-bottom: 0.3rem;
+    }
+    .card-sub {
+      font-size: 13px;
+      color: #8b91a8;
+      margin-bottom: 1.6rem;
+    }
+
+    /* Form rows */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 1.1rem;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #8b91a8;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px;
+      color: #e8eaf0;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+    }
+    input::placeholder { color: #555d75; }
+    input:focus, select:focus {
+      border-color: rgba(139,92,246,0.6);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+    select option { background: #1a1f2e; color: #e8eaf0; }
+
+    /* Password strength */
+    .password-wrap { position: relative; }
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #8b91a8;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: #e8eaf0; }
+
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .strength-bar span {
+      flex: 1;
+      height: 3px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.08);
+      transition: background 0.3s;
+    }
+    .strength-label {
+      font-size: 11px;
+      color: #555d75;
+      margin-top: 4px;
+    }
+
+    /* Error / success */
+    .alert-box {
+      display: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 1.2rem;
+      border: 1px solid transparent;
+    }
+    .alert-box.error {
+      background: rgba(244,63,94,0.1);
+      border-color: rgba(244,63,94,0.3);
+      color: #fb7185;
+    }
+    .alert-box.success {
+      background: rgba(16,185,129,0.1);
+      border-color: rgba(16,185,129,0.3);
+      color: #34d399;
+    }
+
+    /* Submit button */
+    .btn-register {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 6px 20px rgba(139,92,246,0.35);
+      letter-spacing: 0.01em;
+      margin-top: 0.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-register::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-register:hover::before { opacity: 1; }
+    .btn-register:hover {
+      box-shadow: 0 8px 28px rgba(139,92,246,0.5);
+      transform: translateY(-1px);
+    }
+    .btn-register:active { transform: translateY(0); }
+    .btn-register:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Login link */
+    .login-link {
+      text-align: center;
+      margin-top: 1.4rem;
+      font-size: 13.5px;
+      color: #8b91a8;
+    }
+    .login-link a {
+      color: #a78bfa;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .login-link a:hover { color: #c4b5fd; text-decoration: underline; }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin: 1.4rem 0;
+    }
+
+    /* Terms */
+    .terms-note {
+      font-size: 11.5px;
+      color: #555d75;
+      text-align: center;
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Global loader overlay -->
+  <div id="global-loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Creating your account…</div>
+  </div>
+
+  <div class="register-wrapper">
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div class="brand-title">Studyhaus CRM</div>
+      <div class="brand-subtitle">Create your account to get started</div>
+    </div>
+
+    <!-- Card -->
+    <div class="register-card">
+      <div class="card-heading">Create Account</div>
+      <div class="card-sub">Fill in your details below to register</div>
+
+      <!-- Error / Success alerts -->
+      <div id="alert-box" class="alert-box"></div>
+
+      <form id="register-form" novalidate>
+        <!-- Full name + Role -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" placeholder="John Doe" required autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" required>
+              <option value="" disabled selected>Select role</option>
+              <option value="Owner/Admin">Owner / Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Employee">Employee</option>
+              <option value="Student">Student</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" placeholder="Min. 6 characters" required autocomplete="new-password" />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Show/hide password">👁</button>
+          </div>
+          <div class="strength-bar">
+            <span id="s1"></span><span id="s2"></span><span id="s3"></span><span id="s4"></span>
+          </div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="password-wrap">
+            <input type="password" id="confirmPassword" placeholder="Re-enter password" required autocomplete="new-password" />
+            <button type="button" class="toggle-pw" id="toggleConfirm" aria-label="Show/hide confirm password">👁</button>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Submit -->
+        <button type="submit" class="btn-register" id="submit-btn">Create Account</button>
+
+        <p class="terms-note">
+          By registering, your account will be marked <strong>Active</strong> and a profile document
+          will be created in Firestore under the <code>users</code> collection.
+        </p>
+      </form>
+
+      <div class="login-link">
+        Already have an account? <a href="/login.html">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase import map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app":       "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/auth":      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { initAuthGuard } from "./auth/guard.js";
+    import { handleRegister } from "./auth/register.js";
+
+    // Redirect already-logged-in users away from this page
+    initAuthGuard();
+
+    /* ── Elements ── */
+    const form       = document.getElementById("register-form");
+    const alertBox   = document.getElementById("alert-box");
+    const loader     = document.getElementById("global-loader");
+    const submitBtn  = document.getElementById("submit-btn");
+    const pwInput    = document.getElementById("password");
+    const cpwInput   = document.getElementById("confirmPassword");
+    const togglePw   = document.getElementById("togglePw");
+    const toggleConf = document.getElementById("toggleConfirm");
+    const bars       = [document.getElementById("s1"), document.getElementById("s2"), document.getElementById("s3"), document.getElementById("s4")];
+    const strLabel   = document.getElementById("strength-label");
+
+    /* ── Show alert ── */
+    const showAlert = (msg, type = "error") => {
+      alertBox.textContent = msg;
+      alertBox.className = `alert-box ${type}`;
+      alertBox.style.display = "block";
+    };
+    const hideAlert = () => { alertBox.style.display = "none"; };
+
+    /* ── Password strength ── */
+    const getStrength = (pw) => {
+      let score = 0;
+      if (pw.length >= 6)  score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+      if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+      return score;
+    };
+    const colours = ["#f43f5e", "#f59e0b", "#3b82f6", "#10b981"];
+    const labels  = ["Weak", "Fair", "Good", "Strong"];
+
+    pwInput.addEventListener("input", () => {
+      const pw  = pwInput.value;
+      const sc  = pw.length === 0 ? -1 : getStrength(pw);
+      bars.forEach((b, i) => {
+        b.style.background = i <= sc && sc >= 0 ? colours[sc] : "rgba(255,255,255,0.08)";
+      });
+      strLabel.textContent = pw.length === 0 ? "" : labels[sc] + " password";
+      strLabel.style.color = sc >= 0 ? colours[sc] : "#555d75";
+    });
+
+    /* ── Toggle password visibility ── */
+    const toggleVisibility = (input, btn) => {
+      const isText = input.type === "text";
+      input.type = isText ? "password" : "text";
+      btn.textContent = isText ? "👁" : "🙈";
+    };
+    togglePw.addEventListener("click",   () => toggleVisibility(pwInput,  togglePw));
+    toggleConf.addEventListener("click", () => toggleVisibility(cpwInput, toggleConf));
+
+    /* ── Form submit ── */
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const fullName = document.getElementById("fullName").value.trim();
+      const email    = document.getElementById("email").value.trim();
+      const password = pwInput.value;
+      const confirm  = cpwInput.value;
+      const role     = document.getElementById("role").value;
+
+      // Client-side validation
+      if (!fullName) { showAlert("Please enter your full name."); return; }
+      if (!role)     { showAlert("Please select a role."); return; }
+      if (!email)    { showAlert("Please enter your email address."); return; }
+      if (password.length < 6) { showAlert("Password must be at least 6 characters."); return; }
+      if (password !== confirm) { showAlert("Passwords do not match."); return; }
+
+      loader.style.display = "flex";
+      submitBtn.disabled = true;
+
+      try {
+        await handleRegister(fullName, email, password, role);
+        // handleRegister redirects on success, so nothing here
+      } catch (error) {
+        loader.style.display = "none";
+        submitBtn.disabled = false;
+        showAlert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

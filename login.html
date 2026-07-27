@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Studyhaus CRM</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); }
+    .login-container { max-width: 400px; width: 100%; margin: 2rem; }
+    .login-logo { text-align: center; margin-bottom: 2rem; }
+    .login-logo .logo-icon { width: 48px; height: 48px; font-size: 24px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    .login-logo .logo-text { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
+    #global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+    body.light-mode #global-loader { background: rgba(0,0,0,0.8); color: white; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="light-mode">
+  <div id="global-loader">
+    <div class="spinner"></div>
+    <div style="font-weight: 600; color: var(--text-dark);">Authenticating...</div>
+  </div>
+
+  <div class="login-container">
+    <div class="login-logo">
+      <div class="logo-icon">S</div>
+      <div class="logo-text">Studyhaus</div>
+    </div>
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; color: var(--text-dark);">Sign In</h2>
+      <form id="login-form">
+        <div class="form-group full-width">
+          <label>Email Address</label>
+          <input type="email" id="email" required placeholder="admin@studyhaus.com" />
+        </div>
+        <div class="form-group full-width">
+          <label>Password</label>
+          <input type="password" id="password" required placeholder="••••••••" />
+        </div>
+        <div id="error-message" style="color: var(--danger); font-size: 13px; margin-bottom: 1rem; display: none;"></div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Login</button>
+        <div style="text-align: center; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center;">
+          <a href="forgot-password.html" style="color: var(--primary); text-decoration: none;">Forgot Password?</a>
+          <a href="register.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Create Account →</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      }
+    }
+  </script>
+  
+  <script type="module">
+    import { initAuthGuard } from "./auth/guard.js";
+    import { handleLogin } from "./auth/login.js";
+
+    // Initialize protection (will redirect away if already logged in)
+    initAuthGuard();
+
+    const form = document.getElementById("login-form");
+    const errorDiv = document.getElementById("error-message");
+    const loader = document.getElementById("global-loader");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorDiv.style.display = "none";
+      loader.style.display = "flex";
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await handleLogin(email, password);
+      } catch (error) {
+        loader.style.display = "none";
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = "block";
+      }
+    });
+
+    // Show success message if redirected from registration
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("registered") === "1") {
+      const successDiv = document.createElement("div");
+      successDiv.textContent = "✅ Account created! Please sign in.";
+      successDiv.style.cssText = "background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);color:#34d399;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:1rem;text-align:center;";
+      document.getElementById("login-form").prepend(successDiv);
+    }
+  </script>
+</body>
+</html>
