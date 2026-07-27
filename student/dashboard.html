@@ -14,8 +14,11 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">S</div>
-        <span class="logo-text">Studyhaus</span>
+        <div class="logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></div>
+        <div class="logo-text">
+          <div style="font-weight: 700; font-size: 1.1rem; color: #0f172a; line-height: 1.2;">Studyhaus</div>
+          <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Reading Space CRM</div>
+        </div>
       </div>
 
       <nav class="sidebar-nav">
@@ -157,17 +160,14 @@
           <input type="text" placeholder="Search students, seats, receipts…" />
         </div>
         <div class="topbar-actions">
-          <button class="status-badge open" id="status-toggle" onclick="toggleStatus()">
-            <span class="status-dot"></span>
-            <span class="status-text">Open</span>
-          </button>
+          <button class="status-badge open" style="background:#f0fdf4; color:#166534; border-color:#bbf7d0;" id="status-toggle" onclick="toggleStatus()"><span class="status-dot"></span><span class="status-text">Open</span></button>
           <button class="icon-btn theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
             <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </button>
           <div class="topbar-user">
-            <div class="topbar-avatar" id="current-user-avatar">?</div>
-            <span class="topbar-username" id="current-user-name">…</span>
+            <div class="topbar-avatar" style="background:#0f172a; color:#fff;">V</div>
+            <span class="topbar-username" id="current-user-name">Vraj</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--text-muted)"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
@@ -399,92 +399,101 @@
               <h1>Seat Map</h1>
               <p class="page-subtitle">36 occupied · 18 available across 3 floors</p>
             </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button class="btn btn-ghost" style="background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 16px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filter</button>
+              <button class="btn btn-primary" style="background: #0f172a; color: #fff; border-radius: 999px; padding: 6px 16px;">+ Add seat</button>
+            </div>
             <div class="seat-legend">
-              <span class="legend-dot occupied"></span>Occupied
-              <span class="legend-dot available"></span>Available
-              <span class="legend-dot maintenance"></span>Maintenance
-              <span class="legend-dot reserved"></span>Reserved
+              <span class="legend-pill available"><span class="legend-dot"></span>Available</span>
+              <span class="legend-pill occupied"><span class="legend-dot"></span>Occupied</span>
+              <span class="legend-pill reserved"><span class="legend-dot"></span>Reserved</span>
+              <span class="legend-pill maintenance"><span class="legend-dot"></span>Maintenance</span>
             </div>
           </div>
-          <div class="seat-floors">
+          <div class="floor-tabs">
+            <button class="floor-tab active">Ground Floor</button>
+            <button class="floor-tab">First Floor</button>
+            <button class="floor-tab">Second Floor</button>
+          </div>
+          <div class="card" style="padding: 1.5rem;">
+            <div class="seat-floors">
             <div class="card floor-card">
               <div class="floor-title">Ground Floor</div>
               <div class="seat-grid">
-                <div class="seat occupied" title="G-01 - Vihaan Verma"><span>G-01</span></div>
-                <div class="seat occupied" title="G-02 - Ananya Patel"><span>G-02</span></div>
-                <div class="seat available" title="G-03 - Available"><span>G-03</span></div>
-                <div class="seat occupied" title="G-04 - Meera Nair"><span>G-04</span></div>
-                <div class="seat occupied" title="G-05 - Rohan Gupta"><span>G-05</span></div>
-                <div class="seat available" title="G-06 - Available"><span>G-06</span></div>
-                <div class="seat occupied" title="G-07 - Priya Reddy"><span>G-07</span></div>
-                <div class="seat maintenance" title="G-08 - Maintenance"><span>G-08</span></div>
-                <div class="seat available" title="G-09 - Available"><span>G-09</span></div>
-                <div class="seat occupied" title="G-10 - Arjun Mehta"><span>G-10</span></div>
-                <div class="seat available" title="G-11 - Available"><span>G-11</span></div>
-                <div class="seat occupied" title="G-12 - Sneha Kumar"><span>G-12</span></div>
-                <div class="seat occupied" title="G-13 - Akash Roy"><span>G-13</span></div>
-                <div class="seat available" title="G-14 - Available"><span>G-14</span></div>
-                <div class="seat reserved" title="G-15 - Reserved"><span>G-15</span></div>
-                <div class="seat occupied" title="G-16 - Deepa Nair"><span>G-16</span></div>
-                <div class="seat available" title="G-17 - Available"><span>G-17</span></div>
-                <div class="seat occupied" title="G-18 - Kiran Sharma"><span>G-18</span></div>
-                <div class="seat occupied" title="G-19 - Pooja Iyer"><span>G-19</span></div>
-                <div class="seat available" title="G-20 - Available"><span>G-20</span></div>
+                <div class="seat occupied" title="G-01 - Vihaan Verma"><span>01</span></div>
+                <div class="seat occupied" title="G-02 - Ananya Patel"><span>02</span></div>
+                <div class="seat available" title="G-03 - Available"><span>03</span></div>
+                <div class="seat occupied" title="G-04 - Meera Nair"><span>04</span></div>
+                <div class="seat occupied" title="G-05 - Rohan Gupta"><span>05</span></div>
+                <div class="seat available" title="G-06 - Available"><span>06</span></div>
+                <div class="seat occupied" title="G-07 - Priya Reddy"><span>07</span></div>
+                <div class="seat maintenance" title="G-08 - Maintenance"><span>08</span></div>
+                <div class="seat available" title="G-09 - Available"><span>09</span></div>
+                <div class="seat occupied" title="G-10 - Arjun Mehta"><span>10</span></div>
+                <div class="seat available" title="G-11 - Available"><span>11</span></div>
+                <div class="seat occupied" title="G-12 - Sneha Kumar"><span>12</span></div>
+                <div class="seat occupied" title="G-13 - Akash Roy"><span>13</span></div>
+                <div class="seat available" title="G-14 - Available"><span>14</span></div>
+                <div class="seat reserved" title="G-15 - Reserved"><span>15</span></div>
+                <div class="seat occupied" title="G-16 - Deepa Nair"><span>16</span></div>
+                <div class="seat available" title="G-17 - Available"><span>17</span></div>
+                <div class="seat occupied" title="G-18 - Kiran Sharma"><span>18</span></div>
+                <div class="seat occupied" title="G-19 - Pooja Iyer"><span>19</span></div>
+                <div class="seat available" title="G-20 - Available"><span>20</span></div>
               </div>
             </div>
             <div class="card floor-card">
               <div class="floor-title">First Floor</div>
               <div class="seat-grid">
-                <div class="seat occupied" title="F-01 - Aarav Singh"><span>F-01</span></div>
-                <div class="seat occupied" title="F-02 - Ananya Patel"><span>F-02</span></div>
-                <div class="seat occupied" title="F-03 - Vivek Sharma"><span>F-03</span></div>
-                <div class="seat available" title="F-04 - Available"><span>F-04</span></div>
-                <div class="seat occupied" title="F-05 - Vivaan Kapoor"><span>F-05</span></div>
-                <div class="seat available" title="F-06 - Available"><span>F-06</span></div>
-                <div class="seat occupied" title="F-07 - Riaan Bose"><span>F-07</span></div>
-                <div class="seat occupied" title="F-08 - Tara Singh"><span>F-08</span></div>
-                <div class="seat available" title="F-09 - Available"><span>F-09</span></div>
-                <div class="seat occupied" title="F-10 - Zara Khan"><span>F-10</span></div>
-                <div class="seat maintenance" title="F-11 - Maintenance"><span>F-11</span></div>
-                <div class="seat occupied" title="F-12 - Anika Patel"><span>F-12</span></div>
-                <div class="seat available" title="F-13 - Available"><span>F-13</span></div>
-                <div class="seat occupied" title="F-14 - Rohan Das"><span>F-14</span></div>
-                <div class="seat reserved" title="F-15 - Reserved"><span>F-15</span></div>
-                <div class="seat occupied" title="F-16 - Surya Rao"><span>F-16</span></div>
-                <div class="seat available" title="F-17 - Available"><span>F-17</span></div>
-                <div class="seat occupied" title="F-18 - Nila Iyer"><span>F-18</span></div>
-                <div class="seat occupied" title="F-19 - Vijay Menon"><span>F-19</span></div>
-                <div class="seat available" title="F-20 - Available"><span>F-20</span></div>
+                <div class="seat occupied" title="F-01 - Aarav Singh"><span>01</span></div>
+                <div class="seat occupied" title="F-02 - Ananya Patel"><span>02</span></div>
+                <div class="seat occupied" title="F-03 - Vivek Sharma"><span>03</span></div>
+                <div class="seat available" title="F-04 - Available"><span>04</span></div>
+                <div class="seat occupied" title="F-05 - Vivaan Kapoor"><span>05</span></div>
+                <div class="seat available" title="F-06 - Available"><span>06</span></div>
+                <div class="seat occupied" title="F-07 - Riaan Bose"><span>07</span></div>
+                <div class="seat occupied" title="F-08 - Tara Singh"><span>08</span></div>
+                <div class="seat available" title="F-09 - Available"><span>09</span></div>
+                <div class="seat occupied" title="F-10 - Zara Khan"><span>10</span></div>
+                <div class="seat maintenance" title="F-11 - Maintenance"><span>11</span></div>
+                <div class="seat occupied" title="F-12 - Anika Patel"><span>12</span></div>
+                <div class="seat available" title="F-13 - Available"><span>13</span></div>
+                <div class="seat occupied" title="F-14 - Rohan Das"><span>14</span></div>
+                <div class="seat reserved" title="F-15 - Reserved"><span>15</span></div>
+                <div class="seat occupied" title="F-16 - Surya Rao"><span>16</span></div>
+                <div class="seat available" title="F-17 - Available"><span>17</span></div>
+                <div class="seat occupied" title="F-18 - Nila Iyer"><span>18</span></div>
+                <div class="seat occupied" title="F-19 - Vijay Menon"><span>19</span></div>
+                <div class="seat available" title="F-20 - Available"><span>20</span></div>
               </div>
             </div>
             <div class="card floor-card">
               <div class="floor-title">Second Floor</div>
               <div class="seat-grid">
-                <div class="seat occupied" title="S-01 - Raj Patel"><span>S-01</span></div>
-                <div class="seat available" title="S-02 - Available"><span>S-02</span></div>
-                <div class="seat occupied" title="S-03 - Navya Singh"><span>S-03</span></div>
-                <div class="seat occupied" title="S-04 - Aman Gupta"><span>S-04</span></div>
-                <div class="seat available" title="S-05 - Available"><span>S-05</span></div>
-                <div class="seat occupied" title="S-06 - Ishaan Verma"><span>S-06</span></div>
-                <div class="seat available" title="S-07 - Available"><span>S-07</span></div>
-                <div class="seat occupied" title="S-08 - Kavya Reddy"><span>S-08</span></div>
-                <div class="seat maintenance" title="S-09 - Maintenance"><span>S-09</span></div>
-                <div class="seat occupied" title="S-10 - Lokesh Rao"><span>S-10</span></div>
-                <div class="seat available" title="S-11 - Available"><span>S-11</span></div>
-                <div class="seat occupied" title="S-12 - Mila Shah"><span>S-12</span></div>
-                <div class="seat occupied" title="S-13 - Nikhil Joshi"><span>S-13</span></div>
-                <div class="seat reserved" title="S-14 - Reserved"><span>S-14</span></div>
-                <div class="seat available" title="S-15 - Available"><span>S-15</span></div>
-                <div class="seat occupied" title="S-16 - Ojas Shetty"><span>S-16</span></div>
-                <div class="seat occupied" title="S-17 - Pari Desai"><span>S-17</span></div>
-                <div class="seat available" title="S-18 - Available"><span>S-18</span></div>
-                <div class="seat occupied" title="S-19 - Ria Mishra"><span>S-19</span></div>
-                <div class="seat available" title="S-20 - Available"><span>S-20</span></div>
+                <div class="seat occupied" title="S-01 - Raj Patel"><span>01</span></div>
+                <div class="seat available" title="S-02 - Available"><span>02</span></div>
+                <div class="seat occupied" title="S-03 - Navya Singh"><span>03</span></div>
+                <div class="seat occupied" title="S-04 - Aman Gupta"><span>04</span></div>
+                <div class="seat available" title="S-05 - Available"><span>05</span></div>
+                <div class="seat occupied" title="S-06 - Ishaan Verma"><span>06</span></div>
+                <div class="seat available" title="S-07 - Available"><span>07</span></div>
+                <div class="seat occupied" title="S-08 - Kavya Reddy"><span>08</span></div>
+                <div class="seat maintenance" title="S-09 - Maintenance"><span>09</span></div>
+                <div class="seat occupied" title="S-10 - Lokesh Rao"><span>10</span></div>
+                <div class="seat available" title="S-11 - Available"><span>11</span></div>
+                <div class="seat occupied" title="S-12 - Mila Shah"><span>12</span></div>
+                <div class="seat occupied" title="S-13 - Nikhil Joshi"><span>13</span></div>
+                <div class="seat reserved" title="S-14 - Reserved"><span>14</span></div>
+                <div class="seat available" title="S-15 - Available"><span>15</span></div>
+                <div class="seat occupied" title="S-16 - Ojas Shetty"><span>16</span></div>
+                <div class="seat occupied" title="S-17 - Pari Desai"><span>17</span></div>
+                <div class="seat available" title="S-18 - Available"><span>18</span></div>
+                <div class="seat occupied" title="S-19 - Ria Mishra"><span>19</span></div>
+                <div class="seat available" title="S-20 - Available"><span>20</span></div>
               </div>
             </div>
           </div>
-        </div>
-
+        </div></div>
         <!-- Memberships Page -->
         <div class="page" id="page-memberships">
           <div class="page-header">
