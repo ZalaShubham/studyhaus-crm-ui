@@ -7,6 +7,7 @@
   --bg-hover:      #f1f5f9;
   --bg-gray:       #f1f5f9;
   --border:        #e2e8f0;
+  --border-bright: #cbd5e1;
   --text-primary:  #0f172a;
   --text-secondary:#475569;
   --text-muted:    #94a3b8;
@@ -777,3 +778,5 @@ body.light-mode .theme-toggle { color: var(--accent-amber); }
 .seat.reserved { color: #92400e; border-color: #fde68a; background: #fffbeb; }
 .seat.maintenance { color: #1e40af; border-color: #bfdbfe; background: #eff6ff; }
 .topbar-search { border-radius: 999px; background: #fff; border: 1px solid var(--border); }
+
+.topbar-search { border-radius: 999px !important; background: #fff !important; border: 1px solid var(--border) !important; }
