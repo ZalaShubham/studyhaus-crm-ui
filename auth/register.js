@@ -1,5 +1,5 @@
-import { register as authServiceRegister, setSessionPersistence } from "../services/authService.js";
-import { doc, setDoc } from "firebase/firestore";
+import { register as authServiceRegister, setSessionPersistence, login as authServiceLogin } from "../services/authService.js";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 import { ROLES } from "./roles.js";
 
@@ -25,13 +25,6 @@ const toUserFriendlyRegisterError = (error) => {
 };
 
 /**
- * Handle user registration flow
- * @param {string} fullName
- * @param {string} email
- * @param {string} password
- * @param {string} role - Selected role from the form
- */
-/**
  * Get dashboard URL based on role
  */
 const getDashboardUrl = (role) => {
@@ -44,22 +37,67 @@ const getDashboardUrl = (role) => {
   }
 };
 
+/**
+ * Handle user registration flow
+ * @param {string} fullName
+ * @param {string} email
+ * @param {string} password
+ * @param {string} role - Selected role from the form
+ */
 export const handleRegister = async (fullName, email, password, role) => {
   try {
     await setSessionPersistence();
 
-    // 1. Create Firebase Auth user
-    const user = await authServiceRegister(email, password);
+    let user;
+    let firestoreDocExists = false;
+
+    try {
+      // 1. Try to create a new Firebase Auth user
+      user = await authServiceRegister(email, password);
+    } catch (authError) {
+      if (authError?.code === "auth/email-already-in-use") {
+        // ── RECOVERY PATH ──────────────────────────────────────────────────
+        // The Auth user already exists (a previous registration attempt
+        // created the Auth account but failed to write the Firestore doc).
+        // Try to sign in with the SAME credentials to recover the session.
+        try {
+          user = await authServiceLogin(email, password);
+        } catch (loginError) {
+          // Wrong password — the account belongs to someone else
+          throw new Error("An account with this email already exists. Please log in with your existing password.");
+        }
+
+        // Check if the Firestore document was already created
+        const existingDoc = await getDoc(doc(db, "users", user.uid));
+        if (existingDoc.exists()) {
+          // Doc exists — just log them in directly
+          const data = existingDoc.data();
+          const existingRole = data.role || role;
+          localStorage.setItem("userRole", existingRole);
+          localStorage.setItem("userId", user.uid);
+          window.location.href = getDashboardUrl(existingRole);
+          return;
+        }
+
+        // Doc does NOT exist — fall through to create it below
+        firestoreDocExists = false;
+      } else {
+        throw authError; // Re-throw any other auth error
+      }
+    }
 
     // 2. Write user profile to Firestore users collection
-    await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      email: email,
-      name: fullName,
-      role: role,
-      status: "Active",
-      createdAt: new Date().toISOString(),
-    });
+    //    (runs for both new users and recovered accounts with missing docs)
+    if (!firestoreDocExists) {
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: email,
+        name: fullName,
+        role: role,
+        status: "Active",
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     // 3. Store role and userId in localStorage immediately so the auth guard
     //    does NOT need to re-fetch from Firestore (avoids race condition where
@@ -67,14 +105,18 @@ export const handleRegister = async (fullName, email, password, role) => {
     localStorage.setItem("userRole", role);
     localStorage.setItem("userId", user.uid);
 
-    // 4. Redirect directly to the correct dashboard (skip login.html to
-    //    avoid the guard trying to read Firestore before the doc is available).
+    // 4. Redirect directly to the correct dashboard
     window.location.href = getDashboardUrl(role);
+
   } catch (error) {
     console.error("Registration Error:", error);
     // Clean up localStorage if something went wrong mid-way
     localStorage.removeItem("userRole");
     localStorage.removeItem("userId");
+    // If the error already has a user-friendly message, use it directly
+    if (error.message && !error.code) {
+      throw error;
+    }
     throw new Error(toUserFriendlyRegisterError(error));
   }
 };
