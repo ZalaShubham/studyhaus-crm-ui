@@ -113,7 +113,7 @@ body {
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-.sidebar.collapsed { width: 60px; }
+.sidebar.collapsed { width: 60px; min-width: 60px; }
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-group-label,
 .sidebar.collapsed .nav-item span:not(.nav-badge),
