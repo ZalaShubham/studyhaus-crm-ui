@@ -33,25 +33,43 @@ export const handleLogin = async (email, password) => {
     await setSessionPersistence();
     const user = await authServiceLogin(email, password);
     
-    let userDoc = await getDocument("users", user.uid);
+    let userDoc = null;
     let docId = user.uid;
-    
+
+    // 1. Check the canonical 'users' collection first (where register.js writes)
+    userDoc = await getDocument("users", user.uid);
+
+    // 2. Also check role-named collections (Manager, Employee, Owner/Admin)
+    //    — handles documents created manually in Firestore by an admin
     if (!userDoc || !userDoc.role) {
-      userDoc = await getDocument("students", user.uid);
-      if (!userDoc) {
-        // Fallback: Search students by email (for users created manually in Firebase Auth)
-        const q = query(collection(db, "students"), where("email", "==", user.email));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          userDoc = snap.docs[0].data();
-          docId = snap.docs[0].id;
-        }
-      }
-      if (userDoc) {
-        userDoc.role = userDoc.role || "Student";
+      const roleCollections = ["Manager", "Employee", "Owner", "Admin", "students"];
+      for (const col of roleCollections) {
+        const doc = await getDocument(col, user.uid);
+        if (doc) { userDoc = doc; break; }
       }
     }
-    
+
+    // 3. Email-based search across role collections for manually created users
+    if (!userDoc || !userDoc.role) {
+      const searchCollections = ["users", "Manager", "Employee", "students"];
+      for (const col of searchCollections) {
+        try {
+          const q = query(collection(db, col), where("email", "==", user.email));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            userDoc = snap.docs[0].data();
+            docId = snap.docs[0].id;
+            break;
+          }
+        } catch (_) { /* collection may not exist, skip */ }
+      }
+    }
+
+    // 4. Default role to Student if a doc was found but role field is missing
+    if (userDoc && !userDoc.role) {
+      userDoc.role = "Student";
+    }
+
     if (!userDoc || !userDoc.role) {
       throw new Error(
         "User data or role not found in database. In Firebase Console, create a document at users/" +

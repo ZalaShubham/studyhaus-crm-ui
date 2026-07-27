@@ -28,22 +28,40 @@ export const initAuthGuard = () => {
         let role = localStorage.getItem("userRole");
         if (!role) {
           // Role not cached — fetch from Firestore
-          let userDoc = await getDocument("users", user.uid);
+          let userDoc = null;
           let docId = user.uid;
-          
+
+          // 1. Canonical 'users' collection
+          userDoc = await getDocument("users", user.uid);
+
+          // 2. Role-named collections (Manager, Employee, etc.) by UID
           if (!userDoc || !userDoc.role) {
-            userDoc = await getDocument("students", user.uid);
-            if (!userDoc) {
-              const q = query(collection(db, "students"), where("email", "==", user.email));
-              const snap = await getDocs(q);
-              if (!snap.empty) {
-                userDoc = snap.docs[0].data();
-                docId = snap.docs[0].id;
-              }
+            const roleCollections = ["Manager", "Employee", "Owner", "Admin", "students"];
+            for (const col of roleCollections) {
+              const doc = await getDocument(col, user.uid);
+              if (doc) { userDoc = doc; break; }
             }
-            if (userDoc) {
-              userDoc.role = userDoc.role || "Student"; // Default if missing
+          }
+
+          // 3. Email-based search across all known collections
+          if (!userDoc || !userDoc.role) {
+            const searchCollections = ["users", "Manager", "Employee", "students"];
+            for (const col of searchCollections) {
+              try {
+                const q = query(collection(db, col), where("email", "==", user.email));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                  userDoc = snap.docs[0].data();
+                  docId = snap.docs[0].id;
+                  break;
+                }
+              } catch (_) { /* skip missing collections */ }
             }
+          }
+
+          // 4. Default to Student if role field is missing
+          if (userDoc && !userDoc.role) {
+            userDoc.role = "Student";
           }
           
           if (userDoc && userDoc.role) {
