@@ -1,74 +1,14 @@
-import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "../firebase/firebase.js";
-import { validateStudentData } from "./studentValidation.js";
-import { approveAdmission, rejectAdmission } from "./approvalService.js";
-import { initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments, setUploadProgress } from "./documentUploadService.js";
+const fs = require('fs');
 
-/**
- * Fetch available plans for the dropdown.
- * Students only see non-manual plans.
- */
-export const fetchPlansForDropdown = async (isStudent) => {
-  const plansRef = collection(db, "membershipPlans");
-  const q = isStudent ? query(plansRef, where("isManual", "==", false)) : plansRef;
-  const snapshot = await getDocs(q);
-  
-  const plans = [];
-  snapshot.forEach(doc => {
-    plans.push({ id: doc.id, ...doc.data() });
-  });
-  return plans;
-};
+let js = fs.readFileSync('services/admissionService.js', 'utf8');
 
-/**
- * Submit an admission form
- * If user is Student -> goes to 'admissions' collection (Pending)
- * If user is Admin -> goes to 'students' collection (Active immediately)
- */
-export const submitAdmission = async (formData, isStudent) => {
-  try {
-    await validateStudentData(formData);
-    
-    // Add timestamps and role
-    formData.createdAt = serverTimestamp();
-    formData.updatedAt = serverTimestamp();
-    formData.role = "Student"; // Crucial for login routing
+const uiSectionStart = js.indexOf('// UI ORCHESTRATION LOGIC');
+if (uiSectionStart === -1) {
+  console.error("Could not find UI ORCHESTRATION LOGIC in admissionService.js");
+  process.exit(1);
+}
 
-    if (isStudent) {
-      // Self Registration
-      formData.approvalStatus = "Pending";
-      formData.status = "Pending";
-      await addDoc(collection(db, "admissions"), formData);
-    } else {
-      // Admin Admission
-      formData.approvalStatus = "Approved";
-      formData.status = "Active";
-      await addDoc(collection(db, "students"), formData);
-    }
-    
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Listen to pending admissions for the Admin queue
- */
-export const listenToPendingAdmissions = (onUpdate, onError) => {
-  const q = query(collection(db, "admissions"), where("status", "==", "Pending"));
-  
-  return onSnapshot(q, (snapshot) => {
-    const list = [];
-    snapshot.forEach(doc => {
-      list.push({ id: doc.id, ...doc.data() });
-    });
-    onUpdate(list);
-  }, onError);
-};
-
-// ==========================================
-// UI ORCHESTRATION LOGIC
+const replacement = `// UI ORCHESTRATION LOGIC
 // ==========================================
 
 let availablePlansList = [];
@@ -114,21 +54,21 @@ export const initAdmissionsUI = async () => {
       let html = "";
       records.forEach(r => {
         const d = r.createdAt ? new Date(r.createdAt.toMillis()).toLocaleDateString() : "Just now";
-        html += `
+        html += \`
           <tr>
             <td>
-              <div style="font-weight:600; color:#0f172a;">${r.name}</div>
-              <div style="font-size:11px; color:#94a3b8;">${r.email || ""}</div>
+              <div style="font-weight:600; color:#0f172a;">\${r.name}</div>
+              <div style="font-size:11px; color:#94a3b8;">\${r.email || ""}</div>
             </td>
-            <td>${r.phone}</td>
-            <td>${r.planName}</td>
-            <td>${d}</td>
+            <td>\${r.phone}</td>
+            <td>\${r.planName}</td>
+            <td>\${d}</td>
             <td style="text-align:right;">
-              <button class="btn btn-sm" onclick="window.approveStudent('${r.id}')" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; margin-right:4px;">Approve</button>
-              <button class="btn btn-sm" onclick="window.rejectStudent('${r.id}')" style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px;">Reject</button>
+              <button class="btn btn-sm" onclick="window.approveStudent('\${r.id}')" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; margin-right:4px;">Approve</button>
+              <button class="btn btn-sm" onclick="window.rejectStudent('\${r.id}')" style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px;">Reject</button>
             </td>
           </tr>
-        `;
+        \`;
       });
       tbody.innerHTML = html;
     });
@@ -146,7 +86,7 @@ export const initAdmissionsUI = async () => {
       availablePlansList = await fetchPlansForDropdown(isStudent);
       let html = "<option value=''>Choose plan</option>";
       availablePlansList.forEach(p => {
-        html += `<option value="${p.id}">${p.planName} - ₹${p.price}</option>`;
+        html += \`<option value="\${p.id}">\${p.planName} - ₹\${p.price}</option>\`;
       });
       planSelect.innerHTML = html;
     } catch (e) {
@@ -162,10 +102,10 @@ export const initAdmissionsUI = async () => {
       const q = query(collection(db, "seats"), where("status", "==", "Available"));
       const snap = await getDocs(q);
       let availableCount = snap.size;
-      let html = `<option value=''>${availableCount} available</option>`;
+      let html = \`<option value=''>\${availableCount} available</option>\`;
       snap.forEach(doc => {
         const s = doc.data();
-        html += `<option value="${s.seatNumber}">${s.seatNumber}</option>`;
+        html += \`<option value="\${s.seatNumber}">\${s.seatNumber}</option>\`;
       });
       seatSelect.innerHTML = html;
     } catch (e) {
@@ -219,7 +159,7 @@ export const initAdmissionsUI = async () => {
     const plan = availablePlansList.find(p => p.id === planId);
     if (plan) {
       document.getElementById("summary-plan").innerText = plan.planName;
-      document.getElementById("summary-amount").innerText = `₹${plan.price}`;
+      document.getElementById("summary-amount").innerText = \`₹\${plan.price}\`;
       
       const today = new Date();
       document.getElementById("summary-start").innerText = today.toLocaleDateString('en-GB'); // dd/mm/yyyy
@@ -284,3 +224,8 @@ export const initAdmissionsUI = async () => {
     }
   };
 };
+`;
+
+const newJs = js.substring(0, uiSectionStart - 1) + "\n" + replacement;
+fs.writeFileSync('services/admissionService.js', newJs);
+console.log('admissionService.js updated successfully.');
