@@ -11,26 +11,56 @@ export const listenToStudentPortalData = (onDataUpdate, onError) => {
   
   onAuthStateChanged(auth, async (user) => {
     if (user && user.email) {
-      // User is signed in, query students collection by email
+
+      // 1. Try the students collection first (added by admin via Admissions)
       const q = query(collection(db, "students"), where("email", "==", user.email));
-      
-      onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-          onError("No student profile found for this email address.");
+
+      onSnapshot(q, async (snapshot) => {
+        if (!snapshot.empty) {
+          // Found in students collection — full profile available
+          const studentDoc = snapshot.docs[0];
+          onDataUpdate({ id: studentDoc.id, ...studentDoc.data() });
           return;
         }
-        // Assuming one student per email
-        const studentDoc = snapshot.docs[0];
-        onDataUpdate({ id: studentDoc.id, ...studentDoc.data() });
+
+        // 2. Fallback: check the users collection (registered via register.html)
+        try {
+          const usersQ = query(collection(db, "users"), where("email", "==", user.email));
+          const usersSnap = await getDocs(usersQ);
+
+          if (!usersSnap.empty) {
+            const userDoc = usersSnap.docs[0];
+            const userData = userDoc.data();
+            // Build a minimal student-like profile from the users doc
+            onDataUpdate({
+              id: userDoc.id,
+              name: userData.name || user.email.split("@")[0],
+              email: userData.email || user.email,
+              role: userData.role || "Student",
+              status: userData.status || "Active",
+              planName: userData.planName || "Not Assigned",
+              seatNumber: userData.seatNumber || null,
+              paymentDueDate: userData.paymentDueDate || null,
+              parentPhone: userData.parentPhone || "",
+              address: userData.address || "",
+              _fromUsersCollection: true   // flag so portal knows data is limited
+            });
+          } else {
+            onError("No student profile found. Please contact your admin to complete your enrollment.");
+          }
+        } catch (fallbackErr) {
+          onError("Failed to load your profile: " + fallbackErr.message);
+        }
       }, (err) => {
         onError("Failed to fetch student data: " + err.message);
       });
-      
+
     } else {
       onError("No user signed in or missing email.");
     }
   });
 };
+
 
 /**
  * Updates the student's personal editable fields
