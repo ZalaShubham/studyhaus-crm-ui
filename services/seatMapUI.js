@@ -88,16 +88,16 @@ export const initSeatMapUI = async () => {
     // Build options based on current status
     let options = "";
     if (seat.status === "Available") {
-      options = \`1. Assign Student\\n2. Mark Maintenance\\n3. Mark Inactive\`;
+      options = `1. Assign Student\n2. Mark Maintenance\n3. Mark Inactive`;
     } else if (seat.status === "Reserved") {
-      options = \`1. Unassign Student\\n2. Mark Maintenance\\n3. Mark Inactive\`;
+      options = `1. Unassign Student\n2. Mark Maintenance\n3. Mark Inactive`;
     } else if (seat.status === "Maintenance" || seat.status === "Inactive") {
-      options = \`1. Mark Available\`;
+      options = `1. Mark Available`;
     } else if (seat.status === "Occupied") {
-      options = \`Occupied seats cannot be modified directly until the student checks out.\`;
+      options = `Occupied seats cannot be modified directly until the student checks out.`;
     }
 
-    const choice = prompt(\`Seat \${seat.seatNumber} (\${seat.status})\\n\\nOptions:\\n\${options}\\n\\nEnter option number:\`);
+    const choice = prompt(`Seat ${seat.seatNumber} (${seat.status})\n\nOptions:\n${options}\n\nEnter option number:`);
     if (!choice) return;
 
     processSeatAction(seat, choice.trim());
@@ -126,7 +126,7 @@ const processSeatAction = async (seat, choice) => {
 
   if (seat.status === "Reserved") {
     if (choice === "1") {
-      if (confirm(\`Unassign \${seat.assignedStudentName} from this seat?\`)) {
+      if (confirm(`Unassign ${seat.assignedStudentName} from this seat?`)) {
         await unassignSeat(seat.id);
       }
       return;
@@ -143,7 +143,7 @@ const processSeatAction = async (seat, choice) => {
 };
 
 const triggerAssignSeat = async (seat) => {
-  const studentEmailOrId = prompt(\`Enter the Email or Student ID of the student to assign to Seat \${seat.seatNumber}:\`);
+  const studentEmailOrId = prompt(`Enter the Email or Student ID of the student to assign to Seat ${seat.seatNumber}:`);
   if (!studentEmailOrId) return;
 
   try {
@@ -161,11 +161,11 @@ const triggerAssignSeat = async (seat) => {
     const studentData = { id: studentDoc.id, ...studentDoc.data() };
     
     if (studentData.status !== "Active") return alert("Cannot assign seat to inactive student.");
-    if (studentData.seatNumber) return alert(\`Student already has a seat assigned: \${studentData.seatNumber}\`);
+    if (studentData.seatNumber) return alert(`Student already has a seat assigned: ${studentData.seatNumber}`);
 
     const res = await assignSeat(seat.id, studentData);
     if (!res.success) alert("Failed to assign seat: " + res.error);
-    else alert(\`Successfully assigned \${studentData.name} to \${seat.seatNumber}\`);
+    else alert(`Successfully assigned ${studentData.name} to ${seat.seatNumber}`);
 
   } catch (err) {
     alert("Error finding student: " + err.message);
@@ -177,7 +177,7 @@ const updateSeatAnalysis = (seats) => {
   const available = seats.filter(s => s.status === "Available").length;
   const subtitle = document.getElementById("seat-subtitle");
   if (subtitle) {
-    subtitle.innerText = \`\${occupied} occupied · \${available} available across 3 floors\`;
+    subtitle.innerText = `${occupied} occupied · ${available} available across 3 floors`;
   }
 };
 
@@ -213,14 +213,14 @@ const renderSeatMap = () => {
     // Strip prefix from seatNumber (e.g. A01 -> 01, G-01 -> 01)
     let displayNum = seat.seatNumber.replace(/^[A-Za-z-]+/, '');
 
-    html += \`
+    html += `
       <div 
         class="seat-card"
-        onclick="window.handleSeatClick('\${seat.id}')"
+        onclick="window.handleSeatClick('${seat.id}')"
         style="
-          background: \${bg}; 
-          border: \${border}; 
-          color: \${text}; 
+          background: ${bg}; 
+          border: ${border}; 
+          color: ${text}; 
           border-radius: 8px; 
           aspect-ratio: 1.1; 
           display: flex; 
@@ -232,9 +232,9 @@ const renderSeatMap = () => {
         onmouseover="this.style.transform='translateY(-2px)';"
         onmouseout="this.style.transform='none';"
       >
-        <div style="font-size: 14px; font-weight: 600;">\${displayNum}</div>
+        <div style="font-size: 14px; font-weight: 600;">${displayNum}</div>
       </div>
-    \`;
+    `;
   });
 
   grid.innerHTML = html;
