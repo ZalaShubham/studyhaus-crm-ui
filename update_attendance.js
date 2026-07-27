@@ -1,4 +1,6 @@
-import { listenToAllAttendance } from "./attendanceService.js";
+const fs = require('fs');
+
+const jsCode = `import { listenToAllAttendance } from "./attendanceService.js";
 import { calculateStudyHours } from "./studyHourCalculator.js";
 
 let allRecords = [];
@@ -12,7 +14,7 @@ export const initAttendanceAdminUI = () => {
   const role = localStorage.getItem("userRole");
   if (role === "Student") return; 
 
-  container.innerHTML = `
+  container.innerHTML = \`
     <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
       <div>
         <h1>Attendance</h1>
@@ -85,7 +87,7 @@ export const initAttendanceAdminUI = () => {
         </table>
       </div>
     </div>
-  `;
+  \`;
 
   if (unsubscribe) unsubscribe();
   unsubscribe = listenToAllAttendance((records) => {
@@ -126,18 +128,18 @@ const renderChart = () => {
     const hP = (d.p / 40) * 100;
     const hA = (d.a / 40) * 100;
     const hoverBg = i === 10 ? 'rgba(0,0,0,0.05)' : 'transparent';
-    const tooltip = i === 10 ? `<div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.1); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; white-space:nowrap; margin-bottom:8px; z-index:20;">D${i+1}<div style="color:#1e293b; margin-top:4px;">present : ${d.p}</div><div style="color:#e11d48; margin-top:2px;">absent : ${d.a}</div></div>` : '';
+    const tooltip = i === 10 ? \`<div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.1); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; white-space:nowrap; margin-bottom:8px; z-index:20;">D\${i+1}<div style="color:#1e293b; margin-top:4px;">present : \${d.p}</div><div style="color:#e11d48; margin-top:2px;">absent : \${d.a}</div></div>\` : '';
     
-    html += `
-      <div style="flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative; background:${hoverBg}; border-radius:4px 4px 0 0; padding: 0 4px; cursor:pointer;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='${hoverBg}'">
-        ${tooltip}
+    html += \`
+      <div style="flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative; background:\${hoverBg}; border-radius:4px 4px 0 0; padding: 0 4px; cursor:pointer;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='\${hoverBg}'">
+        \${tooltip}
         <div style="display:flex; align-items:flex-end; gap:2px; width:100%; height:100%; justify-content:center;">
-          <div style="background:#1e3a8a; width:14px; border-radius:3px 3px 0 0; height:${hP}%;"></div>
-          <div style="background:#e11d48; width:14px; border-radius:3px 3px 0 0; height:${hA}%;"></div>
+          <div style="background:#1e3a8a; width:14px; border-radius:3px 3px 0 0; height:\${hP}%;"></div>
+          <div style="background:#e11d48; width:14px; border-radius:3px 3px 0 0; height:\${hA}%;"></div>
         </div>
-        <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-top:6px; position:absolute; top:100%;">D${i+1}</div>
+        <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-top:6px; position:absolute; top:100%;">D\${i+1}</div>
       </div>
-    `;
+    \`;
   });
   barsContainer.innerHTML = html;
 };
@@ -165,32 +167,36 @@ const renderTable = () => {
   rows.forEach(r => {
     let badgeHtml = "";
     if (r.status === "Absent") {
-      badgeHtml = `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Absent</span>`;
+      badgeHtml = \`<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Absent</span>\`;
     } else if (r.status === "Present") {
-      badgeHtml = `<span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Present</span>`;
+      badgeHtml = \`<span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Present</span>\`;
     } else if (r.status === "Late") {
-      badgeHtml = `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Late</span>`;
+      badgeHtml = \`<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Late</span>\`;
     }
 
     const initials = r.name.split(" ").map(n => n[0]).join("");
 
-    html += `
+    html += \`
       <tr style="border-bottom:1px solid #f1f5f9; transition:0.2s; cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
         <td style="padding:16px; display:flex; align-items:center; gap:12px;">
-          <div style="width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; border:1px solid #e2e8f0;">${initials}</div>
+          <div style="width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; border:1px solid #e2e8f0;">\${initials}</div>
           <div>
-            <div style="font-weight:600; color:#0f172a; margin-bottom:2px;">${r.name}</div>
-            <div style="font-size:11px; color:#94a3b8; font-family:monospace;">${r.id}</div>
+            <div style="font-weight:600; color:#0f172a; margin-bottom:2px;">\${r.name}</div>
+            <div style="font-size:11px; color:#94a3b8; font-family:monospace;">\${r.id}</div>
           </div>
         </td>
-        <td style="padding:16px; font-weight:600; color:#0f172a;">${r.seat}</td>
-        <td style="padding:16px; color:#475569;">${r.in}</td>
-        <td style="padding:16px; color:#475569;">${r.out}</td>
-        <td style="padding:16px; font-weight:500; color:#475569;">${r.hrs}</td>
-        <td style="padding:16px; text-align:right;">${badgeHtml}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a;">\${r.seat}</td>
+        <td style="padding:16px; color:#475569;">\${r.in}</td>
+        <td style="padding:16px; color:#475569;">\${r.out}</td>
+        <td style="padding:16px; font-weight:500; color:#475569;">\${r.hrs}</td>
+        <td style="padding:16px; text-align:right;">\${badgeHtml}</td>
       </tr>
-    `;
+    \`;
   });
 
   tbody.innerHTML = html;
 };
+`;
+
+fs.writeFileSync('services/attendanceAdminUI.js', jsCode);
+console.log('Attendance page updated!');
