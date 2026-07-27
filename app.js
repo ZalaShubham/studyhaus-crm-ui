@@ -281,7 +281,8 @@ document.querySelectorAll('.notif-item.unread').forEach(item => {
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
-  navigate('dashboard');
+  const defaultPage = document.body.getAttribute('data-default-page') || 'dashboard';
+  navigate(defaultPage);
   // Stagger metric cards animation
   document.querySelectorAll('.metric-card').forEach((card, i) => {
     card.style.opacity = '0';
