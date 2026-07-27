@@ -20,7 +20,7 @@ export const initStudentManagementUI = async () => {
 
   const role = localStorage.getItem("userRole");
   if (role === "Student") {
-    document.body.innerHTML = "<h1>Access Denied</h1>";
+    // Students don't manage the student table — silently skip this admin UI
     return;
   }
 
