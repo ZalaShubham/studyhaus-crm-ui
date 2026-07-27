@@ -1,4 +1,9 @@
-import { listenToAllPayments, approvePayment, rejectPayment } from "./paymentService.js";
+const fs = require('fs');
+
+const paymentJsPath = 'services/paymentAdminUI.js';
+let paymentJs = fs.readFileSync(paymentJsPath, 'utf8');
+
+const newPaymentInit = `import { listenToAllPayments, approvePayment, rejectPayment } from "./paymentService.js";
 
 let allPayments = [];
 let unsubscribe = null;
@@ -12,7 +17,7 @@ export const initPaymentAdminUI = () => {
   if (role === "Student") return; // Security guard
 
   // Initial UI Setup
-  container.innerHTML = `
+  container.innerHTML = \`
     <div class="page-header" style="margin-bottom: 2rem;">
       <div>
         <h1>Payments</h1>
@@ -76,7 +81,7 @@ export const initPaymentAdminUI = () => {
         </table>
       </div>
     </div>
-  `;
+  \`;
 
   // Filter Listeners
   document.getElementById("payment-search").addEventListener("input", (e) => {
@@ -176,7 +181,7 @@ const renderPaymentAdminTable = () => {
   }
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color: var(--text-muted);">No transactions found.</td></tr>`;
+    tbody.innerHTML = \`<tr><td colspan="7" style="text-align:center; padding:2rem; color: var(--text-muted);">No transactions found.</td></tr>\`;
     return;
   }
 
@@ -189,22 +194,26 @@ const renderPaymentAdminTable = () => {
       : (r.status === "approved" ? "background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;" : "background:#fef2f2; color:#991b1b; border:1px solid #fecaca;");
     
     // Make the row clickable for admins to approve if it's pending.
-    const clickAttr = (isPending && canApprove) ? `onclick="window.handleApprovePayment('${r.id}')" style="cursor:pointer;" title="Click to Approve"` : "";
+    const clickAttr = (isPending && canApprove) ? \`onclick="window.handleApprovePayment('\${r.id}')" style="cursor:pointer;" title="Click to Approve"\` : "";
 
-    html += `
+    html += \`
       <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:16px;">${r.transactionId || "RC-N/A"}</td>
-        <td style="padding:16px; font-weight:600; color:#0f172a;">${r.studentName || "Unknown"}</td>
-        <td style="padding:16px;">${r.planName || "Unknown Plan"}</td>
-        <td style="padding:16px;">${r.paymentMethod || "Cash"}</td>
-        <td style="padding:16px; font-weight:600; color:#0f172a; text-align:right;">₹${r.amount}</td>
-        <td style="padding:16px;">${new Date(r.date).toISOString().split('T')[0]}</td>
-        <td style="padding:16px; text-align:right;" ${clickAttr}>
-          <span style="${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">${statusText}</span>
+        <td style="padding:16px;">\${r.transactionId || "RC-N/A"}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a;">\${r.studentName || "Unknown"}</td>
+        <td style="padding:16px;">\${r.planName || "Unknown Plan"}</td>
+        <td style="padding:16px;">\${r.paymentMethod || "Cash"}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a; text-align:right;">₹\${r.amount}</td>
+        <td style="padding:16px;">\${new Date(r.date).toISOString().split('T')[0]}</td>
+        <td style="padding:16px; text-align:right;" \${clickAttr}>
+          <span style="\${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">\${statusText}</span>
         </td>
       </tr>
-    `;
+    \`;
   });
 
   tbody.innerHTML = html;
 };
+`;
+
+fs.writeFileSync(paymentJsPath, newPaymentInit);
+console.log('paymentAdminUI.js updated successfully with imports.');

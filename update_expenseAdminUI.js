@@ -1,4 +1,9 @@
-import { listenToExpenseCategories, addExpenseCategory, updateExpenseCategory, toggleExpenseCategory, deleteExpenseCategory } from "./expenseCategoryService.js";
+const fs = require('fs');
+
+const expenseJsPath = 'services/expenseAdminUI.js';
+let expenseJs = fs.readFileSync(expenseJsPath, 'utf8');
+
+const newExpenseInit = `import { listenToExpenseCategories, addExpenseCategory, updateExpenseCategory, toggleExpenseCategory, deleteExpenseCategory } from "./expenseCategoryService.js";
 import { listenToExpenses, addExpense, deleteExpense } from "./expenseService.js";
 import { exportToCSV, exportToPDF } from "./expenseExportService.js";
 
@@ -16,7 +21,7 @@ export const initExpenseAdminUI = () => {
   const isOwner = role === "Owner/Admin";
   const canEdit = (role === "Owner/Admin" || role === "Manager");
 
-  container.innerHTML = `
+  container.innerHTML = \`
     <div class="page-header" style="margin-bottom: 2rem;">
       <div>
         <h1>Expenses</h1>
@@ -24,7 +29,7 @@ export const initExpenseAdminUI = () => {
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <button class="btn btn-ghost" id="btn-export-csv" style="background:#fff; color:#0f172a; border:1px solid #e2e8f0; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
-        ${canEdit ? `<button class="btn btn-primary" id="btn-add-expense" style="background:#1e3a8a; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;">+ Add expense</button>` : ""}
+        \${canEdit ? \`<button class="btn btn-primary" id="btn-add-expense" style="background:#1e3a8a; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;">+ Add expense</button>\` : ""}
       </div>
     </div>
     
@@ -90,7 +95,7 @@ export const initExpenseAdminUI = () => {
         </div>
       </div>
     </div>
-  `;
+  \`;
 
   // Start Listeners
   listenToExpenseCategories(cats => {
@@ -152,7 +157,7 @@ const renderExpenses = () => {
   if (domRecur) domRecur.innerText = recurring;
 
   if (allExpenses.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-muted);">No expenses found.</td></tr>`;
+    tbody.innerHTML = \`<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-muted);">No expenses found.</td></tr>\`;
     return;
   }
 
@@ -167,19 +172,23 @@ const renderExpenses = () => {
       ? "background:#fffbeb; color:#d97706; border:1px solid #fde68a;" 
       : "background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;";
 
-    html += `
+    html += \`
       <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:16px; font-weight:600; color:#0f172a;">${r.category || "General"}</td>
-        <td style="padding:16px;">${r.vendor || r.name || "-"}</td>
-        <td style="padding:16px;">${r.id.substring(0,6).toUpperCase()}</td>
-        <td style="padding:16px; font-weight:600; color:#0f172a; text-align:right;">₹${r.amount}</td>
-        <td style="padding:16px;">${new Date(r.date).toISOString().split('T')[0]}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a;">\${r.category || "General"}</td>
+        <td style="padding:16px;">\${r.vendor || r.name || "-"}</td>
+        <td style="padding:16px;">\${r.id.substring(0,6).toUpperCase()}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a; text-align:right;">₹\${r.amount}</td>
+        <td style="padding:16px;">\${new Date(r.date).toISOString().split('T')[0]}</td>
         <td style="padding:16px; text-align:right;">
-          <span style="${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">${statusText}</span>
+          <span style="\${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">\${statusText}</span>
         </td>
       </tr>
-    `;
+    \`;
   });
 
   tbody.innerHTML = html;
 };
+`;
+
+fs.writeFileSync(expenseJsPath, newExpenseInit);
+console.log('expenseAdminUI.js updated successfully with full mockups logic.');
