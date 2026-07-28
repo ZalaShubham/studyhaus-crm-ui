@@ -24,7 +24,8 @@ export const initStudentPortalUI = () => {
   const role = localStorage.getItem("userRole");
   if (role !== "Student") return;
 
-  window.navigate("student-portal");
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  portalSection.classList.add('active');
   portalSection.innerHTML = `<div style="padding: 2rem; text-align: center;">Loading your portal...</div>`;
 
   unsubscribePortal = listenToStudentPortalData(async (studentData) => {
