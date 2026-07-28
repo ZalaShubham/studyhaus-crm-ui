@@ -18,6 +18,7 @@ import { initOldStudentAdminUI } from "./services/oldStudentAdminUI.js";
 import { initDashboardReminders } from "./services/dashboardReminderUI.js";
 import { initRenewalAdminUI, renderRenewalForm, renderRenewalHistory } from "./services/renewalAdminUI.js";
 import { openReportViewer, closeReportViewer } from "./services/reportAdminUI.js";
+import { initAnnouncementAdminUI } from "./services/announcementAdminUI.js";
 import "./services/whatsappModalUI.js"; // Auto-injects modal styles and functions
 
 // Expose the test function to the global window object
@@ -39,6 +40,9 @@ initAuthGuard();
 
 // When DOM is loaded, enforce module-level permissions and init live dashboard
 document.addEventListener("DOMContentLoaded", () => {
+  // Move all dialogs to body to prevent them from failing to open if their parent page is hidden
+  document.querySelectorAll("dialog").forEach(d => document.body.appendChild(d));
+
   const role = localStorage.getItem("userRole");
   if (role) {
     enforceModulePermissions(role);
@@ -72,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initOldStudentAdminUI();
     // Initialize Renewal Module
     initRenewalAdminUI();
+    // Initialize Announcements
+    initAnnouncementAdminUI();
   }
 });
 

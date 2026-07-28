@@ -2,6 +2,7 @@ import { listenToAllStudents, softDeleteStudent, updateStudentProfile } from "./
 import { searchStudents, filterStudents, sortStudents, paginateStudents } from "./studentDataProcessing.js";
 import { fetchPlansForDropdown } from "./admissionService.js";
 import { convertToOldStudent } from "./oldStudentService.js";
+import { loadStudentDocuments } from "./documentUploadService.js";
 
 let allStudents = [];
 let currentQuery = "";
@@ -209,7 +210,9 @@ const renderProfileModal = (s, role) => {
       </div>
       
       <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--border); display:flex; align-items:center; justify-content:center;">Photo</div>
+        <div id="sp-avatar-${s.id}" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: white; display:flex; align-items:center; justify-content:center; font-size: 24px; font-weight: bold; overflow: hidden;">
+          ${s.name ? s.name.substring(0, 2).toUpperCase() : "ST"}
+        </div>
         <div>
           <h3 style="margin: 0; font-size: 1.25rem;">${s.name}</h3>
           <div style="color: var(--text-muted);">${s.studentId || "No ID"} · ${s.status}</div>
@@ -288,6 +291,17 @@ const renderProfileModal = (s, role) => {
     </div>
   `;
   modal.showModal();
+
+  if (s.selfieUrl) {
+    loadStudentDocuments(s.id).then(docs => {
+      if (docs && docs.selfie) {
+        const avatarEl = document.getElementById(`sp-avatar-${s.id}`);
+        if (avatarEl) {
+          avatarEl.innerHTML = `<img src="${docs.selfie}" style="width:100%; height:100%; object-fit:cover;" alt="Photo" />`;
+        }
+      }
+    }).catch(err => console.error("Failed to load selfie", err));
+  }
 };
 
 window.submitStudentEdit = async (id) => {
@@ -338,11 +352,23 @@ window.switchStudentProfileTab = (tab, el) => {
 };
 
 window.openRenewalModal = (studentId) => {
-  const student = dataset.find(s => s.id === studentId);
+  const student = allStudents.find(s => s.id === studentId);
   if (!student) return;
   const role = localStorage.getItem("userRole");
+  
+  const modal = document.getElementById("renewal-modal");
+  modal.innerHTML = `
+    <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Renew Membership</h2>
+        <button class="btn btn-ghost" onclick="document.getElementById('renewal-modal').close()" style="padding: 0.25rem 0.5rem;">✕</button>
+      </div>
+      <div id="renewal-modal-body"></div>
+    </div>
+  `;
+  
   window.renderRenewalForm(student, "renewal-modal-body", role);
-  document.getElementById("renewal-modal").showModal();
+  modal.showModal();
 };
 
 window.loadRenewalHistory = (studentId) => {

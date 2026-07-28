@@ -198,7 +198,14 @@ const renderPaymentAdminTable = () => {
         <td style="padding:16px;">${r.planName || "Unknown Plan"}</td>
         <td style="padding:16px;">${r.paymentMethod || "Cash"}</td>
         <td style="padding:16px; font-weight:600; color:var(--text-primary); text-align:right;">₹${r.amount}</td>
-        <td style="padding:16px;">${new Date(r.date).toISOString().split('T')[0]}</td>
+        <td style="padding:16px;">${
+          (() => {
+            const raw = r.date || r.paymentDate || (r.createdAt && r.createdAt.seconds ? r.createdAt.seconds * 1000 : null);
+            if (!raw) return "N/A";
+            const d = new Date(raw);
+            return isNaN(d.getTime()) ? "N/A" : d.toISOString().split('T')[0];
+          })()
+        }</td>
         <td style="padding:16px; text-align:right;" ${clickAttr}>
           <span style="${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">${statusText}</span>
         </td>

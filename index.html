@@ -404,6 +404,47 @@
           
           <dialog id="whatsapp-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);"></dialog>
           <dialog id="renewal-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);"></dialog>
+          <dialog id="announcement-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);">
+            <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0;">Schedule Announcement</h2>
+                <button class="btn btn-ghost" onclick="document.getElementById('announcement-modal').close()" style="padding: 0.25rem 0.5rem;">✕</button>
+              </div>
+              <form id="announcement-form" onsubmit="event.preventDefault(); window.submitAnnouncement()">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label>Title</label>
+                  <input type="text" id="ann-title" required placeholder="e.g. Diwali Holiday" />
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label>Message</label>
+                  <textarea id="ann-message" required rows="3" placeholder="Announcement details..."></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label>Type</label>
+                  <select id="ann-type">
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="success">Success</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label>Audience</label>
+                  <select id="ann-audience">
+                    <option value="All Students">All Students</option>
+                    <option value="Active Students">Active Students Only</option>
+                    <option value="Staff">Staff</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                  <label>Scheduled Date & Time (Optional)</label>
+                  <input type="datetime-local" id="ann-date" />
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                  <button type="submit" class="btn btn-primary" id="btn-schedule-announcement">Schedule</button>
+                </div>
+              </form>
+            </div>
+          </dialog>
         </div>
 
         <!-- Seat Map Page -->
@@ -1155,28 +1196,12 @@
         <!-- Notifications Page -->
         <div class="page" id="page-notifications">
           <div class="page-header">
-            <div><h1>Notifications</h1><p class="page-subtitle">3 unread · 12 sent this month</p></div>
-            <button class="btn btn-primary">+ Schedule Announcement</button>
+            <div><h1>Notifications</h1><p class="page-subtitle">Announcements & Alerts</p></div>
+            <button class="btn btn-primary" onclick="document.getElementById('announcement-modal').showModal()">+ Schedule Announcement</button>
           </div>
           <div class="card">
             <div class="notif-list">
-              <div class="notif-item unread">
-                <div class="notif-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-                <div class="notif-content"><div class="notif-title">Diwali holiday notice scheduled</div><div class="notif-body">Goes out to all active students tomorrow at 8:00 AM.</div><div class="notif-time">Scheduled for Jul 23, 8:00 AM</div></div>
-                <span class="dot-unread"></span>
-              </div>
-              <div class="notif-item unread">
-                <div class="notif-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-                <div class="notif-content"><div class="notif-title">Overdue payment alert</div><div class="notif-body">Vihaan Verma and Priya Reddy have overdue payments.</div><div class="notif-time">Today, 10:00 AM</div></div>
-                <span class="dot-unread"></span>
-              </div>
-              <div class="notif-item unread">
-                <div class="notif-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-                <div class="notif-content"><div class="notif-title">New student enrolled</div><div class="notif-body">Ishaan Verma has been successfully enrolled in 12 Hours Daily plan.</div><div class="notif-time">Today, 09:15 AM</div></div>
-                <span class="dot-unread"></span>
-              </div>
-              <div class="notif-item"><div class="notif-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="notif-content"><div class="notif-title">Renewal reminder sent</div><div class="notif-body">Monthly renewal SMS sent to 8 students due this week.</div><div class="notif-time">Yesterday, 9:00 AM</div></div></div>
-              <div class="notif-item"><div class="notif-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="notif-content"><div class="notif-title">Weekend closure notice</div><div class="notif-body">Reading space closed Saturday 2 PM – Sunday 10 AM. SMS sent to all.</div><div class="notif-time">Jul 19, 6:00 PM</div></div></div>
+              <!-- Rendered dynamically -->
             </div>
           </div>
         </div>

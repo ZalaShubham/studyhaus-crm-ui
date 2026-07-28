@@ -119,6 +119,7 @@ window.submitRenewal = async (studentId, oldPlanName) => {
   const res = await processRenewal(data);
   if (res.success) {
     alert("Renewal processed successfully!");
+    document.getElementById("renewal-modal")?.close();
     window.closeStudentProfile(); // Assuming this is called from the profile modal
   } else {
     alert("Error: " + res.error);

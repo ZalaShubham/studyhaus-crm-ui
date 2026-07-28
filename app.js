@@ -218,8 +218,6 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
       const text = this.textContent.trim();
       if (text.includes('New admission') || text.includes('Add Student')) {
         navigate('admissions');
-      } else if (text.includes('Schedule Announcement')) {
-        showToast('Announcement scheduler coming soon!', 'info');
       } else if (text.includes('New Plan') || text.includes('Log') || text.includes('Add') || text.includes('Upload') || text.includes('Mark')) {
         showToast('Feature panel opening soon…', 'info');
       }
