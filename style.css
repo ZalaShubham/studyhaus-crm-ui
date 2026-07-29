@@ -1982,18 +1982,29 @@ body.light-mode .theme-toggle {
   background: #fff;
 }
 
-/* ==================== SCROLLBAR ==================== */
-.page-content::-webkit-scrollbar {
+/* ==================== GLOBAL SCROLLBAR ==================== */
+::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.page-content::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.page-content::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 /* ==================== RESPONSIVE ==================== */
