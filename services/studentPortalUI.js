@@ -288,25 +288,34 @@ const renderPortal = () => {
 
     <!-- Top Dashboard Metrics -->
     <div class="metrics-grid">
-      <div class="metric-card" style="display:flex; gap:1rem; align-items:center;">
-        <div class="avatar" style="background:var(--primary); font-size:1.5rem;">${initials}</div>
+      <div class="metric-card" style="align-items: center;">
+        <div class="metric-icon violet" style="border-radius: 50%; font-weight: bold;">${initials}</div>
         <div>
           <div class="metric-label">Membership Plan</div>
-          <div class="metric-value" style="font-size:1.2rem;">${s.planName || 'None'}</div>
+          <div class="metric-value" style="font-size: 1.1rem;">${s.planName || 'None'}</div>
         </div>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">Seat Number</div>
-        <div class="metric-value">${s.seatNumber || 'Unassigned'}</div>
+      <div class="metric-card" style="align-items: center;">
+        <div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+        <div>
+          <div class="metric-label">Seat Number</div>
+          <div class="metric-value">${s.seatNumber || 'Unassigned'}</div>
+        </div>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">Status</div>
-        <div class="metric-value">${s.status || 'Pending'}</div>
+      <div class="metric-card" style="align-items: center;">
+        <div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+        <div>
+          <div class="metric-label">Status</div>
+          <div class="metric-value">${s.status || 'Pending'}</div>
+        </div>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">Days Remaining</div>
-        <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} Days</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Due: ${s.paymentDueDate || 'N/A'}</div>
+      <div class="metric-card" style="align-items: center;">
+        <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+        <div>
+          <div class="metric-label">Days Remaining</div>
+          <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} Days</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Due: ${s.paymentDueDate || 'N/A'}</div>
+        </div>
       </div>
     </div>
     
