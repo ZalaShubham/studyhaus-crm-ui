@@ -129,6 +129,22 @@ toastStyles.textContent = `
 `;
 document.head.appendChild(toastStyles);
 
+// Override native alert with custom toast
+window.alert = function(msg) {
+  let type = 'info';
+  const lowerMsg = String(msg).toLowerCase();
+  
+  if (lowerMsg.includes('error') || lowerMsg.includes('fail') || lowerMsg.includes('invalid') || lowerMsg.includes('denied')) {
+    type = 'error';
+  } else if (lowerMsg.includes('success') || lowerMsg.includes('saved') || lowerMsg.includes('updated') || lowerMsg.includes('approved') || lowerMsg.includes('admitted')) {
+    type = 'success';
+  } else if (lowerMsg.includes('warning') || lowerMsg.includes('required') || lowerMsg.includes('missing') || lowerMsg.includes('please')) {
+    type = 'warning';
+  }
+  
+  window.showToast(msg, type);
+};
+
 // ==================== TASK CHECKBOXES ====================
 document.querySelectorAll('.task-item input[type=checkbox]').forEach(cb => {
   cb.addEventListener('change', function () {
