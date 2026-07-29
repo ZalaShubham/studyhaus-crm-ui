@@ -45,6 +45,7 @@ export const addExpense = async (expenseData, categoryName, authorName) => {
       vendor: (expenseData.vendor || "").trim(),
       description: (expenseData.description || "").trim(),
       expenseDate: expenseData.expenseDate,
+      status: expenseData.status || "Paid",
       createdBy: authorName,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -68,6 +69,7 @@ export const updateExpense = async (id, expenseData, categoryName) => {
       vendor: (expenseData.vendor || "").trim(),
       description: (expenseData.description || "").trim(),
       expenseDate: expenseData.expenseDate,
+      status: expenseData.status || "Paid",
       updatedAt: serverTimestamp()
     });
     return { success: true };

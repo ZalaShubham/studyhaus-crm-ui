@@ -106,6 +106,33 @@ export const initExpenseAdminUI = () => {
   if(document.getElementById("btn-export-csv")) {
     document.getElementById("btn-export-csv").addEventListener("click", () => exportToCSV(allExpenses));
   }
+
+  if(document.getElementById("btn-add-expense")) {
+    document.getElementById("btn-add-expense").addEventListener("click", async () => {
+      const expenseName = prompt("Enter expense name (e.g. Electricity Bill):");
+      if (!expenseName) return;
+      const amountStr = prompt("Enter amount:");
+      if (!amountStr) return;
+      const vendor = prompt("Enter vendor name:");
+      const statusInput = prompt("Enter status (Paid or Pending):", "Paid");
+      const finalStatus = (statusInput && statusInput.trim().toLowerCase() === "pending") ? "Pending" : "Paid";
+      
+      const expenseData = {
+        expenseName,
+        categoryId: "general",
+        amount: amountStr,
+        paymentMethod: "Cash",
+        vendor: vendor || "",
+        description: "",
+        expenseDate: new Date().toISOString().split('T')[0],
+        status: finalStatus
+      };
+      
+      const res = await addExpense(expenseData, "General", localStorage.getItem("userName") || "Admin User");
+      if (res.success) alert("Expense added successfully!");
+      else alert("Failed to add expense: " + res.error);
+    });
+  }
 };
 
 const renderExpenses = () => {
@@ -125,20 +152,23 @@ const renderExpenses = () => {
 
   allExpenses.forEach(exp => {
     const amt = parseFloat(exp.amount) || 0;
-    const d = exp.date ? new Date(exp.date) : new Date();
+    const expDate = exp.expenseDate || exp.date; // Fallback
+    const d = expDate ? new Date(expDate) : new Date();
+    const status = exp.status || "Paid"; // Default to Paid if not set
 
-    if (exp.status === "Pending") {
+    if (status === "Pending") {
       totalPending += amt;
     }
     
     if (d.getMonth() === month && d.getFullYear() === year) {
-      if (exp.status === "Paid") {
+      if (status === "Paid") {
         totalMonth += amt;
       }
     }
     
     // In our mock logic, let's just count Rent/Salary as recurring for visual
-    if (exp.category === "Rent" || exp.category === "Salary" || exp.category === "Internet") {
+    const catName = exp.categoryName || exp.category;
+    if (catName === "Rent" || catName === "Salary" || catName === "Internet") {
       recurring++;
     }
   });
@@ -157,23 +187,28 @@ const renderExpenses = () => {
   }
 
   // Sort descending by date
-  allExpenses.sort((a,b) => new Date(b.date) - new Date(a.date));
+  allExpenses.sort((a,b) => new Date(b.expenseDate || b.date) - new Date(a.expenseDate || a.date));
 
   let html = "";
   allExpenses.forEach(r => {
-    const isPending = r.status === "Pending";
+    const status = r.status || "Paid";
+    const isPending = status === "Pending";
     const statusText = isPending ? "Pending" : "Paid";
     const statusStyle = isPending 
-      ? "background:var(--bg-card)beb; color:#d97706; border:1px solid #fde68a;" 
+      ? "background:#fffbeb; color:#d97706; border:1px solid #fde68a;" 
       : "background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;";
 
+    const catName = r.categoryName || r.category || "General";
+    const expName = r.expenseName || r.name || "-";
+    const expDate = r.expenseDate || r.date;
+
     html += `
-      <tr style="border-bottom:1px solid var(--border);">
-        <td style="padding:16px; font-weight:600; color:var(--text-primary);">${r.category || "General"}</td>
-        <td style="padding:16px;">${r.vendor || r.name || "-"}</td>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:16px; font-weight:600; color:#0f172a;">${catName}</td>
+        <td style="padding:16px;">${r.vendor || expName}</td>
         <td style="padding:16px;">${r.id.substring(0,6).toUpperCase()}</td>
-        <td style="padding:16px; font-weight:600; color:var(--text-primary); text-align:right;">₹${r.amount}</td>
-        <td style="padding:16px;">${new Date(r.date).toISOString().split('T')[0]}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a; text-align:right;">₹${r.amount}</td>
+        <td style="padding:16px;">${expDate ? new Date(expDate).toISOString().split('T')[0] : "-"}</td>
         <td style="padding:16px; text-align:right;">
           <span style="${statusStyle} padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600;">${statusText}</span>
         </td>
