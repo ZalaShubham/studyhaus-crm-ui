@@ -58,6 +58,26 @@ export const listenToAllPayments = (onUpdate) => {
   });
 };
 
+export const receiveDirectPayment = async (data) => {
+  try {
+    await addDoc(collection(db, "payments"), {
+      studentName: data.studentName,
+      planName: data.planName,
+      amount: Number(data.amount),
+      paymentMethod: data.paymentMethod,
+      transactionId: data.transactionId || "RC-N/A",
+      status: data.status || "approved",
+      date: data.date || new Date().toISOString(),
+      createdAt: serverTimestamp(),
+      approvedBy: data.approvedBy || "Admin",
+      approvalDate: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 export const approvePayment = async (paymentId, approverName) => {
   try {
     const paymentRef = doc(db, "payments", paymentId);

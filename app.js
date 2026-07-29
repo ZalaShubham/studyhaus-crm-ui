@@ -263,6 +263,76 @@ const observer = new MutationObserver((mutations) => {
 });
 if (analyticsPage) observer.observe(analyticsPage, { attributes: true, attributeFilter: ['class'] });
 
+// ==================== ANALYTICS FILTER TABS ====================
+document.querySelectorAll('#page-analytics .filter-tabs .filter-tab').forEach(tab => {
+  tab.addEventListener('click', function () {
+    const filterType = this.textContent.trim();
+    
+    const subtitle = document.querySelector('#page-analytics .page-subtitle');
+    const metricValues = document.querySelectorAll('#page-analytics .metric-value');
+    const metricChanges = document.querySelectorAll('#page-analytics .metric-change');
+    const chartBars = document.querySelectorAll('#page-analytics .bar');
+    
+    if (filterType === 'This Month') {
+      if(subtitle) subtitle.textContent = 'July 2024 performance overview';
+      if(metricValues[0]) metricValues[0].textContent = '₹71,000';
+      if(metricChanges[0]) { metricChanges[0].textContent = '↑ 12%'; metricChanges[0].className = 'metric-change positive'; }
+      if(metricValues[1]) metricValues[1].textContent = '8';
+      if(metricChanges[1]) { metricChanges[1].textContent = '↑ 3 vs last month'; metricChanges[1].className = 'metric-change positive'; }
+      if(metricValues[2]) metricValues[2].textContent = '68%';
+      if(metricChanges[2]) { metricChanges[2].textContent = '↑ 5%'; metricChanges[2].className = 'metric-change positive'; }
+      if(metricValues[3]) metricValues[3].textContent = '72%';
+      if(metricChanges[3]) { metricChanges[3].textContent = 'Similar to last month'; metricChanges[3].className = 'metric-change neutral'; }
+      
+      if(chartBars[0]) chartBars[0].style.setProperty('--h', '45%');
+      if(chartBars[1]) chartBars[1].style.setProperty('--h', '58%');
+      if(chartBars[2]) chartBars[2].style.setProperty('--h', '50%');
+      if(chartBars[3]) chartBars[3].style.setProperty('--h', '62%');
+      if(chartBars[4]) chartBars[4].style.setProperty('--h', '85%'); 
+      if(chartBars[5]) chartBars[5].style.setProperty('--h', '95%'); 
+    } 
+    else if (filterType === 'Last Month') {
+      if(subtitle) subtitle.textContent = 'June 2024 performance overview';
+      if(metricValues[0]) metricValues[0].textContent = '₹63,392';
+      if(metricChanges[0]) { metricChanges[0].textContent = '↑ 8%'; metricChanges[0].className = 'metric-change positive'; }
+      if(metricValues[1]) metricValues[1].textContent = '5';
+      if(metricChanges[1]) { metricChanges[1].textContent = '↓ 1 vs previous'; metricChanges[1].className = 'metric-change negative'; }
+      if(metricValues[2]) metricValues[2].textContent = '63%';
+      if(metricChanges[2]) { metricChanges[2].textContent = '↑ 2%'; metricChanges[2].className = 'metric-change positive'; }
+      if(metricValues[3]) metricValues[3].textContent = '70%';
+      if(metricChanges[3]) { metricChanges[3].textContent = 'Similar to previous'; metricChanges[3].className = 'metric-change neutral'; }
+
+      if(chartBars[0]) chartBars[0].style.setProperty('--h', '35%');
+      if(chartBars[1]) chartBars[1].style.setProperty('--h', '45%');
+      if(chartBars[2]) chartBars[2].style.setProperty('--h', '58%');
+      if(chartBars[3]) chartBars[3].style.setProperty('--h', '50%');
+      if(chartBars[4]) chartBars[4].style.setProperty('--h', '62%');
+      if(chartBars[5]) chartBars[5].style.setProperty('--h', '85%');
+    }
+    else if (filterType === 'Quarter') {
+      if(subtitle) subtitle.textContent = 'Q3 2024 performance overview';
+      if(metricValues[0]) metricValues[0].textContent = '₹205,500';
+      if(metricChanges[0]) { metricChanges[0].textContent = '↑ 18%'; metricChanges[0].className = 'metric-change positive'; }
+      if(metricValues[1]) metricValues[1].textContent = '22';
+      if(metricChanges[1]) { metricChanges[1].textContent = '↑ 5 vs last quarter'; metricChanges[1].className = 'metric-change positive'; }
+      if(metricValues[2]) metricValues[2].textContent = '65%';
+      if(metricChanges[2]) { metricChanges[2].textContent = '↑ 4%'; metricChanges[2].className = 'metric-change positive'; }
+      if(metricValues[3]) metricValues[3].textContent = '71%';
+      if(metricChanges[3]) { metricChanges[3].textContent = 'Similar to last quarter'; metricChanges[3].className = 'metric-change neutral'; }
+
+      if(chartBars[0]) chartBars[0].style.setProperty('--h', '60%');
+      if(chartBars[1]) chartBars[1].style.setProperty('--h', '70%');
+      if(chartBars[2]) chartBars[2].style.setProperty('--h', '65%');
+      if(chartBars[3]) chartBars[3].style.setProperty('--h', '80%');
+      if(chartBars[4]) chartBars[4].style.setProperty('--h', '90%'); 
+      if(chartBars[5]) chartBars[5].style.setProperty('--h', '100%'); 
+    }
+
+    animateBars();
+  });
+});
+
+
 // ==================== NOTIFICATION READ ====================
 document.querySelectorAll('.notif-item.unread').forEach(item => {
   item.addEventListener('click', function () {

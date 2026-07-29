@@ -1,4 +1,4 @@
-import { listenToAllPayments, approvePayment, rejectPayment } from "./paymentService.js";
+import { listenToAllPayments, approvePayment, rejectPayment, receiveDirectPayment } from "./paymentService.js";
 
 let allPayments = [];
 let unsubscribe = null;
@@ -20,7 +20,7 @@ export const initPaymentAdminUI = () => {
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <button class="btn btn-ghost" style="background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border); border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
-        <button class="btn btn-primary" style="background:var(--primary); color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;">+ Receive payment</button>
+        <button class="btn btn-primary" id="btn-receive-payment" onclick="document.getElementById('receive-payment-modal').showModal()" style="background:var(--primary); color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;">+ Receive payment</button>
       </div>
     </div>
     
@@ -78,6 +78,52 @@ export const initPaymentAdminUI = () => {
     </div>
   `;
 
+  if (!document.getElementById("receive-payment-modal")) {
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = `
+      <dialog id="receive-payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);">
+        <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Receive Payment</h2>
+            <button class="btn btn-ghost" onclick="document.getElementById('receive-payment-modal').close()" style="padding: 0.25rem 0.5rem;">✕</button>
+          </div>
+          <form id="receive-payment-form" onsubmit="event.preventDefault(); window.submitReceivePayment()">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Student Name</label>
+              <input type="text" id="rec-pay-student" required placeholder="Student Name" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Plan Name</label>
+              <input type="text" id="rec-pay-plan" required placeholder="e.g. Monthly Pass" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Amount (₹)</label>
+              <input type="number" id="rec-pay-amount" required min="1" placeholder="e.g. 1000" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Payment Method</label>
+              <select id="rec-pay-method" required class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;">
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Transaction ID (Optional)</label>
+              <input type="text" id="rec-pay-txn" placeholder="e.g. TXN12345" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('receive-payment-modal').close()">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-payment">Save Payment</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    `;
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+
   // Filter Listeners
   document.getElementById("payment-search").addEventListener("input", (e) => {
     currentFilters.search = e.target.value.toLowerCase();
@@ -103,6 +149,48 @@ export const initPaymentAdminUI = () => {
     const approver = localStorage.getItem("userName") || "Admin";
     const res = await rejectPayment(id, approver, remark);
     if (!res.success) alert("Error rejecting payment: " + res.error);
+  };
+
+  window.submitReceivePayment = async () => {
+    const studentName = document.getElementById("rec-pay-student").value.trim();
+    const planName = document.getElementById("rec-pay-plan").value.trim();
+    const amount = document.getElementById("rec-pay-amount").value;
+    const paymentMethod = document.getElementById("rec-pay-method").value;
+    const transactionId = document.getElementById("rec-pay-txn").value.trim();
+
+    if (!studentName || !planName || !amount) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const btn = document.getElementById("btn-save-payment");
+    const originalText = btn.innerText;
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    const data = {
+      studentName,
+      planName,
+      amount: Number(amount),
+      paymentMethod,
+      transactionId: transactionId || "RC-N/A",
+      status: "approved",
+      date: new Date().toISOString(),
+      approvedBy: localStorage.getItem("userName") || "Admin"
+    };
+
+    const res = await receiveDirectPayment(data);
+    
+    btn.innerText = originalText;
+    btn.disabled = false;
+
+    if (res.success) {
+      document.getElementById("receive-payment-modal").close();
+      document.getElementById("receive-payment-form").reset();
+      if(typeof showToast === 'function') showToast("Payment received successfully!");
+    } else {
+      alert("Error: " + res.error);
+    }
   };
 
   // Start Listener

@@ -42,6 +42,43 @@ export const initMembershipPlans = async () => {
   const grid = document.getElementById("membership-plans-grid");
   if (!grid) return; // Not on the memberships page
 
+  if (!document.getElementById("add-plan-modal")) {
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = `
+      <dialog id="add-plan-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);">
+        <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Add New Plan</h2>
+            <button class="btn btn-ghost" onclick="document.getElementById('add-plan-modal').close()" style="padding: 0.25rem 0.5rem;">✕</button>
+          </div>
+          <form id="add-plan-form" onsubmit="event.preventDefault(); window.submitPlanForm()">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Plan Name</label>
+              <input type="text" id="add-plan-name" required placeholder="e.g. Weekend Pass" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Price (₹)</label>
+              <input type="number" id="add-plan-price" required min="1" placeholder="e.g. 500" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Duration</label>
+              <input type="text" id="add-plan-duration" required placeholder="e.g. 1 Week, 1 Month" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Notes (Optional)</label>
+              <textarea id="add-plan-notes" rows="2" placeholder="Any additional notes..." class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('add-plan-modal').close()">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-plan">Save Plan</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    `;
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+
   // 1. Enforce UI Permissions for this page
   enforcePlanUIPermissions();
 
@@ -152,20 +189,32 @@ const listenToPlans = () => {
  * Handle Manual Plan Creation
  */
 const handleCreateManualPlan = async () => {
-  const name = prompt("Enter Custom Plan Name:");
-  if (!name) return;
+  document.getElementById("add-plan-name").value = "";
+  document.getElementById("add-plan-price").value = "";
+  document.getElementById("add-plan-duration").value = "";
+  document.getElementById("add-plan-notes").value = "";
+  document.getElementById("add-plan-modal").showModal();
+};
 
-  const priceStr = prompt("Enter Price (e.g. 500):");
-  if (!priceStr) return;
+window.submitPlanForm = async () => {
+  const name = document.getElementById("add-plan-name").value.trim();
+  const price = document.getElementById("add-plan-price").value;
+  const duration = document.getElementById("add-plan-duration").value.trim();
+  const notes = document.getElementById("add-plan-notes").value.trim();
 
-  const duration = prompt("Enter Duration (e.g. 1 Week, 1 Month):");
-  if (!duration) return;
+  if (!name || !price || !duration) {
+    alert("Please fill in all required fields.");
+    return;
+  }
 
-  const notes = prompt("Enter Notes (Optional):");
+  const btn = document.getElementById("btn-save-plan");
+  const originalText = btn.innerText;
+  btn.innerText = "Saving...";
+  btn.disabled = true;
 
   const newPlan = {
     planName: name,
-    price: Number(priceStr),
+    price: Number(price),
     duration: duration,
     notes: notes || "",
     isManual: true,
@@ -177,9 +226,13 @@ const handleCreateManualPlan = async () => {
     await validatePlan(newPlan);
     const plansRef = collection(db, "membershipPlans");
     await addDoc(plansRef, newPlan);
-    alert("Manual Plan created successfully!");
+    document.getElementById("add-plan-modal").close();
+    if(typeof showToast === 'function') showToast("Manual Plan created successfully!");
   } catch (error) {
     alert("Error: " + error.message);
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
   }
 };
 

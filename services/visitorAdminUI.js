@@ -91,12 +91,48 @@ export const initVisitorAdminUI = async () => {
               ${canEdit ? `<th>Actions</th>` : ""}
             </tr>
           </thead>
-          <tbody id="visitor-tbody">
-            <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Add Visitor Modal -->
+    <dialog id="add-visitor-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary);">
+      <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="margin: 0;">Add New Visitor</h2>
+          <button class="btn btn-ghost" onclick="document.getElementById('add-visitor-modal').close()" style="padding: 0.25rem 0.5rem;">✕</button>
+        </div>
+        <form id="add-visitor-form" onsubmit="event.preventDefault(); window.submitVisitorForm()">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Visitor Name</label>
+            <input type="text" id="add-vis-name" required placeholder="Enter visitor name" class="input-field" style="width: 100%; box-sizing: border-box;" />
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Phone Number</label>
+            <input type="tel" id="add-vis-phone" required placeholder="10-digit phone number" pattern="[0-9]{10}" class="input-field" style="width: 100%; box-sizing: border-box;" />
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Purpose</label>
+            <select id="add-vis-purpose" required class="input-field" style="width: 100%; box-sizing: border-box;">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Handled By</label>
+            <input type="text" id="add-vis-employee" required placeholder="Employee name" class="input-field" style="width: 100%; box-sizing: border-box;" />
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Remarks (Optional)</label>
+            <textarea id="add-vis-remarks" rows="2" placeholder="Any additional notes..." class="input-field" style="width: 100%; box-sizing: border-box;"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('add-visitor-modal').close()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-visitor">Save Visitor</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
   `;
 
   // Attach Filter Listeners
@@ -219,25 +255,40 @@ const handleAddVisitor = async () => {
     return alert("No purposes available.");
   }
 
-  const name = prompt("Enter Visitor Name:");
-  if (!name) return;
+  // Populate purposes dropdown
+  const purposeSelect = document.getElementById("add-vis-purpose");
+  if (purposeSelect) {
+    purposeSelect.innerHTML = allPurposes.map(p => `<option value="${p.name}">${p.name}</option>`).join("");
+  }
 
-  const phone = prompt("Enter 10-digit Phone Number:");
-  if (!phone) return;
-
-  let purpPrompt = "Select Purpose Number:\n";
-  allPurposes.forEach((p, i) => purpPrompt += `${i + 1}. ${p.name}\n`);
-  const purpIdxStr = prompt(purpPrompt);
-  if (!purpIdxStr) return;
-  const pIdx = parseInt(purpIdxStr) - 1;
-  if (isNaN(pIdx) || pIdx < 0 || pIdx >= allPurposes.length) return alert("Invalid purpose.");
-  const purpose = allPurposes[pIdx].name;
-
+  // Set default employee name
   const currentUser = localStorage.getItem("userName") || "Admin";
-  const employeeName = prompt(`Enter Employee Handling Visit (Default: ${currentUser}):`, currentUser);
-  if (!employeeName) return;
+  document.getElementById("add-vis-employee").value = currentUser;
 
-  const remarks = prompt("Enter Remarks (Optional):") || "";
+  // Clear other fields
+  document.getElementById("add-vis-name").value = "";
+  document.getElementById("add-vis-phone").value = "";
+  document.getElementById("add-vis-remarks").value = "";
+
+  document.getElementById("add-visitor-modal").showModal();
+};
+
+window.submitVisitorForm = async () => {
+  const name = document.getElementById("add-vis-name").value.trim();
+  const phone = document.getElementById("add-vis-phone").value.trim();
+  const purpose = document.getElementById("add-vis-purpose").value;
+  const employeeName = document.getElementById("add-vis-employee").value.trim();
+  const remarks = document.getElementById("add-vis-remarks").value.trim();
+
+  if (!name || !phone || !purpose || !employeeName) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const btn = document.getElementById("btn-save-visitor");
+  const originalText = btn.innerText;
+  btn.innerText = "Saving...";
+  btn.disabled = true;
 
   const data = {
     visitorName: name,
@@ -249,7 +300,14 @@ const handleAddVisitor = async () => {
 
   const authorId = localStorage.getItem("userId") || "admin";
   const res = await addVisitor(data, authorId);
+  
+  btn.innerText = originalText;
+  btn.disabled = false;
+
   if (!res.success) {
     alert("Error: " + res.error);
+  } else {
+    document.getElementById("add-visitor-modal").close();
+    if(typeof showToast === 'function') showToast("Visitor added successfully!");
   }
 };
