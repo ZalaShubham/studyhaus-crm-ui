@@ -11,17 +11,26 @@ export const seedInitialSeats = async () => {
   const snap = await getDocs(seatsRef);
   
   if (snap.empty) {
-    console.log("Seeding initial 50 seats...");
-    for (let i = 1; i <= 50; i++) {
-      const numStr = i < 10 ? `0${i}` : `${i}`;
-      await addDoc(seatsRef, {
-        seatNumber: `A${numStr}`,
-        status: "Available", // Available, Occupied, Reserved, Maintenance, Inactive
-        assignedStudentId: null,
-        assignedStudentName: null,
-        planType: null,
-        lastUpdated: serverTimestamp()
-      });
+    console.log("Seeding initial 50 seats per floor...");
+    const floors = [
+      { prefix: 'A', name: 'Ground Floor' },
+      { prefix: 'B', name: 'First Floor' },
+      { prefix: 'C', name: 'Second Floor' }
+    ];
+
+    for (const floor of floors) {
+      for (let i = 0; i <= 50; i++) {
+        const numStr = i < 10 ? `0${i}` : `${i}`;
+        await addDoc(seatsRef, {
+          seatNumber: `${floor.prefix}${numStr}`,
+          floor: floor.name,
+          status: "Available",
+          assignedStudentId: null,
+          assignedStudentName: null,
+          planType: null,
+          lastUpdated: serverTimestamp()
+        });
+      }
     }
   }
 };
