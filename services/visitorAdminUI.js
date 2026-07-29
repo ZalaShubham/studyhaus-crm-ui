@@ -91,6 +91,8 @@ export const initVisitorAdminUI = async () => {
               ${canEdit ? `<th>Actions</th>` : ""}
             </tr>
           </thead>
+          <tbody id="visitor-tbody">
+            <tr><td colspan="${canEdit ? '7' : '6'}" style="text-align:center; padding: 2rem;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
