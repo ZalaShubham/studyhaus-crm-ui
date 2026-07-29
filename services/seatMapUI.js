@@ -103,8 +103,8 @@ export const initSeatMapUI = async () => {
       const seatNumber = prompt("Enter new seat number (e.g. B01):");
       if (!seatNumber || seatNumber.trim() === "") return;
       
-      const res = await addSingleSeat(seatNumber.trim().toUpperCase());
-      if (res.success) alert("Seat added successfully!");
+      const res = await addSingleSeat(seatNumber.trim().toUpperCase(), currentFilters.floor);
+      if (res.success) alert("Seat added successfully to " + currentFilters.floor + "!");
       else alert("Failed to add seat: " + res.error);
     });
   }
@@ -288,11 +288,12 @@ const renderSeatMap = () => {
   const grid = document.getElementById("seat-grid");
   if (!grid) return;
 
-  // Let's assume all seats are currently dumped together.
-  // We don't have actual floor data in the objects probably, but we can divide by prefix or ID.
-  // We'll just render all seats for now if we can't filter by floor.
-  // Actually, let's filter by prefix if seatNumber starts with something, but if not just render them all.
-  let filtered = allSeats;
+  // Filter seats by floor
+  // If a seat has no floor property (like the initially seeded ones), treat it as "Ground Floor"
+  let filtered = allSeats.filter(seat => {
+    const seatFloor = seat.floor || "Ground Floor";
+    return seatFloor === currentFilters.floor;
+  });
 
   let html = "";
   filtered.forEach(seat => {

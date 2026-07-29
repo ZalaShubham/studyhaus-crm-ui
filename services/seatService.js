@@ -26,11 +26,12 @@ export const seedInitialSeats = async () => {
   }
 };
 
-export const addSingleSeat = async (seatNumber) => {
+export const addSingleSeat = async (seatNumber, floor = "Ground Floor") => {
   try {
     const seatsRef = collection(db, "seats");
     await addDoc(seatsRef, {
       seatNumber,
+      floor,
       status: "Available",
       assignedStudentId: null,
       assignedStudentName: null,
