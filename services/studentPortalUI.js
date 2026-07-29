@@ -84,8 +84,8 @@ export const initStudentPortalUI = () => {
     };
 
     const res = await updateStudentOwnProfile(currentStudent.id, updates);
-    if (res.success) alert("Profile updated!");
-    else alert("Failed to update profile: " + res.error);
+    if (res.success) window.showToast("Profile updated!", "success");
+    else window.showToast("Failed to update profile: " + res.error, "error");
     
     btn.textContent = "Save Profile Changes";
     btn.disabled = false;
@@ -104,8 +104,8 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkIn(currentStudent, selectedSeat);
-    if (!res.success) alert("Check-In Failed: " + res.error);
-    else alert("Checked in successfully!");
+    if (!res.success) window.showToast("Check-In Failed: " + res.error, "error");
+    else window.showToast("Checked in successfully!", "success");
     
     if (document.getElementById("btn-checkin")) {
       btn.textContent = "Check-In Now";
@@ -118,7 +118,7 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkOut(attendanceId, checkInTimestamp);
-    if (!res.success) alert("Check-Out Failed: " + res.error);
+    if (!res.success) window.showToast("Check-Out Failed: " + res.error, "error");
   };
 
   window.handleDownloadPDF = async () => {
@@ -130,7 +130,7 @@ export const initStudentPortalUI = () => {
     
     const calculated = calculateStudyHours(currentAttendance);
     const res = await generateAttendancePDF(currentStudent.name, currentAttendance, calculated.totalHours);
-    if (!res.success) alert("Failed to generate PDF: " + res.error);
+    if (!res.success) window.showToast("Failed to generate PDF: " + res.error, "error");
 
     btn.innerHTML = originalText;
     btn.disabled = false;
@@ -155,17 +155,17 @@ export const initStudentPortalUI = () => {
     const months = document.getElementById("payment-months").value;
     const amount = document.getElementById("payment-amount").value;
 
-    if (!txnId) return alert("Please enter the Transaction ID.");
+    if (!txnId) return window.showToast("Please enter the Transaction ID.", "error");
 
     btn.innerHTML = "Submitting...";
     btn.disabled = true;
 
     const res = await submitPaymentRequest(currentStudent, txnId, months, amount);
     if (res.success) {
-      alert("Payment Request Submitted Successfully!");
+      window.showToast("Payment Request Submitted Successfully!", "success");
       document.getElementById("payment-txnid").value = "";
     } else {
-      alert("Failed: " + res.error);
+      window.showToast("Failed: " + res.error, "error");
     }
 
     btn.innerHTML = "Submit Payment Request";
@@ -182,11 +182,11 @@ export const initStudentPortalUI = () => {
 
     const res = await submitComplaint(currentStudent, category, description);
     if (res.success) {
-      alert("Complaint Submitted Successfully!");
+      window.showToast("Complaint Submitted Successfully!", "success");
       document.getElementById("complaint-category").value = "";
       document.getElementById("complaint-description").value = "";
     } else {
-      alert("Failed: " + res.error);
+      window.showToast("Failed: " + res.error, "error");
     }
 
     btn.innerHTML = "Submit Complaint";
