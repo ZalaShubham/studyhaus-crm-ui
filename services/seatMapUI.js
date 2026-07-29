@@ -1,4 +1,4 @@
-import { listenToAllSeats, assignSeat, unassignSeat, changeSeatStatus, seedInitialSeats } from "./seatService.js";
+import { listenToAllSeats, assignSeat, unassignSeat, changeSeatStatus, seedInitialSeats, addSingleSeat } from "./seatService.js";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
@@ -25,7 +25,7 @@ export const initSeatMapUI = async () => {
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <button class="btn btn-ghost" style="background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 16px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filter</button>
-        <button class="btn btn-primary" style="background: #0f172a; color: #fff; border-radius: 999px; padding: 6px 16px;">+ Add seat</button>
+        <button class="btn btn-primary" id="btn-add-seat" style="background: #0f172a; color: #fff; border-radius: 999px; padding: 6px 16px;">+ Add seat</button>
       </div>
     </div>
     
@@ -74,6 +74,17 @@ export const initSeatMapUI = async () => {
       renderSeatMap();
     });
   });
+
+  if (document.getElementById("btn-add-seat")) {
+    document.getElementById("btn-add-seat").addEventListener("click", async () => {
+      const seatNumber = prompt("Enter new seat number (e.g. B01):");
+      if (!seatNumber || seatNumber.trim() === "") return;
+      
+      const res = await addSingleSeat(seatNumber.trim().toUpperCase());
+      if (res.success) alert("Seat added successfully!");
+      else alert("Failed to add seat: " + res.error);
+    });
+  }
 
   // Global Actions
   window.handleSeatClick = (seatId) => {

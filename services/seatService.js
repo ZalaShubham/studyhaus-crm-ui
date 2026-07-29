@@ -10,7 +10,6 @@ export const seedInitialSeats = async () => {
   const seatsRef = collection(db, "seats");
   const snap = await getDocs(seatsRef);
   
-  // Only seed if collection is completely empty
   if (snap.empty) {
     console.log("Seeding initial 50 seats...");
     for (let i = 1; i <= 50; i++) {
@@ -24,6 +23,23 @@ export const seedInitialSeats = async () => {
         lastUpdated: serverTimestamp()
       });
     }
+  }
+};
+
+export const addSingleSeat = async (seatNumber) => {
+  try {
+    const seatsRef = collection(db, "seats");
+    await addDoc(seatsRef, {
+      seatNumber,
+      status: "Available",
+      assignedStudentId: null,
+      assignedStudentName: null,
+      planType: null,
+      lastUpdated: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 };
 
