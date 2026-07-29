@@ -172,7 +172,17 @@ export const initExpenseAdminUI = () => {
       if (allCategories.length > 0) {
         catSelect.innerHTML = allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
       } else {
-        catSelect.innerHTML = `<option value="cat_general">General</option>`;
+        catSelect.innerHTML = `
+          <option value="cat_general">General</option>
+          <option value="cat_rent">Rent</option>
+          <option value="cat_electricity">Electricity</option>
+          <option value="cat_internet">Internet</option>
+          <option value="cat_salary">Salary</option>
+          <option value="cat_cleaning">Cleaning</option>
+          <option value="cat_repairs">Repairs</option>
+          <option value="cat_snacks">Snacks</option>
+          <option value="cat_marketing">Marketing</option>
+        `;
       }
       
       // Set default date
