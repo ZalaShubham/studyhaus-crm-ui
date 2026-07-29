@@ -143,15 +143,17 @@ const processSeatAction = async (seat, choice) => {
 };
 
 const triggerAssignSeat = async (seat) => {
-  const studentEmailOrId = prompt(`Enter the Email or Student ID of the student to assign to Seat ${seat.seatNumber}:`);
+  const studentEmailOrId = prompt(`Enter the Name, Email or Student ID of the student to assign to Seat ${seat.seatNumber}:`);
   if (!studentEmailOrId) return;
 
   try {
     const q1 = query(collection(db, "students"), where("email", "==", studentEmailOrId));
     const q2 = query(collection(db, "students"), where("studentId", "==", studentEmailOrId));
+    const q3 = query(collection(db, "students"), where("name", "==", studentEmailOrId));
     
     let studentSnap = await getDocs(q1);
     if (studentSnap.empty) studentSnap = await getDocs(q2);
+    if (studentSnap.empty) studentSnap = await getDocs(q3);
 
     if (studentSnap.empty) {
       return alert("Student not found.");
