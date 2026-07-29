@@ -31,12 +31,12 @@ export const PERMISSIONS = {
   ],
   [ROLES.STUDENT]: [
     "student-portal",
-    "profile",
-    "attendance",
-    "payments",
-    "complaints",
-    "study-reports",
-    "notifications"
+    "student-payments",
+    "student-attendance",
+    "student-complaints",
+    "student-profile",
+    "notifications",
+    "settings"
   ]
 };
 

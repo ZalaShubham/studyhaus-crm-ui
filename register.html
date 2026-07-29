@@ -171,6 +171,10 @@
     const roleSelect = document.getElementById("roleSelect");
     const studentExtraFields = document.getElementById("student-extra-fields");
     const mobileInput = document.getElementById("mobile");
+    const form = document.getElementById("register-form");
+    const errorDiv = document.getElementById("error-message");
+    const loader = document.getElementById("global-loader");
+    const submitBtn = document.getElementById("submit-btn");
 
     roleSelect.addEventListener("change", () => {
       if (roleSelect.value === "Student") {

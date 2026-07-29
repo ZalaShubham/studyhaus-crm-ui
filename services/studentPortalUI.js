@@ -27,6 +27,10 @@ export const initStudentPortalUI = () => {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   portalSection.classList.add('active');
   portalSection.innerHTML = `<div style="padding: 2rem; text-align: center;">Loading your portal...</div>`;
+  document.getElementById("page-student-payments").innerHTML = "";
+  document.getElementById("page-student-attendance").innerHTML = "";
+  document.getElementById("page-student-complaints").innerHTML = "";
+  document.getElementById("page-student-profile").innerHTML = "";
 
   unsubscribePortal = listenToStudentPortalData(async (studentData) => {
     currentStudent = studentData;
@@ -270,6 +274,7 @@ const renderPortal = () => {
     attendanceActionHtml = `<button id="btn-checkin" class="btn btn-primary" onclick="window.handleCheckIn()">Check-In Now</button>`;
   }
 
+  // 1. DASHBOARD PAGE (Overview)
   portalSection.innerHTML = `
     <div class="page-header">
       <div>
@@ -304,11 +309,53 @@ const renderPortal = () => {
         <div style="font-size: 0.8rem; color: var(--text-muted);">Due: ${s.paymentDueDate || 'N/A'}</div>
       </div>
     </div>
+    
+    <div style="margin-top: 2rem;">
+      <h3 style="margin-bottom: 1rem;">Quick Links</h3>
+      <div class="dashboard-grid">
+        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-payments')">
+          <div class="avatar" style="background: var(--accent-violet);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div>
+            <h4 style="margin: 0;">Payments & Renewals</h4>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Submit payments and view history</div>
+          </div>
+        </div>
+        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-attendance')">
+          <div class="avatar" style="background: var(--success);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div>
+            <h4 style="margin: 0;">Attendance</h4>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">View check-ins and hours</div>
+          </div>
+        </div>
+        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-complaints')">
+          <div class="avatar" style="background: var(--danger);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div>
+            <h4 style="margin: 0;">Complaints</h4>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Report issues and track status</div>
+          </div>
+        </div>
+        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-profile')">
+          <div class="avatar" style="background: var(--primary);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div>
+            <h4 style="margin: 0;">My Profile</h4>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Update personal information</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 
-    <div class="form-grid" style="margin-top: 2rem;">
-      <!-- Main Content Column -->
+  // 2. PAYMENTS PAGE
+  document.getElementById("page-student-payments").innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1>Payments & Renewals</h1>
+        <p class="page-subtitle">Manage your subscription and view past payments.</p>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top: 1rem;">
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
-        
         <!-- Submit Payment Request -->
         <div class="card" style="border-left: 4px solid var(--accent-violet);">
           <h3 style="margin-bottom: 1rem;">Submit Payment</h3>
@@ -327,13 +374,49 @@ const renderPortal = () => {
 
         <div class="card"><h3 style="margin-bottom: 1rem;">Renewal History</h3><table class="data-table"><thead><tr><th>Date</th><th>Plan</th><th>Period</th><th>Amount</th></tr></thead><tbody>${renewalsHtml}</tbody></table></div>
         <div class="card"><h3 style="margin-bottom: 1rem;">My Payments</h3><table class="data-table"><thead><tr><th>Date</th><th>Period</th><th>Amount</th><th>Txn ID</th><th>Status</th></tr></thead><tbody>${paymentsHtml}</tbody></table></div>
-        <div class="card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;"><h3 style="margin:0;">Recent Attendance</h3><button id="btn-pdf" class="btn btn-ghost" onclick="window.handleDownloadPDF()">Download PDF</button></div><table class="data-table"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th></tr></thead><tbody>${historyHtml}</tbody></table></div>
       </div>
+    </div>
+  `;
 
-      <!-- Right Column -->
+  // 3. ATTENDANCE PAGE
+  document.getElementById("page-student-attendance").innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1>Attendance</h1>
+        <p class="page-subtitle">Track your daily study hours.</p>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top: 1rem;">
+      <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0;">Recent Attendance</h3>
+            <button id="btn-pdf" class="btn btn-ghost" onclick="window.handleDownloadPDF()">Download PDF</button>
+          </div>
+          <table class="data-table"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th></tr></thead><tbody>${historyHtml}</tbody></table>
+        </div>
+      </div>
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 1;">
-        
-        <!-- Submit Complaint -->
+        <div class="card" style="padding: 1.5rem; text-align:center;">
+          <h4 style="margin-bottom: 0.5rem; color: var(--text-muted);">Today's Hours</h4>
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary);">${studyHours.todayHours}h</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 4. COMPLAINTS PAGE
+  document.getElementById("page-student-complaints").innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1>Complaints</h1>
+        <p class="page-subtitle">Report issues and track their resolution status.</p>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top: 1rem;">
+      <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
         <div class="card" style="border-left: 4px solid var(--danger);">
           <h3 style="margin-bottom: 1rem;">Report an Issue</h3>
           <form onsubmit="event.preventDefault(); window.handleComplaintSubmit();" style="display:flex; flex-direction:column; gap:1rem;">
@@ -359,12 +442,33 @@ const renderPortal = () => {
             <button type="submit" id="btn-submit-complaint" class="btn btn-primary">Submit Complaint</button>
           </form>
         </div>
-
         <div class="card"><h3 style="margin-bottom: 1rem;">My Complaints</h3><table class="data-table"><thead><tr><th>Date</th><th>Category</th><th>Details</th><th>Status</th></tr></thead><tbody>${complaintsHtml}</tbody></table></div>
+      </div>
+    </div>
+  `;
 
+  // 5. PROFILE PAGE
+  document.getElementById("page-student-profile").innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1>My Profile</h1>
+        <p class="page-subtitle">Update your personal information.</p>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top: 1rem;">
+      <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
         <!-- Profile Module -->
-        <div class="card"><h3 style="margin-bottom: 1rem;">My Profile</h3><form onsubmit="event.preventDefault(); window.saveStudentPortalProfile();"><div style="display:flex; flex-direction:column; gap: 1rem;"><div><label style="font-size:0.85rem;">Email</label><input type="email" id="portal-edit-email" value="${s.email || ''}" style="width:100%;" /></div><div><label style="font-size:0.85rem;">Parent Contact</label><input type="tel" id="portal-edit-parent" value="${s.parentPhone || ''}" style="width:100%;" /></div><div><label style="font-size:0.85rem;">Address</label><textarea id="portal-edit-address" rows="2" style="width:100%; resize:none;">${s.address || ''}</textarea></div><button type="submit" id="btn-portal-save" class="btn btn-primary" style="margin-top:0.5rem;">Save Profile Changes</button></div></form></div>
-        <div class="card" style="padding: 1.5rem; text-align:center;"><h4 style="margin-bottom: 0.5rem; color: var(--text-muted);">Today's Hours</h4><div style="font-size: 1.5rem; font-weight: 600; color: var(--primary);">${studyHours.todayHours}h</div></div>
+        <div class="card">
+          <form onsubmit="event.preventDefault(); window.saveStudentPortalProfile();">
+            <div style="display:flex; flex-direction:column; gap: 1rem;">
+              <div><label style="font-size:0.85rem;">Email</label><input type="email" id="portal-edit-email" value="${s.email || ''}" style="width:100%;" /></div>
+              <div><label style="font-size:0.85rem;">Parent Contact</label><input type="tel" id="portal-edit-parent" value="${s.parentPhone || ''}" style="width:100%;" /></div>
+              <div><label style="font-size:0.85rem;">Address</label><textarea id="portal-edit-address" rows="2" style="width:100%; resize:none;">${s.address || ''}</textarea></div>
+              <button type="submit" id="btn-portal-save" class="btn btn-primary" style="margin-top:0.5rem; width: max-content;">Save Profile Changes</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   `;
