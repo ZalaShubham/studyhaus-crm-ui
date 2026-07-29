@@ -18,6 +18,29 @@ export const initSeatMapUI = async () => {
 
   // Initial UI Setup
   container.innerHTML = `
+    <!-- Seat Action Modal -->
+    <div id="seat-action-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:50; align-items:center; justify-content:center;">
+      <div class="card" style="background:var(--bg-card, #fff); padding:2rem; border-radius:12px; width:100%; max-width:400px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <h3 id="seat-modal-title" style="font-size:18px; font-weight:600; color:var(--text-primary, #0f172a);">Seat Action</h3>
+          <button id="btn-close-seat-modal" style="background:transparent; border:none; font-size:18px; cursor:pointer;">&times;</button>
+        </div>
+        
+        <div id="seat-modal-options" style="display:flex; flex-direction:column; gap:0.75rem;">
+          <!-- Action buttons injected here -->
+        </div>
+
+        <div id="seat-modal-assign-form" style="display:none; flex-direction:column; gap:1rem;">
+          <p style="font-size:13px; color:var(--text-secondary, #475569);">Enter Name, Email, or Student ID to assign:</p>
+          <input type="text" id="seat-assign-input" placeholder="Search student..." style="width:100%; padding:8px 12px; border:1px solid var(--border, #e2e8f0); border-radius:6px;">
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
+            <button id="btn-cancel-assign" class="btn btn-ghost" style="padding:8px 16px; border:1px solid var(--border, #e2e8f0); border-radius:999px; background:transparent;">Cancel</button>
+            <button id="btn-confirm-assign" class="btn btn-primary" style="padding:8px 16px; border:none; border-radius:999px; background:#0f172a; color:#fff;">Assign</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
         <h1>Seat Map</h1>
@@ -86,6 +109,36 @@ export const initSeatMapUI = async () => {
     });
   }
 
+  
+  let currentSelectedSeat = null;
+  const seatModal = document.getElementById("seat-action-modal");
+  const modalTitle = document.getElementById("seat-modal-title");
+  const optionsDiv = document.getElementById("seat-modal-options");
+  const assignForm = document.getElementById("seat-modal-assign-form");
+  const assignInput = document.getElementById("seat-assign-input");
+
+  if (document.getElementById("btn-close-seat-modal")) {
+    document.getElementById("btn-close-seat-modal").addEventListener("click", () => {
+      seatModal.style.display = "none";
+    });
+  }
+
+  if (document.getElementById("btn-cancel-assign")) {
+    document.getElementById("btn-cancel-assign").addEventListener("click", () => {
+      assignForm.style.display = "none";
+      optionsDiv.style.display = "flex";
+    });
+  }
+
+  if (document.getElementById("btn-confirm-assign")) {
+    document.getElementById("btn-confirm-assign").addEventListener("click", async () => {
+      const val = assignInput.value.trim();
+      if (!val) return;
+      seatModal.style.display = "none";
+      await triggerAssignSeat(currentSelectedSeat, val);
+    });
+  }
+
   // Global Actions
   window.handleSeatClick = (seatId) => {
     const role = localStorage.getItem("userRole");
@@ -95,23 +148,61 @@ export const initSeatMapUI = async () => {
     
     const seat = allSeats.find(s => s.id === seatId);
     if (!seat) return;
+    currentSelectedSeat = seat;
 
-    // Build options based on current status
-    let options = "";
+    modalTitle.innerText = `Seat ${seat.seatNumber} (${seat.status})`;
+    optionsDiv.innerHTML = "";
+    optionsDiv.style.display = "flex";
+    assignForm.style.display = "none";
+    assignInput.value = "";
+
+    const createBtn = (text, onClick) => {
+      const btn = document.createElement("button");
+      btn.innerText = text;
+      btn.style.padding = "10px";
+      btn.style.borderRadius = "8px";
+      btn.style.border = "1px solid #e2e8f0";
+      btn.style.background = "#f8fafc";
+      btn.style.cursor = "pointer";
+      btn.style.fontWeight = "500";
+      btn.style.textAlign = "left";
+      btn.style.color = "#0f172a";
+      btn.onmouseover = () => btn.style.background = "#f1f5f9";
+      btn.onmouseout = () => btn.style.background = "#f8fafc";
+      btn.onclick = () => {
+        if (onClick) onClick();
+      };
+      return btn;
+    };
+
+    const handleAction = async (choice) => {
+      seatModal.style.display = "none";
+      await processSeatAction(seat, choice);
+    };
+
     if (seat.status === "Available") {
-      options = `1. Assign Student\n2. Mark Maintenance\n3. Mark Inactive`;
+      optionsDiv.appendChild(createBtn("Assign Student", () => {
+        optionsDiv.style.display = "none";
+        assignForm.style.display = "flex";
+        assignInput.focus();
+      }));
+      optionsDiv.appendChild(createBtn("Mark Maintenance", () => handleAction("2")));
+      optionsDiv.appendChild(createBtn("Mark Inactive", () => handleAction("3")));
     } else if (seat.status === "Reserved") {
-      options = `1. Unassign Student\n2. Mark Maintenance\n3. Mark Inactive`;
+      optionsDiv.appendChild(createBtn("Unassign Student", () => handleAction("1")));
+      optionsDiv.appendChild(createBtn("Mark Maintenance", () => handleAction("2")));
+      optionsDiv.appendChild(createBtn("Mark Inactive", () => handleAction("3")));
     } else if (seat.status === "Maintenance" || seat.status === "Inactive") {
-      options = `1. Mark Available`;
+      optionsDiv.appendChild(createBtn("Mark Available", () => handleAction("1")));
     } else if (seat.status === "Occupied") {
-      options = `Occupied seats cannot be modified directly until the student checks out.`;
+      const p = document.createElement("p");
+      p.innerText = "Occupied seats cannot be modified directly until the student checks out.";
+      p.style.fontSize = "13px";
+      p.style.color = "#475569";
+      optionsDiv.appendChild(p);
     }
 
-    const choice = prompt(`Seat ${seat.seatNumber} (${seat.status})\n\nOptions:\n${options}\n\nEnter option number:`);
-    if (!choice) return;
-
-    processSeatAction(seat, choice.trim());
+    seatModal.style.display = "flex";
   };
 
   // Start Listener
@@ -130,7 +221,7 @@ const processSeatAction = async (seat, choice) => {
   }
 
   if (seat.status === "Available") {
-    if (choice === "1") return await triggerAssignSeat(seat);
+    // choice === "1" is handled directly by modal assign action now
     if (choice === "2") return await changeSeatStatus(seat.id, "Maintenance");
     if (choice === "3") return await changeSeatStatus(seat.id, "Inactive");
   }
@@ -153,8 +244,7 @@ const processSeatAction = async (seat, choice) => {
   alert("Invalid option or action not allowed.");
 };
 
-const triggerAssignSeat = async (seat) => {
-  const studentEmailOrId = prompt(`Enter the Name, Email or Student ID of the student to assign to Seat ${seat.seatNumber}:`);
+const triggerAssignSeat = async (seat, studentEmailOrId) => {
   if (!studentEmailOrId) return;
 
   try {
