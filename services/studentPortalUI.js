@@ -369,7 +369,9 @@ const renderPortal = () => {
         <div class="card" style="border-left: 4px solid var(--accent-violet); max-width: 800px;">
           <h3 style="margin-bottom: 1.5rem;">Submit Payment</h3>
           <div style="display:flex; gap: 2rem; align-items:flex-start; flex-wrap: wrap;">
-            <div style="width: 120px; height: 120px; background: #eee; border-radius: 8px; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.8rem; text-align:center;">[QR Placeholder]</div>
+            <div style="width: 160px; height: 160px; background: #fff; border: 1px solid var(--border); border-radius: 8px; display:flex; align-items:center; justify-content:center; overflow: hidden; flex-shrink: 0;">
+              <img src="./payment-qr.png" alt="Scan to Pay" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/160?text=QR+Code';" />
+            </div>
             <div style="flex:1; min-width: 300px;">
               <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
                 <div class="form-group"><label>Renewal Period</label><select id="payment-months" onchange="window.calculatePaymentAmount()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option></select></div>
