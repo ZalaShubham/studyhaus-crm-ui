@@ -314,8 +314,7 @@ const renderSeatMap = () => {
       bg = "#f1f5f9"; border = "1px dashed #cbd5e1"; text = "#94a3b8";
     }
 
-    // Strip prefix from seatNumber (e.g. A01 -> 01, G-01 -> 01)
-    let displayNum = seat.seatNumber.replace(/^[A-Za-z-]+/, '');
+    let displayNum = seat.seatNumber;
 
     html += `
       <div 
