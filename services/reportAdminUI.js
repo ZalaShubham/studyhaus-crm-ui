@@ -26,9 +26,12 @@ export const openReportViewer = async (type) => {
   currentReportType = type;
   
   // Hide main reports page, show viewer
-  document.getElementById("page-reports").style.display = "none";
+  document.getElementById("page-reports").style.display = "";
+  document.getElementById("page-reports").classList.remove("active");
+  
   const viewer = document.getElementById("page-report-viewer");
-  viewer.style.display = "block";
+  viewer.style.display = "";
+  viewer.classList.add("active");
   
   // Update header
   document.getElementById("rv-title").innerText = reportTitles[type] || "Analytics Report";
@@ -38,8 +41,13 @@ export const openReportViewer = async (type) => {
 };
 
 export const closeReportViewer = () => {
-  document.getElementById("page-report-viewer").style.display = "none";
-  document.getElementById("page-reports").style.display = "block";
+  const viewer = document.getElementById("page-report-viewer");
+  viewer.style.display = "";
+  viewer.classList.remove("active");
+  
+  const reports = document.getElementById("page-reports");
+  reports.style.display = "";
+  reports.classList.add("active");
   clearChart();
 };
 

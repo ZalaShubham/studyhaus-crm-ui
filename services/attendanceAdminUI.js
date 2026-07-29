@@ -1,8 +1,13 @@
-import { listenToAllAttendance } from "./attendanceService.js";
+import { listenToAllAttendance, checkIn, checkOut } from "./attendanceService.js";
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
+import { db } from "../firebase/firebase.js";
+import { listenToAllStudents } from "./studentService.js";
 import { calculateStudyHours } from "./studyHourCalculator.js";
 
 let allRecords = [];
+let allStudents = [];
 let unsubscribe = null;
+let unsubscribeStudents = null;
 let currentFilters = { status: "All", search: "" };
 
 export const initAttendanceAdminUI = () => {
@@ -20,24 +25,24 @@ export const initAttendanceAdminUI = () => {
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <button class="btn btn-ghost" style="background:#fff; color:#0f172a; border:1px solid #e2e8f0; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
-        <button class="btn btn-primary" style="background:#0f172a; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(15,23,42,0.1);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4z"/><path d="M4 16h4v4H4z"/><path d="M16 4h4v4h-4z"/><path d="M14 14h2v2h-2z"/><path d="M18 18h2v2h-2z"/><path d="M14 18h2v2h-2z"/><path d="M18 14h2v2h-2z"/></svg> Scan QR</button>
+        <button class="btn btn-primary" id="btn-scan-qr" style="background:#0f172a; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(15,23,42,0.1);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4z"/><path d="M4 16h4v4H4z"/><path d="M16 4h4v4h-4z"/><path d="M14 14h2v2h-2z"/><path d="M18 18h2v2h-2z"/><path d="M14 18h2v2h-2z"/><path d="M18 14h2v2h-2z"/></svg> Scan QR</button>
       </div>
     </div>
     
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
       <div class="card" style="padding:1.5rem; background:#fff; border:1px solid #e2e8f0; border-radius:12px; display:flex; justify-content:space-between; align-items:flex-start; box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
-        <div><div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Present Today</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-present">0</div></div>
+        <div><div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Present Currently</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-present">0</div></div>
         <div style="width:32px; height:32px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
       </div>
       <div class="card" style="padding:1.5rem; background:#fff; border:1px solid #e2e8f0; border-radius:12px; display:flex; justify-content:space-between; align-items:flex-start; box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
-        <div><div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Absent Today</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-absent">0</div></div>
-        <div style="width:32px; height:32px; background:#fef2f2; color:#991b1b; border:1px solid #fecaca; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><path d="M9 12h6"/></svg></div>
+        <div><div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Completed Today</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-absent">0</div></div>
+        <div style="width:32px; height:32px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><path d="M9 12h6"/></svg></div>
       </div>
       <div class="card" style="padding:1.5rem; background:#fff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
-        <div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Late Arrivals</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-late">0</div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Total Check-Ins Today</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-late">0</div>
       </div>
       <div class="card" style="padding:1.5rem; background:#fff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.02);">
-        <div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Avg Hours</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-avg">0h</div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:0.5px; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Avg Hours (All Time)</div><div style="font-size:24px; font-weight:700; color:#0f172a;" id="att-metric-avg">0h</div>
       </div>
     </div>
 
@@ -87,6 +92,100 @@ export const initAttendanceAdminUI = () => {
     </div>
   `;
 
+  if (!document.getElementById("qr-scan-modal")) {
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = `
+      <dialog id="qr-scan-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a);">
+        <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Scan QR Code (Check-in)</h2>
+            <button class="btn btn-ghost" onclick="document.getElementById('qr-scan-modal').close()" style="padding: 0.25rem 0.5rem; background: transparent; border: none; font-size: 18px; cursor: pointer;">✕</button>
+          </div>
+          
+          <div style="text-align:center; margin-bottom: 1.5rem;">
+            <div style="width: 150px; height: 150px; border: 2px dashed var(--border, #e2e8f0); border-radius: 12px; margin: 0 auto; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--text-muted, #94a3b8); background: #f8fafc;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 0.5rem;"><path d="M4 4h4v4H4z"/><path d="M4 16h4v4H4z"/><path d="M16 4h4v4h-4z"/><path d="M14 14h2v2h-2z"/><path d="M18 18h2v2h-2z"/><path d="M14 18h2v2h-2z"/><path d="M18 14h2v2h-2z"/></svg>
+              <span>Scanner Active...</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary, #475569); margin-top: 1rem;">Or enter student details manually below</p>
+          </div>
+
+          <form id="qr-scan-form" onsubmit="event.preventDefault(); window.submitQRScan()">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Student Email, Phone, or ID</label>
+              <input type="text" id="qr-scan-identifier" required placeholder="e.g. johndoe@email.com or 9876543210" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Seat Number (Optional)</label>
+              <input type="text" id="qr-scan-seat" placeholder="Leave blank if fixed seat..." class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('qr-scan-modal').close()" style="padding:8px 16px; border:1px solid var(--border, #e2e8f0); border-radius:999px; background:transparent;">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-scan" style="padding:8px 16px; border:none; border-radius:999px; background:#0f172a; color:#fff;">Process Check-In</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    `;
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+
+  const btnScan = document.getElementById("btn-scan-qr");
+  if (btnScan) {
+    btnScan.addEventListener("click", () => {
+      document.getElementById("qr-scan-identifier").value = "";
+      document.getElementById("qr-scan-seat").value = "";
+      document.getElementById("qr-scan-modal").showModal();
+    });
+  }
+
+  window.submitQRScan = async () => {
+    const identifier = document.getElementById("qr-scan-identifier").value.trim();
+    const seatNumber = document.getElementById("qr-scan-seat").value.trim() || null;
+
+    if (!identifier) {
+      alert("Please enter a student identifier.");
+      return;
+    }
+
+    const btn = document.getElementById("btn-submit-scan");
+    const originalText = btn.innerText;
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+
+    try {
+      const q1 = query(collection(db, "students"), where("email", "==", identifier));
+      const q2 = query(collection(db, "students"), where("phone", "==", identifier));
+      const q3 = query(collection(db, "students"), where("studentId", "==", identifier));
+      
+      let studentSnap = await getDocs(q1);
+      if (studentSnap.empty) studentSnap = await getDocs(q2);
+      if (studentSnap.empty) studentSnap = await getDocs(q3);
+
+      if (studentSnap.empty) {
+        alert("Student not found.");
+        return;
+      }
+
+      const studentDoc = studentSnap.docs[0];
+      const studentData = { id: studentDoc.id, ...studentDoc.data() };
+
+      const res = await checkIn(studentData, seatNumber ? seatNumber.toUpperCase() : null);
+      if (res.success) {
+        document.getElementById("qr-scan-modal").close();
+        if(typeof showToast === 'function') showToast("Student checked in successfully!");
+        else alert("Student checked in successfully!");
+      } else {
+        alert("Failed to check in: " + res.error);
+      }
+    } catch (err) {
+      alert("Error finding student: " + err.message);
+    } finally {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+  };
+
   if (unsubscribe) unsubscribe();
   unsubscribe = listenToAllAttendance((records) => {
     allRecords = records;
@@ -94,18 +193,39 @@ export const initAttendanceAdminUI = () => {
     renderChart();
     renderTable();
   });
+
+  if (unsubscribeStudents) unsubscribeStudents();
+  unsubscribeStudents = listenToAllStudents((students) => {
+    allStudents = students;
+    renderTable();
+  });
 };
 
 const renderMetrics = () => {
-  // Normally filter for "today". For UI demo, we'll just mock based on active counts
-  const present = allRecords.filter(r => r.status === "Active" || r.status === "Completed").length || 21;
-  const absent = 3;
-  const late = 3;
-  const avg = 5.9;
+  const getTodayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+  const todayStr = getTodayStr();
+
+  const todaysRecords = allRecords.filter(r => r.date === todayStr);
+  const present = todaysRecords.filter(r => r.status === "Active").length;
+  const completed = todaysRecords.filter(r => r.status === "Completed").length;
+  const totalToday = todaysRecords.length;
+
+  let totalHours = 0;
+  let completedCount = 0;
+  allRecords.forEach(r => {
+    if(r.duration && r.duration > 0) {
+       totalHours += r.duration;
+       completedCount++;
+    }
+  });
+  const avg = completedCount > 0 ? (totalHours / completedCount).toFixed(1) : "0.0";
 
   document.getElementById("att-metric-present").innerText = present;
-  document.getElementById("att-metric-absent").innerText = absent;
-  document.getElementById("att-metric-late").innerText = late;
+  document.getElementById("att-metric-absent").innerText = completed;
+  document.getElementById("att-metric-late").innerText = totalToday;
   document.getElementById("att-metric-avg").innerText = avg + "h";
 };
 
@@ -113,29 +233,48 @@ const renderChart = () => {
   const barsContainer = document.getElementById("chart-bars");
   if (!barsContainer) return;
 
-  // Generate 14 days of mock trend data matching screenshot
-  const data = [
-    {p:28, a:4}, {p:33, a:5}, {p:39, a:6}, {p:31, a:4}, {p:37, a:4},
-    {p:29, a:3}, {p:34, a:6}, {p:40, a:7}, {p:38, a:5}, {p:30, a:6},
-    {p:36, a:7}, {p:28, a:4}, {p:34, a:5}, {p:35, a:5}
-  ];
+  const last14Days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    last14Days.push({ dateStr, label, dayIndex: i + 1 });
+  }
+
+  const data = last14Days.map(dInfo => {
+    const recordsForDay = allRecords.filter(r => r.date === dInfo.dateStr);
+    const totalCheckIns = recordsForDay.length; 
+    const completed = recordsForDay.filter(r => r.status === "Completed").length;
+    return { ...dInfo, total: totalCheckIns, completed: completed };
+  });
+
+  const chartMax = 40; // Static axis max based on HTML
 
   let html = "";
   data.forEach((d, i) => {
-    // 40 is max height
-    const hP = (d.p / 40) * 100;
-    const hA = (d.a / 40) * 100;
-    const hoverBg = i === 10 ? 'rgba(0,0,0,0.05)' : 'transparent';
-    const tooltip = i === 10 ? `<div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.1); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; white-space:nowrap; margin-bottom:8px; z-index:20;">D${i+1}<div style="color:#1e293b; margin-top:4px;">present : ${d.p}</div><div style="color:#e11d48; margin-top:2px;">absent : ${d.a}</div></div>` : '';
+    let hTotal = (d.total / chartMax) * 100;
+    if (hTotal > 100) hTotal = 100;
+    
+    let hCompleted = (d.completed / chartMax) * 100;
+    if (hCompleted > 100) hCompleted = 100;
+
+    const tooltip = `<div class="chart-tooltip" style="display:none; position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.1); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; white-space:nowrap; margin-bottom:8px; z-index:20;">
+      ${d.label}
+      <div style="color:#1e3a8a; margin-top:4px;">Check-Ins: ${d.total}</div>
+      <div style="color:#e11d48; margin-top:2px;">Completed: ${d.completed}</div>
+    </div>`;
     
     html += `
-      <div style="flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative; background:${hoverBg}; border-radius:4px 4px 0 0; padding: 0 4px; cursor:pointer;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='${hoverBg}'">
+      <div style="flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative; border-radius:4px 4px 0 0; padding: 0 4px; cursor:pointer;" 
+           onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.querySelector('.chart-tooltip').style.display='block';" 
+           onmouseout="this.style.background='transparent'; this.querySelector('.chart-tooltip').style.display='none';">
         ${tooltip}
         <div style="display:flex; align-items:flex-end; gap:2px; width:100%; height:100%; justify-content:center;">
-          <div style="background:#1e3a8a; width:14px; border-radius:3px 3px 0 0; height:${hP}%;"></div>
-          <div style="background:#e11d48; width:14px; border-radius:3px 3px 0 0; height:${hA}%;"></div>
+          <div style="background:#1e3a8a; width:14px; border-radius:3px 3px 0 0; height:${hTotal}%; transition: height 0.3s;"></div>
+          <div style="background:#e11d48; width:14px; border-radius:3px 3px 0 0; height:${hCompleted}%; transition: height 0.3s;"></div>
         </div>
-        <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-top:6px; position:absolute; top:100%;">D${i+1}</div>
+        <div style="font-size:10px; color:#94a3b8; font-weight:600; margin-top:6px; position:absolute; top:100%; white-space:nowrap;">D${i+1}</div>
       </div>
     `;
   });
@@ -146,51 +285,119 @@ const renderTable = () => {
   const tbody = document.getElementById("attendance-table-body");
   if (!tbody) return;
 
-  // Let's create mock data that looks exactly like the screenshot. 
-  // We'll ignore Firebase data for this UI demo to match screenshot perfectly.
-  const rows = [
-    { name: "Vihaan Verma", id: "RS1001", seat: "G-01", in: "08:00", out: "-", hrs: "-", status: "Absent" },
-    { name: "Ananya Patel", id: "RS1002", seat: "F-02", in: "09:07", out: "14:03", hrs: "5h", status: "Present" },
-    { name: "Navya Singh", id: "RS1003", seat: "S-03", in: "10:14", out: "16:06", hrs: "6h", status: "Present" },
-    { name: "Meera Nair", id: "RS1004", seat: "G-04", in: "11:21", out: "18:09", hrs: "7h", status: "Present" },
-    { name: "Vivaan Kapoor", id: "RS1005", seat: "F-05", in: "12:28", out: "20:12", hrs: "8h", status: "Present" },
-    { name: "Ishaan Verma", id: "RS1006", seat: "S-06", in: "13:35", out: "-", hrs: "-", status: "Present" },
-    { name: "Aadhya Patel", id: "RS1007", seat: "G-07", in: "08:42", out: "18:18", hrs: "10h", status: "Present" },
-    { name: "Neha Singh", id: "RS1008", seat: "F-08", in: "09:49", out: "20:21", hrs: "11h", status: "Late" },
-    { name: "Vivek Nair", id: "RS1009", seat: "S-09", in: "10:56", out: "14:24", hrs: "4h", status: "Present" },
-    { name: "Reyansh Kapoor", id: "RS1010", seat: "G-10", in: "11:03", out: "16:27", hrs: "5h", status: "Present" }
-  ];
+  const getTodayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+  const todayStr = getTodayStr();
+
+  const todaysRecords = allRecords.filter(r => r.date === todayStr);
+  const activeStudents = allStudents.filter(s => s.status === 'Active');
+
+  if (activeStudents.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #64748b;">No active students found.</td></tr>`;
+    return;
+  }
 
   let html = "";
-  rows.forEach(r => {
+  activeStudents.forEach(student => {
+    // Find if student checked in today
+    const record = todaysRecords.find(r => r.studentId === student.id);
+    
+    // Check if student is on leave today
+    const isOnLeave = student.leaveDates && student.leaveDates.includes(todayStr);
+
     let badgeHtml = "";
-    if (r.status === "Absent") {
-      badgeHtml = `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Absent</span>`;
-    } else if (r.status === "Present") {
-      badgeHtml = `<span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Present</span>`;
-    } else if (r.status === "Late") {
-      badgeHtml = `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Late</span>`;
+    if (record && record.status === "Active") {
+      badgeHtml = `<button onclick="window.handleForceCheckOut('${record.id}', ${record.checkIn})" title="Click to check out" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px; cursor:pointer; transition:all 0.2s; outline:none; font-family:inherit;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">Present</button>`;
+    } else if (record && record.status === "Completed") {
+      badgeHtml = `<span style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px;">Completed</span>`;
+    } else if (isOnLeave) {
+      badgeHtml = `<button onclick="window.toggleLeave('${student.id}', '${todayStr}', false)" title="Remove Leave" style="background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px; cursor:pointer; transition:all 0.2s; outline:none; font-family:inherit;" onmouseover="this.style.background='#ffedd5'" onmouseout="this.style.background='#fff7ed'">On Leave</button>`;
+    } else {
+      badgeHtml = `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; text-align:center; min-width:80px; margin-bottom: 4px;">Absent</span>
+                   <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:2px;">
+                     <div style="font-size:10px; color:#166534; cursor:pointer; text-decoration:underline;" onclick="window.markPresent('${student.id}', event)">Mark Present</div>
+                     <div style="font-size:10px; color:#64748b; cursor:pointer; text-decoration:underline;" onclick="window.toggleLeave('${student.id}', '${todayStr}', true, event)">Mark Leave</div>
+                   </div>`;
     }
 
-    const initials = r.name.split(" ").map(n => n[0]).join("");
+    const nameStr = student.name || "Unknown";
+    const initials = nameStr.split(" ").map(n => n[0] || "").join("").substring(0, 2).toUpperCase();
+    const shortId = (student.studentId || "").substring(0, 8);
+    const assignedSeat = student.seatNumber || "-";
+    
+    const inTime = (record && record.checkIn) ? new Date(record.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "-";
+    const outTime = (record && record.checkOut) ? new Date(record.checkOut).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "-";
+    const hrs = (record && record.duration) ? record.duration + "h" : "-";
 
     html += `
       <tr style="border-bottom:1px solid #f1f5f9; transition:0.2s; cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
         <td style="padding:16px; display:flex; align-items:center; gap:12px;">
           <div style="width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; border:1px solid #e2e8f0;">${initials}</div>
           <div>
-            <div style="font-weight:600; color:#0f172a; margin-bottom:2px;">${r.name}</div>
-            <div style="font-size:11px; color:#94a3b8; font-family:monospace;">${r.id}</div>
+            <div style="font-weight:600; color:#0f172a; margin-bottom:2px;">${nameStr}</div>
+            <div style="font-size:11px; color:#94a3b8; font-family:monospace;">${shortId}...</div>
           </div>
         </td>
-        <td style="padding:16px; font-weight:600; color:#0f172a;">${r.seat}</td>
-        <td style="padding:16px; color:#475569;">${r.in}</td>
-        <td style="padding:16px; color:#475569;">${r.out}</td>
-        <td style="padding:16px; font-weight:500; color:#475569;">${r.hrs}</td>
-        <td style="padding:16px; text-align:right;">${badgeHtml}</td>
+        <td style="padding:16px; font-weight:600; color:#0f172a;">${record && record.seatNumber ? record.seatNumber : assignedSeat}</td>
+        <td style="padding:16px; color:#475569;">${inTime}</td>
+        <td style="padding:16px; color:#475569;">${outTime}</td>
+        <td style="padding:16px; font-weight:500; color:#475569;">${hrs}</td>
+        <td style="padding:16px; text-align:right;">
+          <div style="display:flex; flex-direction:column; align-items:flex-end;">
+            ${badgeHtml}
+          </div>
+        </td>
       </tr>
     `;
   });
 
   tbody.innerHTML = html;
+
+  window.handleForceCheckOut = async (attId, inTime, event) => {
+    if (event) event.stopPropagation();
+    if(confirm("Force check-out this student now?")) {
+      const res = await checkOut(attId, inTime);
+      if(!res.success) alert(res.error);
+    }
+  };
+
+  window.toggleLeave = async (studentId, dateStr, isAddingLeave, event) => {
+    if (event) event.stopPropagation();
+    const studentRef = doc(db, "students", studentId);
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) return;
+    
+    let currentLeaves = student.leaveDates || [];
+    if (isAddingLeave) {
+      if (!currentLeaves.includes(dateStr)) currentLeaves.push(dateStr);
+    } else {
+      currentLeaves = currentLeaves.filter(d => d !== dateStr);
+    }
+    
+    try {
+      await updateDoc(studentRef, { leaveDates: currentLeaves });
+      if(typeof showToast === 'function') showToast(isAddingLeave ? "Marked as On Leave" : "Removed Leave");
+    } catch (err) {
+      alert("Error updating leave: " + err.message);
+    }
+  };
+
+  window.markPresent = async (studentId, event) => {
+    if (event) event.stopPropagation();
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) return;
+    
+    try {
+      const res = await checkIn(student, student.seatNumber || null);
+      if (res.success) {
+        if(typeof showToast === 'function') showToast("Marked as Present!");
+      } else {
+        alert("Failed to mark present: " + res.error);
+      }
+    } catch (err) {
+      alert("Error marking present: " + err.message);
+    }
+  };
 };

@@ -43,8 +43,9 @@ const getDashboardUrl = (role) => {
  * @param {string} email
  * @param {string} password
  * @param {string} role - Selected role from the form
+ * @param {Object} studentData - Extra student details (only for Students)
  */
-export const handleRegister = async (fullName, email, password, role) => {
+export const handleRegister = async (fullName, email, password, role, studentData = null) => {
   try {
     await setSessionPersistence();
 
@@ -89,14 +90,21 @@ export const handleRegister = async (fullName, email, password, role) => {
     // 2. Write user profile to Firestore users collection
     //    (runs for both new users and recovered accounts with missing docs)
     if (!firestoreDocExists) {
-      await setDoc(doc(db, "users", user.uid), {
+      const docData = {
         uid: user.uid,
         email: email,
         name: fullName,
         role: role,
         status: "Active",
         createdAt: new Date().toISOString(),
-      });
+      };
+      
+      // Merge student specific fields if provided
+      if (role === "Student" && studentData) {
+        Object.assign(docData, studentData);
+      }
+
+      await setDoc(doc(db, "users", user.uid), docData);
     }
 
     // 3. Store role and userId in localStorage immediately so the auth guard

@@ -72,12 +72,36 @@ export const initSeatMapUI = async () => {
       <h3 style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:4px;" id="current-floor-title">Ground Floor</h3>
       <p style="font-size:13px; color:#94a3b8; margin-bottom:1.5rem;">Section A · Section B · click a seat for details</p>
       
-      <!-- CSS Grid for the Seat Map -->
       <div id="seat-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 1rem;">
         <div style="text-align:center; grid-column: 1 / -1; padding: 2rem; color: #94a3b8;">Loading live seat map...</div>
       </div>
     </div>
   `;
+
+  if (!document.getElementById("add-seat-modal")) {
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = `
+      <dialog id="add-seat-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a);">
+        <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Add New Seat</h2>
+            <button class="btn btn-ghost" onclick="document.getElementById('add-seat-modal').close()" style="padding: 0.25rem 0.5rem; background: transparent; border: none; font-size: 18px; cursor: pointer;">✕</button>
+          </div>
+          <form id="add-seat-form" onsubmit="event.preventDefault(); window.submitAddSeatForm()">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Seat Number</label>
+              <input type="text" id="add-seat-number" required placeholder="e.g. B01" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('add-seat-modal').close()" style="padding:8px 16px; border:1px solid var(--border, #e2e8f0); border-radius:999px; background:transparent;">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-seat" style="padding:8px 16px; border:none; border-radius:999px; background:#0f172a; color:#fff;">Save Seat</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    `;
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
 
   // Floor Tab Listeners
   document.querySelectorAll(".floor-tab").forEach(btn => {
@@ -99,15 +123,33 @@ export const initSeatMapUI = async () => {
   });
 
   if (document.getElementById("btn-add-seat")) {
-    document.getElementById("btn-add-seat").addEventListener("click", async () => {
-      const seatNumber = prompt("Enter new seat number (e.g. B01):");
-      if (!seatNumber || seatNumber.trim() === "") return;
-      
-      const res = await addSingleSeat(seatNumber.trim().toUpperCase(), currentFilters.floor);
-      if (res.success) alert("Seat added successfully to " + currentFilters.floor + "!");
-      else alert("Failed to add seat: " + res.error);
+    document.getElementById("btn-add-seat").addEventListener("click", () => {
+      document.getElementById("add-seat-number").value = "";
+      document.getElementById("add-seat-modal").showModal();
     });
   }
+
+  window.submitAddSeatForm = async () => {
+    const seatNumber = document.getElementById("add-seat-number").value;
+    if (!seatNumber || seatNumber.trim() === "") return;
+    
+    const btn = document.getElementById("btn-save-seat");
+    const originalText = btn.innerText;
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    const res = await addSingleSeat(seatNumber.trim().toUpperCase(), currentFilters.floor);
+    
+    btn.innerText = originalText;
+    btn.disabled = false;
+
+    if (res.success) {
+      document.getElementById("add-seat-modal").close();
+      if(typeof showToast === 'function') showToast("Seat added successfully to " + currentFilters.floor + "!");
+    } else {
+      alert("Failed to add seat: " + res.error);
+    }
+  };
 
   
   let currentSelectedSeat = null;

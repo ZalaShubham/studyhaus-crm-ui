@@ -13,6 +13,33 @@ export const initComplaintAdminUI = () => {
   if (role === "Student") return; // Security guard
 
   // Initial UI Setup
+  if (!document.getElementById("resolve-complaint-modal")) {
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = `
+      <dialog id="resolve-complaint-modal" style="padding:0; border:none; border-radius:12px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); width:90%; max-width:400px;">
+        <div style="padding:1.5rem; background:#fff; border-bottom:1px solid #e2e8f0;">
+          <h2 style="font-size:1.25rem; font-weight:700; color:#0f172a; margin:0;" id="resolve-modal-title">Resolve Complaint</h2>
+        </div>
+        <form id="form-resolve-complaint" onsubmit="event.preventDefault(); window.submitResolveComplaint()" style="padding:1.5rem;">
+          <input type="hidden" id="resolve-complaint-id" />
+          <input type="hidden" id="resolve-complaint-phone" />
+          <input type="hidden" id="resolve-complaint-name" />
+          <input type="hidden" id="resolve-complaint-category" />
+          
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Resolution Note (Optional)</label>
+            <textarea id="resolve-complaint-note" rows="3" class="input-field" placeholder="E.g., Replaced the faulty bulb." style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; resize:vertical; font-family:inherit;"></textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('resolve-complaint-modal').close()" style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:999px; background:transparent;">Cancel</button>
+            <button type="submit" id="btn-save-resolve" class="btn btn-primary" style="padding:8px 16px; border:none; border-radius:999px; background:#0f172a; color:#fff;">Mark Resolved</button>
+          </div>
+        </form>
+      </dialog>
+    `;
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+
   container.innerHTML = `
     <div class="page-header">
       <div>
@@ -88,40 +115,72 @@ export const initComplaintAdminUI = () => {
   });
 
   // Global Actions
-  window.handleResolveComplaint = async (id, phone, name, category) => {
-    const remark = prompt(`Resolving complaint for ${name}.\nEnter a resolution note (optional):`);
-    if (remark === null) return; // cancelled
+  window.handleResolveComplaint = (id, phone, name, category) => {
+    document.getElementById("resolve-complaint-id").value = id;
+    document.getElementById("resolve-complaint-phone").value = phone || "";
+    document.getElementById("resolve-complaint-name").value = name || "";
+    document.getElementById("resolve-complaint-category").value = category || "";
+    document.getElementById("resolve-modal-title").innerText = `Resolve Complaint for ${name}`;
+    document.getElementById("form-resolve-complaint").reset();
+    document.getElementById("resolve-complaint-modal").showModal();
+  };
 
-    const resolver = localStorage.getItem("userName") || "Admin";
-    const res = await resolveComplaint(id, resolver, remark || "Issue resolved.");
-    if (res.success) {
-      // Trigger WhatsApp
-      let cleanPhone = (phone || "").replace(/\D/g, "");
-      if (cleanPhone.length === 10) cleanPhone = "91" + cleanPhone; // Assume India by default if 10 digits
-      
-      if (cleanPhone && confirm("Complaint marked as Resolved. Do you want to notify the student via WhatsApp?")) {
-        const studentData = {
-          id: studentId,
-          fullName: name,
-          phone: cleanPhone
-        };
-        const text = `Hello ${name},\n\nYour complaint regarding '${category}' has been resolved.\n\nThank you for your patience.`;
+  window.submitResolveComplaint = async () => {
+    const id = document.getElementById("resolve-complaint-id").value;
+    const phone = document.getElementById("resolve-complaint-phone").value;
+    const name = document.getElementById("resolve-complaint-name").value;
+    const category = document.getElementById("resolve-complaint-category").value;
+    const note = document.getElementById("resolve-complaint-note").value.trim();
+    
+    const btn = document.getElementById("btn-save-resolve");
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    try {
+      const resolver = localStorage.getItem("userName") || "Admin";
+      const res = await resolveComplaint(id, resolver, note || "Issue resolved.");
+      if (res.success) {
+        document.getElementById("resolve-complaint-modal").close();
+        if(typeof showToast === 'function') showToast("Complaint resolved successfully!");
+
+        // Trigger WhatsApp
+        let cleanPhone = (phone || "").replace(/\D/g, "");
+        if (cleanPhone.length === 10) cleanPhone = "91" + cleanPhone; // Assume India by default if 10 digits
         
-        // Use global whatsapp service if available
-        if (window.sendWhatsAppMessage) {
-          window.sendWhatsAppMessage(studentData, "Complaint Update", text);
-        } else {
-          const encoded = encodeURIComponent(text);
-          window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, "_blank");
+        if (cleanPhone && confirm("Complaint marked as Resolved. Do you want to notify the student via WhatsApp?")) {
+          const studentData = {
+            id: "", // not strictly needed for wa link
+            fullName: name,
+            phone: cleanPhone
+          };
+          const text = `Hello ${name},\n\nYour complaint regarding '${category}' has been resolved.\n\nThank you for your patience.`;
+          
+          // Use global whatsapp service if available
+          if (window.sendWhatsAppMessage) {
+            window.sendWhatsAppMessage(studentData, "Complaint Update", text);
+          } else {
+            const encoded = encodeURIComponent(text);
+            window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, "_blank");
+          }
         }
+      } else {
+        alert("Error resolving complaint: " + res.error);
       }
-    } else {
-      alert("Error resolving complaint: " + res.error);
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      btn.innerText = "Mark Resolved";
+      btn.disabled = false;
     }
   };
 
   window.handleMarkInProgress = async (id) => {
     const res = await updateComplaintStatus(id, "In Progress");
+    if (!res.success) alert("Error: " + res.error);
+  };
+
+  window.handleMarkPending = async (id) => {
+    const res = await updateComplaintStatus(id, "Pending");
     if (!res.success) alert("Error: " + res.error);
   };
 
@@ -139,7 +198,7 @@ const renderComplaintAdminTable = () => {
   if (!tbody) return;
 
   const role = localStorage.getItem("userRole");
-  const canResolve = (role === "Owner" || role === "Manager" || role === "Admin"); 
+  const canResolve = ["owner", "manager", "admin"].includes(role?.toLowerCase()); 
 
   const filtered = filterComplaints(allComplaints, currentFilters);
 
@@ -158,20 +217,14 @@ const renderComplaintAdminTable = () => {
     if (c.status === "Resolved" || c.status === "Closed") badgeClass = "badge-paid";
     if (c.status === "In Progress") badgeClass = "badge-absent"; // Orange-ish or red
 
-    let actionsHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">No actions</span>`;
-    
-    if (c.status === "Pending" || c.status === "In Progress") {
-      if (canResolve) {
-        actionsHtml = `<button class="btn btn-ghost" style="color: var(--success); padding: 0.2rem 0.5rem;" onclick="window.handleResolveComplaint('${c.id}', '${c.studentPhone}', '${c.studentName}', '${c.category}')">Resolve</button>`;
-        
-        if (c.status === "Pending") {
-          actionsHtml += `<button class="btn btn-ghost" style="color: var(--primary); padding: 0.2rem 0.5rem;" onclick="window.handleMarkInProgress('${c.id}')">Start</button>`;
-        }
-      } else {
-        actionsHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">View Only</span>`;
-      }
-    } else {
-      actionsHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">Resolved by: ${c.resolvedBy || 'Unknown'}</span>`;
+    let actionsHtml = `<div style="display:flex; gap:0.25rem; justify-content:flex-end; flex-wrap:wrap;">
+      ${c.status !== "Pending" ? `<button class="btn btn-ghost" style="color:var(--text-muted); font-size:10px; padding:2px 6px; border:1px solid var(--border); border-radius:4px;" onclick="window.handleMarkPending('${c.id}')">Pending</button>` : ''}
+      ${c.status !== "In Progress" ? `<button class="btn btn-ghost" style="color:var(--primary); font-size:10px; padding:2px 6px; border:1px solid var(--border); border-radius:4px;" onclick="window.handleMarkInProgress('${c.id}')">In Progress</button>` : ''}
+      ${c.status !== "Resolved" ? `<button class="btn btn-ghost" style="color:var(--success); font-size:10px; padding:2px 6px; border:1px solid var(--border); border-radius:4px;" onclick="window.handleResolveComplaint('${c.id}', '${c.studentPhone}', '${c.studentName}', '${c.category}')">Resolve</button>` : ''}
+    </div>`;
+
+    if (c.status === "Resolved") {
+      actionsHtml += `<div style="font-size:0.7rem; color:var(--text-muted); text-align:right; margin-top:4px;">Resolved by: ${c.resolvedBy || 'Unknown'}</div>`;
     }
     
     const resNote = c.resolutionNote ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;"><i>Admin: ${c.resolutionNote}</i></div>` : "";

@@ -97,8 +97,53 @@
           <label>Password</label>
           <input type="password" id="password" required placeholder="••••••••" minlength="8" />
         </div>
-        
-        <p class="form-hint">Minimum 8 characters.</p>
+        <p class="form-hint" style="margin-bottom: 1rem;">Minimum 8 characters.</p>
+
+        <!-- Extra Student Fields -->
+        <div id="student-extra-fields" style="display: none;">
+          <h3 style="font-size: 0.95rem; font-weight: 600; color: #0f172a; margin-top: 1.5rem; margin-bottom: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">Student Details</h3>
+          
+          <div class="form-group">
+            <label>Mobile *</label>
+            <input type="tel" pattern="[0-9]{10}" id="mobile" placeholder="10-digit number" />
+          </div>
+          
+          <div class="form-group">
+            <label>Parent mobile</label>
+            <input type="tel" pattern="[0-9]{10}" id="parentMobile" placeholder="10-digit number" />
+          </div>
+
+          <div style="display: flex; gap: 1rem;">
+            <div class="form-group" style="flex: 1;">
+              <label>Date of birth</label>
+              <input type="date" id="dob" style="color: #64748b;" />
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Gender</label>
+              <select id="gender" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.9rem; color: #0f172a; outline: none; transition: border-color 0.2s, background 0.2s;">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>College / Institute</label>
+            <input type="text" id="college" />
+          </div>
+          
+          <div class="form-group">
+            <label>Course</label>
+            <input type="text" id="course" placeholder="UPSC, CA, JEE..." />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Address</label>
+            <textarea id="address" rows="2" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.9rem; color: #0f172a; outline: none; transition: border-color 0.2s, background 0.2s; resize: vertical;"></textarea>
+          </div>
+        </div>
         
         <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
       </form>
@@ -123,10 +168,19 @@
 
     initAuthGuard();
 
-    const form = document.getElementById("register-form");
-    const errorDiv = document.getElementById("error-message");
-    const loader = document.getElementById("global-loader");
-    const submitBtn = document.getElementById("submit-btn");
+    const roleSelect = document.getElementById("roleSelect");
+    const studentExtraFields = document.getElementById("student-extra-fields");
+    const mobileInput = document.getElementById("mobile");
+
+    roleSelect.addEventListener("change", () => {
+      if (roleSelect.value === "Student") {
+        studentExtraFields.style.display = "block";
+        mobileInput.required = true;
+      } else {
+        studentExtraFields.style.display = "none";
+        mobileInput.required = false;
+      }
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -137,10 +191,23 @@
       const fullName = document.getElementById("fullName").value;
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const role = document.getElementById("roleSelect").value;
+      const role = roleSelect.value;
+      
+      let studentData = null;
+      if (role === "Student") {
+        studentData = {
+          phone: document.getElementById("mobile").value,
+          parentPhone: document.getElementById("parentMobile").value,
+          dob: document.getElementById("dob").value,
+          gender: document.getElementById("gender").value,
+          college: document.getElementById("college").value,
+          course: document.getElementById("course").value,
+          address: document.getElementById("address").value
+        };
+      }
 
       try {
-        await handleRegister(fullName, email, password, role);
+        await handleRegister(fullName, email, password, role, studentData);
       } catch (error) {
         loader.style.display = "none";
         submitBtn.disabled = false;

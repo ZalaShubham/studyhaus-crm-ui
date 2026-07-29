@@ -19,6 +19,8 @@ import { initDashboardReminders } from "./services/dashboardReminderUI.js";
 import { initRenewalAdminUI, renderRenewalForm, renderRenewalHistory } from "./services/renewalAdminUI.js";
 import { openReportViewer, closeReportViewer } from "./services/reportAdminUI.js";
 import { initAnnouncementAdminUI } from "./services/announcementAdminUI.js";
+import { initStaffAdminUI } from "./services/staffAdminUI.js";
+import { initTasksAdminUI } from "./services/tasksAdminUI.js";
 import "./services/whatsappModalUI.js"; // Auto-injects modal styles and functions
 
 // Expose the test function to the global window object
@@ -78,6 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initRenewalAdminUI();
     // Initialize Announcements
     initAnnouncementAdminUI();
+    // Initialize Staff UI
+    initStaffAdminUI();
+    // Initialize Tasks UI
+    initTasksAdminUI();
   }
 });
 
