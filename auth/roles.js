@@ -17,7 +17,8 @@ export const PERMISSIONS = {
     "reports",
     "attendance",
     "payments",
-    "seats"
+    "seats",
+    "notifications"
   ],
   [ROLES.EMPLOYEE]: [
     "dashboard",
@@ -27,7 +28,8 @@ export const PERMISSIONS = {
     "attendance",
     "payments",
     "complaints",
-    "seats"
+    "seats",
+    "notifications"
   ],
   [ROLES.STUDENT]: [
     "student-portal",
