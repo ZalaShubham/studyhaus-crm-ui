@@ -357,16 +357,16 @@ const renderPortal = () => {
     <div class="form-grid" style="margin-top: 1rem;">
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
         <!-- Submit Payment Request -->
-        <div class="card" style="border-left: 4px solid var(--accent-violet);">
-          <h3 style="margin-bottom: 1rem;">Submit Payment</h3>
-          <div style="display:flex; gap: 2rem; align-items:flex-start;">
+        <div class="card" style="border-left: 4px solid var(--accent-violet); max-width: 800px;">
+          <h3 style="margin-bottom: 1.5rem;">Submit Payment</h3>
+          <div style="display:flex; gap: 2rem; align-items:flex-start; flex-wrap: wrap;">
             <div style="width: 120px; height: 120px; background: #eee; border-radius: 8px; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.8rem; text-align:center;">[QR Placeholder]</div>
-            <div style="flex:1;">
-              <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1rem; margin-top:0;">
-                <div><label>Renewal Period</label><select id="payment-months" onchange="window.calculatePaymentAmount()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option></select></div>
-                <div><label>Amount to Pay</label><div id="payment-amount-display" style="font-size: 1.2rem; font-weight: 600; padding-top: 0.5rem;">₹--</div><input type="hidden" id="payment-amount" value="0" /></div>
-                <div style="grid-column: span 2;"><label>UPI Transaction ID *</label><input type="text" id="payment-txnid" required /></div>
-                <div style="grid-column: span 2;"><button type="submit" id="btn-submit-payment" class="btn btn-primary" style="width: 100%;">Submit Payment Request</button></div>
+            <div style="flex:1; min-width: 300px;">
+              <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
+                <div class="form-group"><label>Renewal Period</label><select id="payment-months" onchange="window.calculatePaymentAmount()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option></select></div>
+                <div class="form-group"><label>Amount to Pay</label><div id="payment-amount-display" style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">₹--</div><input type="hidden" id="payment-amount" value="0" /></div>
+                <div class="form-group full-width"><label>UPI Transaction ID *</label><input type="text" id="payment-txnid" required /></div>
+                <div class="form-group full-width"><button type="submit" id="btn-submit-payment" class="btn btn-primary">Submit Payment Request</button></div>
               </form>
             </div>
           </div>
@@ -417,12 +417,12 @@ const renderPortal = () => {
     
     <div class="form-grid" style="margin-top: 1rem;">
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
-        <div class="card" style="border-left: 4px solid var(--danger);">
-          <h3 style="margin-bottom: 1rem;">Report an Issue</h3>
-          <form onsubmit="event.preventDefault(); window.handleComplaintSubmit();" style="display:flex; flex-direction:column; gap:1rem;">
-            <div>
+        <div class="card" style="border-left: 4px solid var(--danger); max-width: 600px;">
+          <h3 style="margin-bottom: 1.5rem;">Report an Issue</h3>
+          <form onsubmit="event.preventDefault(); window.handleComplaintSubmit();" class="form-grid">
+            <div class="form-group full-width">
               <label>Category</label>
-              <select id="complaint-category" style="width:100%;" required>
+              <select id="complaint-category" required>
                 <option value="">Select an issue...</option>
                 <option value="Noise">Noise</option>
                 <option value="Light">Light</option>
@@ -435,11 +435,13 @@ const renderPortal = () => {
                 <option value="Others">Others</option>
               </select>
             </div>
-            <div>
+            <div class="form-group full-width">
               <label>Description</label>
-              <textarea id="complaint-description" rows="3" style="width:100%; resize:none;" required placeholder="Describe the issue in detail..."></textarea>
+              <textarea id="complaint-description" rows="3" style="resize:none;" required placeholder="Describe the issue in detail..."></textarea>
             </div>
-            <button type="submit" id="btn-submit-complaint" class="btn btn-primary">Submit Complaint</button>
+            <div class="form-group full-width" style="margin-top: 0.5rem;">
+              <button type="submit" id="btn-submit-complaint" class="btn btn-primary">Submit Complaint</button>
+            </div>
           </form>
         </div>
         <div class="card"><h3 style="margin-bottom: 1rem;">My Complaints</h3><table class="data-table"><thead><tr><th>Date</th><th>Category</th><th>Details</th><th>Status</th></tr></thead><tbody>${complaintsHtml}</tbody></table></div>
@@ -459,13 +461,16 @@ const renderPortal = () => {
     <div class="form-grid" style="margin-top: 1rem;">
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
         <!-- Profile Module -->
-        <div class="card">
+        <div class="card" style="max-width: 600px;">
+          <h3 style="margin-bottom: 1.5rem;">Edit Details</h3>
           <form onsubmit="event.preventDefault(); window.saveStudentPortalProfile();">
-            <div style="display:flex; flex-direction:column; gap: 1rem;">
-              <div><label style="font-size:0.85rem;">Email</label><input type="email" id="portal-edit-email" value="${s.email || ''}" style="width:100%;" /></div>
-              <div><label style="font-size:0.85rem;">Parent Contact</label><input type="tel" id="portal-edit-parent" value="${s.parentPhone || ''}" style="width:100%;" /></div>
-              <div><label style="font-size:0.85rem;">Address</label><textarea id="portal-edit-address" rows="2" style="width:100%; resize:none;">${s.address || ''}</textarea></div>
-              <button type="submit" id="btn-portal-save" class="btn btn-primary" style="margin-top:0.5rem; width: max-content;">Save Profile Changes</button>
+            <div class="form-grid">
+              <div class="form-group full-width"><label>Email</label><input type="email" id="portal-edit-email" value="${s.email || ''}" /></div>
+              <div class="form-group full-width"><label>Parent Contact</label><input type="tel" id="portal-edit-parent" value="${s.parentPhone || ''}" /></div>
+              <div class="form-group full-width"><label>Address</label><textarea id="portal-edit-address" rows="2" style="resize:none;">${s.address || ''}</textarea></div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <button type="submit" id="btn-portal-save" class="btn btn-primary">Save Profile Changes</button>
             </div>
           </form>
         </div>
