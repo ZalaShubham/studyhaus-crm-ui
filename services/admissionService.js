@@ -308,7 +308,7 @@ export const initAdmissionsUI = async () => {
     window.updateSummary();
   };
 
-  window.submitAdmissionForm = async (overridePaymentMethod = null) => {
+  window.submitAdmissionForm = async (overridePaymentMethod = null, txnId = null, dueDate = null) => {
     // If Admin/Manager and no payment method chosen yet, show popup
     if (isAdminOrManager && !overridePaymentMethod) {
       if (!document.getElementById("admission-form").checkValidity()) {
@@ -321,19 +321,79 @@ export const initAdmissionsUI = async () => {
         return;
       }
 
+      window.processAdminPayment = (method) => {
+        if (method === 'Paid (Cash)') {
+          document.getElementById('admin-payment-modal').remove();
+          window.submitAdmissionForm('Paid', null, null);
+        } else if (method === 'Paid (UPI)') {
+          document.getElementById('admin-payment-step-1').style.display = 'none';
+          document.getElementById('admin-payment-step-upi').style.display = 'block';
+        } else if (method === 'Pay Later') {
+          document.getElementById('admin-payment-step-1').style.display = 'none';
+          document.getElementById('admin-payment-step-later').style.display = 'block';
+          // Set default due date to 3 days from now
+          const d = new Date();
+          d.setDate(d.getDate() + 3);
+          document.getElementById('admin-due-date').value = d.toISOString().split('T')[0];
+        }
+      };
+
+      window.finalizeAdminPayment = (method) => {
+        let tId = null;
+        let dDate = null;
+        if (method === 'Paid (UPI)') {
+          tId = document.getElementById('admin-txn-id').value;
+          if (!tId) {
+             if(typeof showToast === 'function') showToast("Transaction ID is required", "warning");
+             return;
+          }
+        } else if (method === 'Pay Later') {
+          dDate = document.getElementById('admin-due-date').value;
+          if (!dDate) {
+             if(typeof showToast === 'function') showToast("Due Date is required", "warning");
+             return;
+          }
+        }
+        document.getElementById('admin-payment-modal').remove();
+        window.submitAdmissionForm(method === 'Paid (UPI)' ? 'Paid' : 'Pay Later', tId, dDate);
+      };
+
+      const amountText = document.getElementById("summary-amount") ? document.getElementById("summary-amount").innerText : "Amount";
+
       const modalHtml = `
         <dialog id="admin-payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 450px; margin: auto;">
           <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Payment Options</h2>
             <button onclick="document.getElementById('admin-payment-modal').remove()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
           </div>
-          <div style="padding: 1.5rem; text-align: center;">
+          
+          <div id="admin-payment-step-1" style="padding: 1.5rem; text-align: center;">
             <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">How is the student paying the admission fee?</p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-direction: column;">
-              <button type="button" class="btn btn-primary" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Paid (UPI)')" style="width: 100%; padding: 12px; font-size: 15px;">Paid via UPI</button>
-              <button type="button" class="btn btn-primary" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Paid (Cash)')" style="width: 100%; padding: 12px; font-size: 15px; background: #16a34a; border: none;">Paid via Cash</button>
-              <button type="button" class="btn btn-ghost" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Pay Later')" style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid var(--borderBright);">Pay Later</button>
+              <button type="button" class="btn btn-primary" onclick="window.processAdminPayment('Paid (UPI)')" style="width: 100%; padding: 12px; font-size: 15px;">Paid via UPI</button>
+              <button type="button" class="btn btn-primary" onclick="window.processAdminPayment('Paid (Cash)')" style="width: 100%; padding: 12px; font-size: 15px; background: #16a34a; border: none;">Paid via Cash</button>
+              <button type="button" class="btn btn-ghost" onclick="window.processAdminPayment('Pay Later')" style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid var(--borderBright);">Pay Later</button>
             </div>
+          </div>
+
+          <div id="admin-payment-step-upi" style="display: none; padding: 1.5rem;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+              <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+              <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay: <span style="color: var(--primary);">${amountText}</span></div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label>Transaction ID *</label>
+              <input type="text" id="admin-txn-id" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+            </div>
+            <button type="button" class="btn btn-primary" onclick="window.finalizeAdminPayment('Paid (UPI)')" style="width: 100%; padding: 12px; font-size: 15px;">Mark as Paid & Submit</button>
+          </div>
+
+          <div id="admin-payment-step-later" style="display: none; padding: 1.5rem;">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label>Payment Due Date *</label>
+              <input type="date" id="admin-due-date" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" />
+            </div>
+            <button type="button" class="btn btn-primary" onclick="window.finalizeAdminPayment('Pay Later')" style="width: 100%; padding: 12px; font-size: 15px;">Confirm Pay Later</button>
           </div>
         </dialog>
       `;
@@ -372,6 +432,9 @@ export const initAdmissionsUI = async () => {
         paymentMethod: isAdminOrManager ? (overridePaymentMethod || "Admin Created") : "Pending",
         termsAccepted: true
       };
+
+      if (txnId) data.transactionId = txnId;
+      if (dueDate) data.paymentDueDate = dueDate;
 
       const res = await submitAdmission(data, isStudent);
       if (res.success) {
