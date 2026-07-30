@@ -68,10 +68,6 @@ export const initMembershipPlans = async () => {
               <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Notes (Optional)</label>
               <textarea id="add-plan-notes" rows="2" placeholder="Any additional notes..." class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem;"></textarea>
             </div>
-            <div class="form-group" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="add-plan-is-manual" style="width: 1rem; height: 1rem; cursor: pointer;" />
-              <label for="add-plan-is-manual" style="font-size:0.875rem; font-weight:600; color:var(--text-secondary); cursor: pointer; margin: 0;">Is Manual Plan (Hidden from students)</label>
-            </div>
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
               <button type="button" class="btn btn-ghost" onclick="document.getElementById('add-plan-modal').close()">Cancel</button>
               <button type="submit" class="btn btn-primary" id="btn-save-plan">Save Plan</button>
@@ -197,8 +193,6 @@ const handleCreateManualPlan = async () => {
   document.getElementById("add-plan-price").value = "";
   document.getElementById("add-plan-duration").value = "";
   document.getElementById("add-plan-notes").value = "";
-  const isManualCheckbox = document.getElementById("add-plan-is-manual");
-  if (isManualCheckbox) isManualCheckbox.checked = false;
   document.getElementById("add-plan-modal").showModal();
 };
 
@@ -207,8 +201,6 @@ window.submitPlanForm = async () => {
   const price = document.getElementById("add-plan-price").value;
   const duration = document.getElementById("add-plan-duration").value.trim();
   const notes = document.getElementById("add-plan-notes").value.trim();
-  const isManualCheckbox = document.getElementById("add-plan-is-manual");
-  const isManual = isManualCheckbox ? isManualCheckbox.checked : false;
 
   if (!name || !price || !duration) {
     window.showToast("Please fill in all required fields.", "warning");
@@ -225,7 +217,7 @@ window.submitPlanForm = async () => {
     price: Number(price),
     duration: duration,
     notes: notes || "",
-    isManual: isManual,
+    isManual: false,
     status: "Active",
     createdAt: new Date().toISOString()
   };
