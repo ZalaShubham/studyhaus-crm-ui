@@ -1,8 +1,8 @@
-import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot, doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 import { validateStudentData } from "./studentValidation.js";
 import { approveAdmission, rejectAdmission } from "./approvalService.js";
-import { initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments, setUploadProgress } from "./documentUploadService.js";
+import { getAuth } from "firebase/auth";
 
 /**
  * Fetch available plans for the dropdown.
@@ -21,6 +21,33 @@ export const fetchPlansForDropdown = async (isStudent) => {
 };
 
 /**
+ * Update payment details for an existing pending admission
+ */
+export const updateAdmissionPayment = async (admissionId, transactionId, paymentScreenshotUrl) => {
+  try {
+    const admissionRef = doc(db, "admissions", admissionId);
+    const updates = {
+      paymentMethod: "Paid",
+      transactionId: transactionId,
+      updatedAt: serverTimestamp()
+    };
+    if (paymentScreenshotUrl) {
+      updates.paymentScreenshotUrl = paymentScreenshotUrl;
+    }
+    await updateDoc(admissionRef, updates);
+    
+    // Auto-approve the student since they have now paid
+    const res = await approveAdmission(admissionId);
+    if (!res.success) {
+       console.error("Auto-approval failed: ", res.error);
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
  * Submit an admission form
  * If user is Student -> goes to 'admissions' collection (Pending)
  * If user is Admin -> goes to 'students' collection (Active immediately)
@@ -34,11 +61,25 @@ export const submitAdmission = async (formData, isStudent) => {
     formData.updatedAt = serverTimestamp();
     formData.role = "Student"; // Crucial for login routing
 
+    // Check if auto-approval applies for "Paid" student admissions
+    const autoApprove = isStudent && formData.paymentMethod === "Paid";
+
     if (isStudent) {
-      // Self Registration
-      formData.approvalStatus = "Pending";
-      formData.status = "Pending";
-      await addDoc(collection(db, "admissions"), formData);
+      const auth = getAuth();
+      const uid = auth.currentUser ? auth.currentUser.uid : null;
+      if (!uid) throw new Error("Student must be logged in to submit admission");
+
+      if (!autoApprove) {
+        // Self Registration (Pay Later)
+        formData.approvalStatus = "Pending";
+        formData.status = "Pending";
+        await setDoc(doc(db, "admissions", uid), formData);
+      } else {
+        // Auto-Approved Student
+        formData.approvalStatus = "Approved";
+        formData.status = "Active";
+        await setDoc(doc(db, "students", uid), formData);
+      }
     } else {
       // Admin Admission
       formData.approvalStatus = "Approved";
@@ -82,19 +123,35 @@ export const initAdmissionsUI = async () => {
   const isAdminOrManager = role === "Owner/Admin" || role === "Manager";
 
   window.approveStudent = async (id) => {
-    if (confirm("Approve this admission?")) {
+    const confirmed = await window.showCustomConfirm("Approve Admission", "Are you sure you want to approve this student?", "Approve", false);
+    if (confirmed) {
       const res = await approveAdmission(id);
-      if (res.success) alert("Admission Approved! Student is now Active.");
-      else alert("Error: " + res.error);
+      if (res.success) window.showToast("Admission Approved! Student is now Active.", "success");
+      else window.showToast("Error: " + res.error, "error");
     }
   };
 
   window.rejectStudent = async (id) => {
-    const reason = prompt("Enter rejection reason (optional):");
+    const reason = await window.showCustomPrompt("Reject Admission", "Please provide a reason for rejection (optional):", "Reject", true);
     if (reason !== null) {
       const res = await rejectAdmission(id, reason);
-      if (res.success) alert("Admission Rejected.");
-      else alert("Error: " + res.error);
+      if (res.success) window.showToast("Admission Rejected.", "info");
+      else window.showToast("Error: " + res.error, "error");
+    }
+  };
+
+  window.viewPaymentScreenshot = async (studentId) => {
+    try {
+        const { loadStudentDocuments } = await import("./documentUploadService.js");
+        const docs = await loadStudentDocuments(studentId);
+        if (docs && docs.selfie) {
+            const win = window.open("", "_blank");
+            win.document.write('<html><body style="margin:0; display:flex; justify-content:center; align-items:center; background:#111;"><img src="' + docs.selfie + '" style="max-width:100%; max-height:100vh; object-fit:contain;"/></body></html>');
+        } else {
+            window.showToast("No screenshot found.", "warning");
+        }
+    } catch (e) {
+        window.showToast("Error loading screenshot: " + e.message, "error");
     }
   };
 
@@ -114,11 +171,23 @@ export const initAdmissionsUI = async () => {
       let html = "";
       records.forEach(r => {
         const d = r.createdAt ? new Date(r.createdAt.toMillis()).toLocaleDateString() : "Just now";
+        
+        let paymentInfo = ``;
+        if (r.paymentMethod === "Paid") {
+          paymentInfo = `<div style="font-size:11px; color:var(--primary); font-weight:600; margin-top:4px;">Txn ID: ${r.transactionId || 'N/A'}</div>`;
+          if (r.paymentScreenshotUrl) {
+            paymentInfo += `<button class="btn btn-sm btn-ghost" onclick="window.viewPaymentScreenshot('${r.id}')" style="padding:2px 6px; font-size:10px; margin-top:4px; height:auto; line-height:1.2;">View Screenshot</button>`;
+          }
+        } else if (r.paymentMethod === "Pay Later") {
+          paymentInfo = `<div style="font-size:11px; color:var(--warning); font-weight:600; margin-top:4px;">Pay Later</div>`;
+        }
+        
         html += `
           <tr>
             <td>
               <div style="font-weight:600; color:#0f172a;">${r.name}</div>
               <div style="font-size:11px; color:#94a3b8;">${r.email || ""}</div>
+              ${paymentInfo}
             </td>
             <td>${r.phone}</td>
             <td>${r.planName}</td>
@@ -239,7 +308,42 @@ export const initAdmissionsUI = async () => {
     window.updateSummary();
   };
 
-  window.submitAdmissionForm = async () => {
+  window.submitAdmissionForm = async (overridePaymentMethod = null) => {
+    // If Admin/Manager and no payment method chosen yet, show popup
+    if (isAdminOrManager && !overridePaymentMethod) {
+      if (!document.getElementById("admission-form").checkValidity()) {
+        document.getElementById("admission-form").reportValidity();
+        return;
+      }
+      const planEl = document.getElementById("adm-plan");
+      if (!planEl || !planEl.value) {
+        if(typeof showToast === 'function') showToast("Please select a plan first.", "warning");
+        return;
+      }
+
+      const modalHtml = `
+        <dialog id="admin-payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 450px; margin: auto;">
+          <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Payment Options</h2>
+            <button onclick="document.getElementById('admin-payment-modal').remove()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+          </div>
+          <div style="padding: 1.5rem; text-align: center;">
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">How is the student paying the admission fee?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-direction: column;">
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Paid (UPI)')" style="width: 100%; padding: 12px; font-size: 15px;">Paid via UPI</button>
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Paid (Cash)')" style="width: 100%; padding: 12px; font-size: 15px; background: #16a34a; border: none;">Paid via Cash</button>
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('admin-payment-modal').remove(); window.submitAdmissionForm('Pay Later')" style="width: 100%; padding: 12px; font-size: 15px; border: 1px solid var(--borderBright);">Pay Later</button>
+            </div>
+          </div>
+        </dialog>
+      `;
+      const existing = document.getElementById("admin-payment-modal");
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      document.getElementById("admin-payment-modal").showModal();
+      return;
+    }
+
     const btn = document.getElementById("btn-submit-admission");
     const originalContent = btn.innerHTML;
     btn.innerHTML = "Submitting...";
@@ -265,19 +369,27 @@ export const initAdmissionsUI = async () => {
         planId: planId,
         planName: plan ? plan.planName : "",
         seatAssigned: seatEl.value || "",
-        paymentMethod: isAdminOrManager ? "Admin Created" : "Pending",
+        paymentMethod: isAdminOrManager ? (overridePaymentMethod || "Admin Created") : "Pending",
         termsAccepted: true
       };
 
       const res = await submitAdmission(data, isStudent);
       if (res.success) {
-        alert(isStudent ? "Admission request submitted and is Pending Approval!" : "Student successfully admitted as Active!");
+        if (isStudent) {
+            if (data.paymentMethod === "Paid") {
+                window.showToast("Payment verified! You are now admitted and will be redirected to your dashboard.", "success");
+            } else {
+                window.showToast("Admission request submitted and is Pending Approval!", "success");
+            }
+        } else {
+            window.showToast("Student successfully admitted as Active!", "success");
+        }
         window.resetAdmission();
       } else {
-        alert("Error: " + res.error);
+        window.showToast("Error: " + res.error, "error");
       }
     } catch (e) {
-      alert("Validation Error: " + e.message);
+      window.showToast("Validation Error: " + e.message, "error");
     } finally {
       btn.innerHTML = originalContent;
       btn.disabled = false;

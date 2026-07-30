@@ -20,7 +20,7 @@ const loadScript = (src) => {
 
 export const exportToCSV = (filename, rows) => {
   if (!rows || rows.length === 0) {
-    alert("No data to export.");
+    window.showToast("No data to export.", "warning");
     return;
   }
   
@@ -56,7 +56,7 @@ export const exportToCSV = (filename, rows) => {
 
 export const exportToExcel = async (filename, rows) => {
   if (!rows || rows.length === 0) {
-    alert("No data to export.");
+    window.showToast("No data to export.", "warning");
     return;
   }
 
@@ -73,13 +73,13 @@ export const exportToExcel = async (filename, rows) => {
     window.XLSX.writeFile(workbook, `${filename}.xlsx`);
   } catch (err) {
     console.error("Failed to export to Excel:", err);
-    alert("Failed to load Excel export library. Try CSV instead.");
+    window.showToast("Failed to load Excel export library. Try CSV instead.", "error");
   }
 };
 
 export const exportToPDF = async (filename, title, rows) => {
   if (!rows || rows.length === 0) {
-    alert("No data to export.");
+    window.showToast("No data to export.", "warning");
     return;
   }
 
@@ -114,6 +114,6 @@ export const exportToPDF = async (filename, title, rows) => {
     doc.save(`${filename}.pdf`);
   } catch (err) {
     console.error("Failed to export to PDF:", err);
-    alert("Failed to load PDF export library.");
+    window.showToast("Failed to load PDF export library.", "error");
   }
 };

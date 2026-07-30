@@ -203,7 +203,7 @@ window.submitPlanForm = async () => {
   const notes = document.getElementById("add-plan-notes").value.trim();
 
   if (!name || !price || !duration) {
-    alert("Please fill in all required fields.");
+    window.showToast("Please fill in all required fields.", "warning");
     return;
   }
 
@@ -229,7 +229,7 @@ window.submitPlanForm = async () => {
     document.getElementById("add-plan-modal").close();
     if(typeof showToast === 'function') showToast("Manual Plan created successfully!");
   } catch (error) {
-    alert("Error: " + error.message);
+    window.showToast("Error: " + error.message, "error");
   } finally {
     btn.innerText = originalText;
     btn.disabled = false;
@@ -240,12 +240,12 @@ window.submitPlanForm = async () => {
  * Global edit handler
  */
 window.editPlan = async (id, currentName, currentPrice) => {
-  const newPriceStr = prompt(`Update price for ${currentName}:`, currentPrice);
+  const newPriceStr = await window.showCustomPrompt("Update Price", `Update price for ${currentName}:`, "Update");
   if (!newPriceStr) return;
 
   const newPrice = Number(newPriceStr);
   if (isNaN(newPrice) || newPrice <= 0) {
-    alert("Invalid price.");
+    window.showToast("Invalid price.", "error");
     return;
   }
 
@@ -255,9 +255,9 @@ window.editPlan = async (id, currentName, currentPrice) => {
       price: newPrice,
       updatedAt: new Date().toISOString()
     });
-    alert("Plan updated successfully!");
+    window.showToast("Plan updated successfully!", "success");
   } catch (error) {
-    alert("Failed to update plan: " + error.message);
+    window.showToast("Failed to update plan: " + error.message, "error");
   }
 };
 
@@ -265,13 +265,14 @@ window.editPlan = async (id, currentName, currentPrice) => {
  * Global delete handler
  */
 window.deletePlan = async (id, planName) => {
-  if (confirm(`Are you sure you want to delete '${planName}'?`)) {
+  const confirmed = await window.showCustomConfirm("Delete Plan", `Are you sure you want to delete '${planName}'?`, "Delete", true);
+  if (confirmed) {
     try {
       const docRef = doc(db, "membershipPlans", id);
       await deleteDoc(docRef);
-      alert("Plan deleted.");
+      window.showToast("Plan deleted.", "success");
     } catch (error) {
-      alert("Failed to delete plan: " + error.message);
+      window.showToast("Failed to delete plan: " + error.message, "error");
     }
   }
 };

@@ -1,4 +1,4 @@
-import { collection, query, where, onSnapshot, getDocs, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebase/firebase.js";
 
@@ -31,20 +31,40 @@ export const listenToStudentPortalData = (onDataUpdate, onError) => {
           if (!usersSnap.empty) {
             const userDoc = usersSnap.docs[0];
             const userData = userDoc.data();
-            // Build a minimal student-like profile from the users doc
-            onDataUpdate({
-              id: userDoc.id,
-              name: userData.name || user.email.split("@")[0],
-              email: userData.email || user.email,
-              role: userData.role || "Student",
-              status: userData.status || "Active",
-              planName: userData.planName || "Not Assigned",
-              seatNumber: userData.seatNumber || null,
-              paymentDueDate: userData.paymentDueDate || null,
-              parentPhone: userData.parentPhone || "",
-              address: userData.address || "",
-              _fromUsersCollection: true   // flag so portal knows data is limited
-            });
+            const admRef = doc(db, "admissions", user.uid);
+            const admSnap = await getDoc(admRef);
+
+            if (admSnap.exists() && admSnap.data().status === "Pending") {
+              const admDoc = admSnap;
+              const admData = admDoc.data();
+              onDataUpdate({
+                id: admDoc.id,
+                name: admData.name || userData.name || user.email.split("@")[0],
+                email: admData.email || user.email,
+                role: "Student",
+                status: "Pending",
+                planName: admData.planName || "Not Assigned",
+                seatNumber: admData.seatAssigned || null,
+                _fromUsersCollection: true,
+                _isPendingAdmission: true
+              });
+            } else {
+              // Build a minimal student-like profile from the users doc
+              onDataUpdate({
+                id: userDoc.id,
+                name: userData.name || user.email.split("@")[0],
+                email: userData.email || user.email,
+                role: userData.role || "Student",
+                status: "Pending", // Was "Active" before, but they are not yet admitted
+                planName: "Not Assigned",
+                seatNumber: null,
+                paymentDueDate: null,
+                parentPhone: userData.parentPhone || "",
+                address: userData.address || "",
+                _fromUsersCollection: true,
+                _isNewUser: true
+              });
+            }
           } else {
             onError("No student profile found. Please contact your admin to complete your enrollment.");
           }

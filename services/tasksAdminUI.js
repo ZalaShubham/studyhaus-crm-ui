@@ -69,14 +69,10 @@ export const initTasksAdminUI = () => {
       await addDoc(collection(db, "tasks"), data);
       
       document.getElementById("add-task-modal").close();
-      if(typeof showToast === 'function') {
-        showToast("Task added successfully!");
-      }
-      
-      alert("Task saved! (Table is currently static but data was saved to Firebase)");
+      window.showToast("Task saved! (Table is currently static but data was saved to Firebase)", "success");
       
     } catch (err) {
-      alert("Error adding task: " + err.message);
+      window.showToast("Error adding task: " + err.message, "error");
     } finally {
       btn.innerText = "Save Task";
       btn.disabled = false;

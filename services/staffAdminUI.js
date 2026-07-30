@@ -70,14 +70,10 @@ export const initStaffAdminUI = () => {
       await addDoc(collection(db, "staff"), data);
       
       document.getElementById("add-staff-modal").close();
-      if(typeof showToast === 'function') {
-        showToast("Staff added successfully!");
-      }
-      
-      alert("Staff member saved! (Table is currently static but data was saved to Firebase)");
+      window.showToast("Staff member saved! (Table is currently static but data was saved to Firebase)", "success");
       
     } catch (err) {
-      alert("Error adding staff: " + err.message);
+      window.showToast("Error adding staff: " + err.message, "error");
     } finally {
       btn.innerText = "Save Staff";
       btn.disabled = false;

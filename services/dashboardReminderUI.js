@@ -22,16 +22,17 @@ export const initDashboardReminders = () => {
 
   // Define actions globally for inline onclick handlers
   window.handleCompleteReminder = async (studentId, type) => {
-    if (confirm(`Mark this ${type} reminder as completed?`)) {
+    const confirmed = await window.showCustomConfirm("Complete Reminder", `Mark this ${type} reminder as completed?`);
+    if (confirmed) {
       await markReminderCompleted(studentId, type);
     }
   };
 
   window.handleRescheduleReminder = async (studentId, type) => {
-    const newDate = prompt(`Enter new date for ${type} reminder (YYYY-MM-DD):`);
+    const newDate = await window.showCustomPrompt("Reschedule", `Enter new date for ${type} reminder (YYYY-MM-DD):`, "Reschedule");
     if (newDate) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-        return alert("Invalid format. Please use YYYY-MM-DD.");
+        return window.showToast("Invalid format. Please use YYYY-MM-DD.", "warning");
       }
       await rescheduleReminder(studentId, type, newDate);
     }

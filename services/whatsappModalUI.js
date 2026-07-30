@@ -54,7 +54,7 @@ export const openWhatsAppModal = async (studentData) => {
 
   sendBtn.onclick = async () => {
     const val = tplSelect.value;
-    if (!val) return alert("Select a template.");
+    if (!val) return window.showToast("Select a template.", "warning");
     
     let templateName = "Custom";
     if (val !== "custom") {
@@ -63,7 +63,7 @@ export const openWhatsAppModal = async (studentData) => {
     }
 
     const finalMessage = msgPreview.value.trim();
-    if (!finalMessage) return alert("Message cannot be empty.");
+    if (!finalMessage) return window.showToast("Message cannot be empty.", "warning");
 
     // The send service automatically logs and opens new tab
     const success = await sendWhatsAppMessage(studentData, templateName, finalMessage);

@@ -83,13 +83,12 @@ window.submitAnnouncement = async () => {
   if (btn) { btn.disabled = false; btn.textContent = "Schedule"; }
 
   if (res.success) {
-    if(window.showToast) window.showToast("Announcement scheduled successfully!", "success");
-    else alert("Announcement scheduled successfully!");
+    window.showToast("Announcement scheduled successfully!", "success");
     
     document.getElementById("announcement-modal").close();
     document.getElementById("announcement-form").reset();
   } else {
-    alert("Error: " + res.error);
+    window.showToast("Error: " + res.error, "error");
   }
 };
 
@@ -97,12 +96,13 @@ window.submitAnnouncement = async () => {
  * Handles deleting an announcement
  */
 window.deleteAnnouncementHandler = async (id) => {
-  if (confirm("Are you sure you want to delete this announcement?")) {
+  const confirmed = await window.showCustomConfirm("Delete Announcement", "Are you sure you want to delete this announcement?", "Delete", true);
+  if (confirmed) {
     const res = await deleteAnnouncement(id);
     if (res.success) {
-      if(window.showToast) window.showToast("Announcement deleted", "success");
+      window.showToast("Announcement deleted", "success");
     } else {
-      alert("Error deleting announcement: " + res.error);
+      window.showToast("Error deleting announcement: " + res.error, "error");
     }
   }
 };

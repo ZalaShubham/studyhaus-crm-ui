@@ -23,6 +23,14 @@ export const approveAdmission = async (admissionId) => {
     const studentRef = doc(db, "students", admissionId);
     await setDoc(studentRef, data);
 
+    // Update the corresponding user document to Active
+    const userRef = doc(db, "users", admissionId);
+    try {
+      await updateDoc(userRef, { status: "Active" });
+    } catch (e) {
+      console.warn("Could not update users document (it may not exist if created via manual admin admission):", e);
+    }
+
     // Remove from admissions collection
     await deleteDoc(admissionRef);
     
@@ -44,6 +52,14 @@ export const rejectAdmission = async (admissionId, reason) => {
       status: "Rejected",
       updatedAt: new Date().toISOString()
     });
+
+    const userRef = doc(db, "users", admissionId);
+    try {
+      await updateDoc(userRef, { status: "Rejected" });
+    } catch (e) {
+      console.warn("Could not update users document:", e);
+    }
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };

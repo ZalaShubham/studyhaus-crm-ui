@@ -144,7 +144,7 @@ export const initAttendanceAdminUI = () => {
     const seatNumber = document.getElementById("qr-scan-seat").value.trim() || null;
 
     if (!identifier) {
-      alert("Please enter a student identifier.");
+      window.showToast("Please enter a student identifier.", "warning");
       return;
     }
 
@@ -163,7 +163,7 @@ export const initAttendanceAdminUI = () => {
       if (studentSnap.empty) studentSnap = await getDocs(q3);
 
       if (studentSnap.empty) {
-        alert("Student not found.");
+        window.showToast("Student not found.", "error");
         return;
       }
 
@@ -174,12 +174,12 @@ export const initAttendanceAdminUI = () => {
       if (res.success) {
         document.getElementById("qr-scan-modal").close();
         if(typeof showToast === 'function') showToast("Student checked in successfully!");
-        else alert("Student checked in successfully!");
+        else window.showToast("Student checked in successfully!", "success");
       } else {
-        alert("Failed to check in: " + res.error);
+        window.showToast("Failed to check in: " + res.error, "error");
       }
     } catch (err) {
-      alert("Error finding student: " + err.message);
+      window.showToast("Error finding student: " + err.message, "error");
     } finally {
       btn.innerText = originalText;
       btn.disabled = false;
@@ -357,9 +357,10 @@ const renderTable = () => {
 
   window.handleForceCheckOut = async (attId, inTime, event) => {
     if (event) event.stopPropagation();
-    if(confirm("Force check-out this student now?")) {
+    const confirmed = await window.showCustomConfirm("Force Check-Out", "Force check-out this student now?");
+    if (confirmed) {
       const res = await checkOut(attId, inTime);
-      if(!res.success) alert(res.error);
+      if(!res.success) window.showToast(res.error, "error");
     }
   };
 
@@ -380,7 +381,7 @@ const renderTable = () => {
       await updateDoc(studentRef, { leaveDates: currentLeaves });
       if(typeof showToast === 'function') showToast(isAddingLeave ? "Marked as On Leave" : "Removed Leave");
     } catch (err) {
-      alert("Error updating leave: " + err.message);
+      window.showToast("Error updating leave: " + err.message, "error");
     }
   };
 
@@ -394,10 +395,10 @@ const renderTable = () => {
       if (res.success) {
         if(typeof showToast === 'function') showToast("Marked as Present!");
       } else {
-        alert("Failed to mark present: " + res.error);
+        window.showToast("Failed to mark present: " + res.error, "error");
       }
     } catch (err) {
-      alert("Error marking present: " + err.message);
+      window.showToast("Error marking present: " + err.message, "error");
     }
   };
 };

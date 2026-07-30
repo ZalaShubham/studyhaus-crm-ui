@@ -147,7 +147,7 @@ export const initSeatMapUI = async () => {
       document.getElementById("add-seat-modal").close();
       if(typeof showToast === 'function') showToast("Seat added successfully to " + currentFilters.floor + "!");
     } else {
-      alert("Failed to add seat: " + res.error);
+      window.showToast("Failed to add seat: " + res.error, "error");
     }
   };
 
@@ -185,7 +185,7 @@ export const initSeatMapUI = async () => {
   window.handleSeatClick = (seatId) => {
     const role = localStorage.getItem("userRole");
     if (role === "Employee") {
-      return alert("You only have View permissions for seats.");
+      return window.showToast("You only have View permissions for seats.", "warning");
     }
     
     const seat = allSeats.find(s => s.id === seatId);
@@ -258,7 +258,7 @@ export const initSeatMapUI = async () => {
 
 const processSeatAction = async (seat, choice) => {
   if (seat.status === "Occupied") {
-    alert("Cannot modify an occupied seat.");
+    window.showToast("Cannot modify an occupied seat.", "error");
     return;
   }
 
@@ -270,7 +270,8 @@ const processSeatAction = async (seat, choice) => {
 
   if (seat.status === "Reserved") {
     if (choice === "1") {
-      if (confirm(`Unassign ${seat.assignedStudentName} from this seat?`)) {
+      const confirmed = await window.showCustomConfirm("Unassign Seat", `Unassign ${seat.assignedStudentName} from this seat?`);
+      if (confirmed) {
         await unassignSeat(seat.id);
       }
       return;
@@ -283,7 +284,7 @@ const processSeatAction = async (seat, choice) => {
     if (choice === "1") return await changeSeatStatus(seat.id, "Available");
   }
   
-  alert("Invalid option or action not allowed.");
+  window.showToast("Invalid option or action not allowed.", "error");
 };
 
 const triggerAssignSeat = async (seat, studentEmailOrId) => {
@@ -299,21 +300,21 @@ const triggerAssignSeat = async (seat, studentEmailOrId) => {
     if (studentSnap.empty) studentSnap = await getDocs(q3);
 
     if (studentSnap.empty) {
-      return alert("Student not found.");
+      return window.showToast("Student not found.", "error");
     }
 
     const studentDoc = studentSnap.docs[0];
     const studentData = { id: studentDoc.id, ...studentDoc.data() };
     
-    if (studentData.status !== "Active") return alert("Cannot assign seat to inactive student.");
-    if (studentData.seatNumber) return alert(`Student already has a seat assigned: ${studentData.seatNumber}`);
+    if (studentData.status !== "Active") return window.showToast("Cannot assign seat to inactive student.", "warning");
+    if (studentData.seatNumber) return window.showToast(`Student already has a seat assigned: ${studentData.seatNumber}`, "warning");
 
     const res = await assignSeat(seat.id, studentData);
-    if (!res.success) alert("Failed to assign seat: " + res.error);
-    else alert(`Successfully assigned ${studentData.name} to ${seat.seatNumber}`);
+    if (!res.success) window.showToast("Failed to assign seat: " + res.error, "error");
+    else window.showToast(`Successfully assigned ${studentData.name} to ${seat.seatNumber}`, "success");
 
   } catch (err) {
-    alert("Error finding student: " + err.message);
+    window.showToast("Error finding student: " + err.message, "error");
   }
 };
 
@@ -326,61 +327,171 @@ const updateSeatAnalysis = (seats) => {
   }
 };
 
-const renderSeatMap = () => {
-  const grid = document.getElementById("seat-grid");
-  if (!grid) return;
+  window.quickCreateSeat = async (seatNumber, floor) => {
+    const res = await addSingleSeat(String(seatNumber), floor);
+    if (res.success) {
+      if(typeof showToast === 'function') showToast(`Seat ${seatNumber} created!`, 'success');
+    } else {
+      if(typeof showToast === 'function') showToast(`Error: ${res.error}`, 'error');
+    }
+  };
 
-  // Filter seats by floor
-  // If a seat has no floor property (like the initially seeded ones), treat it as "Ground Floor"
-  let filtered = allSeats.filter(seat => {
-    const seatFloor = seat.floor || "Ground Floor";
-    return seatFloor === currentFilters.floor;
-  });
+  const renderSeatMap = () => {
+    const grid = document.getElementById("seat-grid");
+    if (!grid) return;
 
-  let html = "";
-  filtered.forEach(seat => {
-    // Determine colors
-    let bg = "#f8fafc";
-    let border = "1px solid #e2e8f0";
-    let text = "#0f172a";
-    
-    if (seat.status === "Available") {
-      bg = "#f0fdf4"; border = "1px solid #bbf7d0"; text = "#166534";
-    } else if (seat.status === "Occupied") {
-      bg = "#fef2f2"; border = "1px solid #fecaca"; text = "#991b1b";
-    } else if (seat.status === "Reserved") {
-      bg = "#fffbeb"; border = "1px solid #fde68a"; text = "#92400e";
-    } else if (seat.status === "Maintenance") {
-      bg = "#eff6ff"; border = "1px solid #bfdbfe"; text = "#1e40af";
-    } else if (seat.status === "Inactive") {
-      bg = "#f1f5f9"; border = "1px dashed #cbd5e1"; text = "#94a3b8";
+    let filtered = allSeats.filter(seat => {
+      const seatFloor = seat.floor || "Ground Floor";
+      return seatFloor === currentFilters.floor;
+    });
+
+    const generateRange = (prefix, start, end) => {
+      const arr = [];
+      if (start <= end) {
+        for (let i = start; i <= end; i++) arr.push(`${prefix}${i}`);
+      } else {
+        for (let i = start; i >= end; i--) arr.push(`${prefix}${i}`);
+      }
+      return arr;
+    };
+
+    const renderSeatCard = (seatNumStr) => {
+      let seat = filtered.find(s => s.seatNumber === String(seatNumStr));
+      
+      if (!seat) {
+        return `
+          <div class="seat-card empty-seat" 
+               onclick="window.quickCreateSeat('${seatNumStr}', '${currentFilters.floor}')"
+               style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; height: 50px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 14px; cursor: pointer; transition: 0.2s;"
+               onmouseover="this.style.background='#f1f5f9';"
+               onmouseout="this.style.background='#f8fafc';"
+               title="Click to create seat ${seatNumStr} in database"
+               >
+            ${seatNumStr}
+          </div>
+        `;
+      }
+
+      let bg = "#f8fafc", border = "1px solid #e2e8f0", text = "#0f172a";
+      if (seat.status === "Available") { bg = "#f0fdf4"; border = "1px solid #bbf7d0"; text = "#166534"; }
+      else if (seat.status === "Occupied") { bg = "#fef2f2"; border = "1px solid #fecaca"; text = "#991b1b"; }
+      else if (seat.status === "Reserved") { bg = "#fffbeb"; border = "1px solid #fde68a"; text = "#92400e"; }
+      else if (seat.status === "Maintenance") { bg = "#eff6ff"; border = "1px solid #bfdbfe"; text = "#1e40af"; }
+      else if (seat.status === "Inactive") { bg = "#f1f5f9"; border = "1px dashed #cbd5e1"; text = "#94a3b8"; }
+
+      return `
+        <div 
+          class="seat-card"
+          onclick="window.handleSeatClick('${seat.id}')"
+          style="
+            background: ${bg}; border: ${border}; color: ${text}; 
+            border-radius: 8px; height: 50px; display: flex; 
+            align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+          "
+          onmouseover="this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.transform='none';"
+        >
+          <div style="font-size: 14px; font-weight: 600;">${seat.seatNumber}</div>
+        </div>
+      `;
+    };
+
+    const renderColHtml = (arr) => {
+      let colHtml = `<div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">`;
+      arr.forEach(num => { colHtml += renderSeatCard(num); });
+      colHtml += `</div>`;
+      return colHtml;
+    };
+
+    let html = "";
+
+    if (currentFilters.floor === "First Floor") {
+      html = `
+        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+          <!-- Door -->
+          <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            DOOR
+          </div>
+          
+          <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 800px; margin: 0 auto;">
+            ${renderColHtml(generateRange('B', 1, 10))}
+            ${renderColHtml(generateRange('B', 11, 20))}
+            
+            <!-- Middle aisle -->
+            <div style="width: 40px; flex-shrink: 0;"></div>
+
+            ${renderColHtml(generateRange('B', 21, 30))}
+            ${renderColHtml(generateRange('B', 31, 40))}
+          </div>
+        </div>
+      `;
+    } else if (currentFilters.floor === "Ground Floor") {
+      html = `
+        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+          <!-- Door -->
+          <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            DOOR
+          </div>
+          
+          <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto; align-items: flex-start;">
+            ${renderColHtml(generateRange('A', 1, 18))}
+            ${renderColHtml(generateRange('A', 19, 34))}
+            
+            <!-- Middle section with seats 67 and 68 -->
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 80px; flex-shrink: 0; align-self: center;">
+               ${renderSeatCard('A67')}
+               ${renderSeatCard('A68')}
+            </div>
+
+            ${renderColHtml(generateRange('A', 35, 48))}
+            ${renderColHtml(generateRange('A', 49, 66))}
+          </div>
+        </div>
+      `;
+    } else if (currentFilters.floor === "Second Floor") {
+      html = `
+        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+          <!-- Door -->
+          <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            DOOR
+          </div>
+          
+          <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto;">
+            ${renderColHtml(generateRange('C', 1, 8))}
+            ${renderColHtml(generateRange('C', 9, 16))}
+            
+            <!-- Aisle -->
+            <div style="width: 30px; flex-shrink: 0;"></div>
+
+            ${renderColHtml(generateRange('C', 17, 24))}
+
+            <!-- Aisle -->
+            <div style="width: 30px; flex-shrink: 0;"></div>
+
+            ${renderColHtml(generateRange('C', 25, 32))}
+            ${renderColHtml(generateRange('C', 33, 40))}
+          </div>
+        </div>
+      `;
+    } else {
+      // Fallback for Second Floor or other custom floors
+      grid.style.display = "grid";
+      grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(85px, 1fr))";
+      grid.style.gap = "1rem";
+      
+      let fallbackHtml = "";
+      filtered.forEach(seat => {
+        fallbackHtml += renderSeatCard(seat.seatNumber);
+      });
+      html = fallbackHtml;
+      
+      grid.innerHTML = html;
+      return;
     }
 
-    let displayNum = seat.seatNumber;
+    // Unset grid style for custom physical layout containers
+    grid.style.display = "block";
+    grid.innerHTML = html;
+  };
 
-    html += `
-      <div 
-        class="seat-card"
-        onclick="window.handleSeatClick('${seat.id}')"
-        style="
-          background: ${bg}; 
-          border: ${border}; 
-          color: ${text}; 
-          border-radius: 8px; 
-          aspect-ratio: 1.1; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center;
-          cursor: pointer;
-          transition: 0.2s;
-        "
-        onmouseover="this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.transform='none';"
-      >
-        <div style="font-size: 14px; font-weight: 600;">${displayNum}</div>
-      </div>
-    `;
-  });
-
-  grid.innerHTML = html;
-};

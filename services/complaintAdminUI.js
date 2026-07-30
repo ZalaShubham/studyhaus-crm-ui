@@ -147,7 +147,7 @@ export const initComplaintAdminUI = () => {
         let cleanPhone = (phone || "").replace(/\D/g, "");
         if (cleanPhone.length === 10) cleanPhone = "91" + cleanPhone; // Assume India by default if 10 digits
         
-        if (cleanPhone && confirm("Complaint marked as Resolved. Do you want to notify the student via WhatsApp?")) {
+        if (cleanPhone && await window.showCustomConfirm("Notify Student", "Complaint marked as Resolved. Do you want to notify the student via WhatsApp?", "Notify")) {
           const studentData = {
             id: "", // not strictly needed for wa link
             fullName: name,
@@ -164,10 +164,10 @@ export const initComplaintAdminUI = () => {
           }
         }
       } else {
-        alert("Error resolving complaint: " + res.error);
+        window.showToast("Error resolving complaint: " + res.error, "error");
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      window.showToast("Error: " + err.message, "error");
     } finally {
       btn.innerText = "Mark Resolved";
       btn.disabled = false;
@@ -176,12 +176,12 @@ export const initComplaintAdminUI = () => {
 
   window.handleMarkInProgress = async (id) => {
     const res = await updateComplaintStatus(id, "In Progress");
-    if (!res.success) alert("Error: " + res.error);
+    if (!res.success) window.showToast("Error: " + res.error, "error");
   };
 
   window.handleMarkPending = async (id) => {
     const res = await updateComplaintStatus(id, "Pending");
-    if (!res.success) alert("Error: " + res.error);
+    if (!res.success) window.showToast("Error: " + res.error, "error");
   };
 
   // Start Listener

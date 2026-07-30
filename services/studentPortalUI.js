@@ -95,7 +95,7 @@ export const initStudentPortalUI = () => {
     let selectedSeat = null;
     const isRotational = (currentStudent.planName || "").toLowerCase().includes("rotational");
     if (isRotational) {
-      selectedSeat = prompt("You are on a Rotational Plan.\nPlease enter the Seat Number you are occupying today (e.g., A01):");
+      selectedSeat = await window.showCustomPrompt("Seat Required", "You are on a Rotational Plan.<br>Please enter the Seat Number you are occupying today (e.g., A01):");
       if (!selectedSeat) return; // cancelled
       selectedSeat = selectedSeat.trim().toUpperCase();
     }
@@ -275,84 +275,461 @@ const renderPortal = () => {
   }
 
   // 1. DASHBOARD PAGE (Overview)
-  portalSection.innerHTML = `
-    <div class="page-header">
-      <div>
-        <h1>Welcome back, ${s.name}</h1>
-        <p class="page-subtitle">Here is your personal study portal.</p>
+  if (s._isNewUser) {
+    // New user -> Show admission form
+    portalSection.innerHTML = `
+      <div class="page-header" style="margin-bottom: 1.5rem;">
+        <div>
+          <h1>Complete Your Admission</h1>
+          <p class="page-subtitle">Please fill out the admission form to enroll in a plan.</p>
+        </div>
       </div>
-      <div style="display:flex; gap:1rem;">
-        ${attendanceActionHtml}
+      <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+        <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
+          <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name *</label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.name || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile *</label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.phone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.parentPhone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email</label><input type="email" id="adm-email" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth</label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender</label>
+                <select id="adm-gender" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+                  <option value="">Select</option><option value="Male" ${s.gender === 'Male' ? 'selected' : ''}>Male</option><option value="Female" ${s.gender === 'Female' ? 'selected' : ''}>Female</option><option value="Other" ${s.gender === 'Other' ? 'selected' : ''}>Other</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.college || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.course || ''}" /></div>
+              <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">${s.address || ''}</textarea></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan *</label>
+                <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+                  <option value="">Choose plan (Loading...)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Seat (optional)</label>
+                <select id="adm-seat" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+                  <option value="">Loading...</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div style="width: 280px; position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+          <div class="card" style="padding: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: none;">
+            <h4 style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 1rem;">SUMMARY</h4>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 12px;"><span>Plan</span><span id="summary-plan" style="color: #0f172a; font-weight: 600;">—</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 12px;"><span>Amount</span><span id="summary-amount" style="color: #0f172a; font-weight: 600;">—</span></div>
+            <div style="height: 1px; background: #e2e8f0; margin: 12px 0;"></div>
+            <button class="btn btn-primary" id="btn-submit-admission" onclick="document.getElementById('admission-form').requestSubmit()" style="width: 100%; padding: 12px; font-size: 14px;">Confirm Admission</button>
+          </div>
+        </div>
       </div>
-    </div>
+      
+      <!-- Payment Modal -->
+      <dialog id="payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 450px; margin: auto;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Payment Options</h2>
+          <button onclick="document.getElementById('payment-modal').close()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        
+        <!-- Step 1: Choose Pay Now or Pay Later -->
+        <div id="payment-step-1" style="padding: 1.5rem; text-align: center;">
+          <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">You can pay now to confirm your seat immediately, or pay later at the desk.</p>
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn btn-ghost" onclick="window.submitSelfAdmission('Pay Later')" style="flex: 1; border: 1px solid var(--borderBright);">Pay Later</button>
+            <button class="btn btn-primary" onclick="window.showPaymentStep2()" style="flex: 1;">Pay Now</button>
+          </div>
+        </div>
 
-    <!-- Top Dashboard Metrics -->
-    <div class="metrics-grid">
-      <div class="metric-card" style="align-items: center;">
-        <div class="metric-icon violet" style="border-radius: 50%; font-weight: bold;">${initials}</div>
-        <div>
-          <div class="metric-label">Membership Plan</div>
-          <div class="metric-value" style="font-size: 1.1rem;">${s.planName || 'None'}</div>
+        <!-- Step 2: Pay Now Form -->
+        <div id="payment-step-2" style="padding: 1.5rem; display: none;">
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+            <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay: <span id="payment-modal-amount" style="color: var(--primary);">₹--</span></div>
+          </div>
+          <div class="form-group">
+            <label>Transaction ID *</label>
+            <input type="text" id="modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div id="modal-doc-upload-section"></div>
+          </div>
+          <button class="btn btn-primary" id="btn-modal-paid" onclick="window.submitSelfAdmission('Paid')" style="width: 100%;">Mark as Paid & Submit</button>
         </div>
-      </div>
-      <div class="metric-card" style="align-items: center;">
-        <div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
-        <div>
-          <div class="metric-label">Seat Number</div>
-          <div class="metric-value">${s.seatNumber || 'Unassigned'}</div>
-        </div>
-      </div>
-      <div class="metric-card" style="align-items: center;">
-        <div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
-        <div>
-          <div class="metric-label">Status</div>
-          <div class="metric-value">${s.status || 'Pending'}</div>
-        </div>
-      </div>
-      <div class="metric-card" style="align-items: center;">
-        <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-        <div>
-          <div class="metric-label">Days Remaining</div>
-          <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} Days</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Due: ${s.paymentDueDate || 'N/A'}</div>
-        </div>
-      </div>
-    </div>
+      </dialog>
+    `;
     
-    <div style="margin-top: 2rem;">
-      <h3 style="margin-bottom: 1rem;">Quick Links</h3>
-      <div class="dashboard-grid">
-        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-payments')">
-          <div class="avatar" style="background: var(--accent-violet);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+    // Hide sidebars since they shouldn't access other pages yet
+    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+    navItems.forEach(item => {
+      if (item.getAttribute('data-page') !== 'student-portal') {
+        item.style.display = 'none';
+      }
+    });
+
+    // We must manually trigger initAdmissionsUI logic for dropdowns since we are in the student portal view
+    import("./admissionService.js").then(({ fetchPlansForDropdown, submitAdmission }) => {
+      window.submitAdmission = submitAdmission;
+      fetchPlansForDropdown(true).then(plans => {
+        window.availablePlansList = plans;
+        const planSelect = document.getElementById("adm-plan");
+        if (planSelect) {
+          let html = "<option value=''>Choose plan</option>";
+          plans.forEach(p => { html += `<option value="${p.id}">${p.planName} - ₹${p.price}</option>`; });
+          planSelect.innerHTML = html;
+        }
+      });
+    });
+
+    import("firebase/firestore").then(({ collection, query, where, getDocs }) => {
+      import("../firebase/firebase.js").then(({ db }) => {
+        const q = query(collection(db, "seats"), where("status", "==", "Available"));
+        getDocs(q).then(snap => {
+          const seatSelect = document.getElementById("adm-seat");
+          if (seatSelect) {
+            let html = `<option value=''>${snap.size} available</option>`;
+            snap.forEach(doc => { const st = doc.data(); html += `<option value="${st.seatNumber}">${st.seatNumber}</option>`; });
+            seatSelect.innerHTML = html;
+          }
+        });
+      });
+    });
+    
+    // Add logic for modal flow
+    window.showPaymentModal = () => {
+      const modal = document.getElementById("payment-modal");
+      document.getElementById("payment-step-1").style.display = "block";
+      document.getElementById("payment-step-2").style.display = "none";
+      
+      const amount = document.getElementById("summary-amount").innerText;
+      document.getElementById("payment-modal-amount").innerText = amount;
+      
+      modal.showModal();
+    };
+
+    window.showPaymentStep2 = () => {
+      document.getElementById("payment-step-1").style.display = "none";
+      document.getElementById("payment-step-2").style.display = "block";
+      
+      import("./documentUploadService.js").then(({ initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments }) => {
+        window.getSelectedDocumentFiles = getSelectedDocumentFiles;
+        window.uploadAdmissionDocuments = uploadAdmissionDocuments;
+        initDocumentUploads("modal-doc-upload-section");
+        // Hide aadhar uploads, only show selfie but repurposed as screenshot
+        setTimeout(() => {
+          const d1 = document.getElementById('doc-card-aadhaarFront');
+          const d2 = document.getElementById('doc-card-aadhaarBack');
+          const d3 = document.getElementById('doc-card-selfie');
+          if (d1) d1.style.display = 'none';
+          if (d2) d2.style.display = 'none';
+          if (d3) {
+            d3.style.gridColumn = "1 / -1";
+            const lbl = d3.querySelector('div[style*="font-size:12px"]');
+            if (lbl) lbl.textContent = "Payment Screenshot (Optional)";
+            const icon = d3.querySelector('div[style*="font-size:1.5rem"]');
+            if (icon) icon.textContent = "🧾";
+          }
+        }, 100);
+      });
+    };
+
+    window.submitSelfAdmission = async (paymentMethod) => {
+      let txnId = "";
+      let paymentScreenshotUrl = "";
+      
+      try {
+        if (paymentMethod === "Paid") {
+          txnId = document.getElementById("modal-txnid").value;
+          if (!txnId) return window.showToast("Please enter Transaction ID.", "warning");
+          
+          // Optional file upload handling
+          const btn = document.getElementById("btn-modal-paid");
+          btn.innerHTML = "Uploading & Submitting...";
+          btn.disabled = true;
+
+          if (window.getSelectedDocumentFiles && window.uploadAdmissionDocuments) {
+            const files = window.getSelectedDocumentFiles();
+            if (files.selfie) {
+               const urlMap = await window.uploadAdmissionDocuments({ selfie: files.selfie }, s.id);
+               paymentScreenshotUrl = urlMap.selfieUrl || "";
+            }
+          }
+        } else {
+          const btn = document.querySelector("#payment-step-1 button.btn-ghost");
+          btn.innerHTML = "Submitting...";
+          btn.disabled = true;
+        }
+
+        // Collect form data
+        const planEl = document.getElementById("adm-plan");
+        const seatEl = document.getElementById("adm-seat");
+        const planId = planEl.value;
+        const plan = (window.availablePlansList || []).find(p => p.id === planId);
+
+        const data = {
+          name: document.getElementById("adm-name").value,
+          phone: document.getElementById("adm-phone").value,
+          email: (document.getElementById("adm-email")?.value || "").trim().toLowerCase(),
+          dob: document.getElementById("adm-dob")?.value || "",
+          gender: document.getElementById("adm-gender")?.value || "",
+          parentPhone: document.getElementById("adm-parent-phone")?.value || "",
+          college: document.getElementById("adm-college")?.value || "",
+          course: document.getElementById("adm-course")?.value || "",
+          address: document.getElementById("adm-address")?.value || "",
+          planId: planId,
+          planName: plan ? plan.planName : "",
+          seatAssigned: seatEl.value || "",
+          paymentMethod: paymentMethod,
+          transactionId: txnId,
+          paymentScreenshotUrl: paymentScreenshotUrl,
+          termsAccepted: true
+        };
+        
+        if (paymentMethod === "Pay Later") {
+          const d = new Date();
+          d.setDate(d.getDate() + 3); // Default 3 days for pay later
+          data.paymentDueDate = d.toISOString().split('T')[0];
+        }
+
+        if (window.submitAdmission) {
+          const res = await window.submitAdmission(data, true);
+          if (res.success) {
+            if (paymentMethod === "Paid") {
+              window.showToast("Payment verified! You are now admitted and will be redirected to your dashboard.", "success");
+            } else {
+              window.showToast("Admission request submitted successfully and is Pending Approval!", "success");
+            }
+            document.getElementById("payment-modal").close();
+            window.location.reload(); // reload to show pending or active state
+          } else {
+            window.showToast("Error: " + res.error, "error");
+            document.getElementById("payment-modal").close();
+            if (paymentMethod === "Paid") {
+              const btn = document.getElementById("btn-modal-paid");
+              btn.innerHTML = "Mark as Paid & Submit";
+              btn.disabled = false;
+            } else {
+              const btn = document.querySelector("#payment-step-1 button.btn-ghost");
+              btn.innerHTML = "Pay Later";
+              btn.disabled = false;
+            }
+          }
+        }
+      } catch (err) {
+        window.showToast("An unexpected error occurred: " + err.message, "error");
+        if (paymentMethod === "Paid") {
+          const btn = document.getElementById("btn-modal-paid");
+          if(btn) { btn.innerHTML = "Mark as Paid & Submit"; btn.disabled = false; }
+        } else {
+          const btn = document.querySelector("#payment-step-1 button.btn-ghost");
+          if(btn) { btn.innerHTML = "Pay Later"; btn.disabled = false; }
+        }
+      }
+    };
+    
+  } else if (s._isPendingAdmission) {
+    // Pending admission state
+    portalSection.innerHTML = `
+      <div class="page-header" style="margin-bottom: 1.5rem; justify-content: center; text-align: center;">
+        <div>
+          <h1 style="color: var(--warning);">Admission Pending Approval</h1>
+          <p class="page-subtitle" style="margin-top: 0.5rem;">Your admission details have been submitted and are waiting for admin approval. Please check back later or contact the desk.</p>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: center;">
+        <div class="card" style="padding: 2rem; max-width: 500px; text-align: center; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
+           <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+           <h3 style="margin-bottom: 1rem; color: #0f172a;">What's next?</h3>
+           <ul style="text-align: left; color: #475569; font-size: 0.95rem; line-height: 1.5; padding-left: 1.5rem;">
+             <li>The admin will verify your details and payment.</li>
+             <li>Once approved, you will get access to the portal.</li>
+             <li>If you chose "Pay Later", please visit the desk, or pay online below.</li>
+           </ul>
+           <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="window.showPendingPaymentModal()">Pay Now Online</button>
+        </div>
+      </div>
+
+      <!-- Payment Modal for Pending State -->
+      <dialog id="pending-payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 450px; margin: auto;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Pay Now</h2>
+          <button onclick="document.getElementById('pending-payment-modal').close()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        
+        <!-- Step 2: Pay Now Form (Directly) -->
+        <div id="pending-payment-step-2" style="padding: 1.5rem;">
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+            <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay</div>
+          </div>
+          <div class="form-group">
+            <label>Transaction ID *</label>
+            <input type="text" id="pending-modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div id="pending-modal-doc-upload-section"></div>
+          </div>
+          <button class="btn btn-primary" id="btn-pending-modal-paid" onclick="window.submitPendingPayment()" style="width: 100%;">Mark as Paid & Submit</button>
+        </div>
+      </dialog>
+    `;
+
+    window.showPendingPaymentModal = () => {
+      document.getElementById('pending-payment-modal').showModal();
+      import("./documentUploadService.js").then(({ initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments }) => {
+        window.getSelectedDocumentFiles = getSelectedDocumentFiles;
+        window.uploadAdmissionDocuments = uploadAdmissionDocuments;
+        initDocumentUploads("pending-modal-doc-upload-section");
+        setTimeout(() => {
+          const d1 = document.getElementById('doc-card-aadhaarFront');
+          const d2 = document.getElementById('doc-card-aadhaarBack');
+          const d3 = document.getElementById('doc-card-selfie');
+          if (d1) d1.style.display = 'none';
+          if (d2) d2.style.display = 'none';
+          if (d3) {
+            d3.style.gridColumn = "1 / -1";
+            const lbl = d3.querySelector('div[style*="font-size:12px"]');
+            if (lbl) lbl.textContent = "Payment Screenshot (Optional)";
+            const icon = d3.querySelector('div[style*="font-size:1.5rem"]');
+            if (icon) icon.textContent = "🧾";
+          }
+        }, 100);
+      });
+    };
+
+    window.submitPendingPayment = async () => {
+        const txnId = document.getElementById("pending-modal-txnid").value;
+        if (!txnId) return window.showToast("Please enter Transaction ID.", "warning");
+        
+        const btn = document.getElementById("btn-pending-modal-paid");
+        btn.innerHTML = "Uploading & Submitting...";
+        btn.disabled = true;
+
+        let paymentScreenshotUrl = "";
+        if (window.getSelectedDocumentFiles && window.uploadAdmissionDocuments) {
+          const files = window.getSelectedDocumentFiles();
+          if (files.selfie) {
+             const urlMap = await window.uploadAdmissionDocuments({ selfie: files.selfie }, s.id);
+             paymentScreenshotUrl = urlMap.selfieUrl || "";
+          }
+        }
+
+        import("./admissionService.js").then(async ({ updateAdmissionPayment }) => {
+           const res = await updateAdmissionPayment(s.id, txnId, paymentScreenshotUrl);
+           if (res.success) {
+               window.showToast("Payment details updated successfully!", "success");
+               document.getElementById("pending-payment-modal").close();
+               window.location.reload();
+           } else {
+               window.showToast("Error: " + res.error, "error");
+               btn.innerHTML = "Mark as Paid & Submit";
+               btn.disabled = false;
+           }
+        });
+    };
+    
+    // Hide sidebars since they shouldn't access other pages yet
+    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+    navItems.forEach(item => {
+      if (item.getAttribute('data-page') !== 'student-portal') {
+        item.style.display = 'none';
+      }
+    });
+
+  } else {
+    // Normal active student dashboard
+    
+    // Restore sidebars for active students
+    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+    navItems.forEach(item => {
+      const dp = item.getAttribute('data-page');
+      const allowedForStudent = ["student-portal", "student-payments", "student-attendance", "student-complaints", "student-profile", "notifications", "settings"];
+      if (allowedForStudent.includes(dp)) {
+        item.style.display = 'flex';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    portalSection.innerHTML = `
+      <div class="page-header">
+        <div>
+          <h1>Welcome back, ${s.name}</h1>
+          <p class="page-subtitle">Here is your personal study portal.</p>
+        </div>
+        <div style="display:flex; gap:1rem;">
+          ${attendanceActionHtml}
+        </div>
+      </div>
+
+      <!-- Top Dashboard Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card" style="align-items: center;">
+          <div class="metric-icon violet" style="border-radius: 50%; font-weight: bold;">${initials}</div>
           <div>
-            <h4 style="margin: 0;">Payments & Renewals</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Submit payments and view history</div>
+            <div class="metric-label">Membership Plan</div>
+            <div class="metric-value" style="font-size: 1.1rem;">${s.planName || 'None'}</div>
           </div>
         </div>
-        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-attendance')">
-          <div class="avatar" style="background: var(--success);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="metric-card" style="align-items: center;">
+          <div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
           <div>
-            <h4 style="margin: 0;">Attendance</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">View check-ins and hours</div>
+            <div class="metric-label">Seat Number</div>
+            <div class="metric-value">${s.seatNumber || 'Unassigned'}</div>
           </div>
         </div>
-        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-complaints')">
-          <div class="avatar" style="background: var(--danger);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="metric-card" style="align-items: center;">
+          <div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
           <div>
-            <h4 style="margin: 0;">Complaints</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Report issues and track status</div>
+            <div class="metric-label">Status</div>
+            <div class="metric-value">${s.status || 'Pending'}</div>
           </div>
         </div>
-        <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-profile')">
-          <div class="avatar" style="background: var(--primary);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="metric-card" style="align-items: center;">
+          <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
           <div>
-            <h4 style="margin: 0;">My Profile</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Update personal information</div>
+            <div class="metric-label">Days Remaining</div>
+            <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} Days</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Due: ${s.paymentDueDate || 'N/A'}</div>
           </div>
         </div>
       </div>
-    </div>
-  `;
+      
+      <div style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Quick Links</h3>
+        <div class="dashboard-grid">
+          <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-payments')">
+            <div class="avatar" style="background: var(--accent-violet);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div>
+              <h4 style="margin: 0;">Payments & Renewals</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Submit payments and view history</div>
+            </div>
+          </div>
+          <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-attendance')">
+            <div class="avatar" style="background: var(--success);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div>
+              <h4 style="margin: 0;">Attendance</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">View check-ins and hours</div>
+            </div>
+          </div>
+          <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-complaints')">
+            <div class="avatar" style="background: var(--danger);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div>
+              <h4 style="margin: 0;">Complaints</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Report issues and track status</div>
+            </div>
+          </div>
+          <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-profile')">
+            <div class="avatar" style="background: var(--primary);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div>
+              <h4 style="margin: 0;">My Profile</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Update personal information</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   // 2. PAYMENTS PAGE
   document.getElementById("page-student-payments").innerHTML = `

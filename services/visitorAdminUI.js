@@ -215,9 +215,10 @@ const renderVisitors = (canEdit, canDelete) => {
   };
 
   window.handleDeleteVisitor = async (id) => {
-    if (confirm("Delete this visitor record?")) {
+    const confirmed = await window.showCustomConfirm("Delete Visitor", "Delete this visitor record?", "Delete", true);
+    if (confirmed) {
       const res = await deleteVisitor(id);
-      if (!res.success) alert(res.error);
+      if (!res.success) window.showToast(res.error, "error");
     }
   };
 
@@ -254,7 +255,7 @@ const renderVisitors = (canEdit, canDelete) => {
 
 const handleAddVisitor = async () => {
   if (allPurposes.length === 0) {
-    return alert("No purposes available.");
+    return window.showToast("No purposes available.", "warning");
   }
 
   // Populate purposes dropdown
@@ -283,7 +284,7 @@ window.submitVisitorForm = async () => {
   const remarks = document.getElementById("add-vis-remarks").value.trim();
 
   if (!name || !phone || !purpose || !employeeName) {
-    alert("Please fill in all required fields.");
+    window.showToast("Please fill in all required fields.", "warning");
     return;
   }
 
@@ -307,7 +308,7 @@ window.submitVisitorForm = async () => {
   btn.disabled = false;
 
   if (!res.success) {
-    alert("Error: " + res.error);
+    window.showToast("Error: " + res.error, "error");
   } else {
     document.getElementById("add-visitor-modal").close();
     if(typeof showToast === 'function') showToast("Visitor added successfully!");

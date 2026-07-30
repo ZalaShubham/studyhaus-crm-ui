@@ -95,7 +95,7 @@ export const handleRegister = async (fullName, email, password, role, studentDat
         email: email,
         name: fullName,
         role: role,
-        status: "Active",
+        status: "Active", // Let them be active in users collection, studentPortalService handles the rest
         createdAt: new Date().toISOString(),
       };
       

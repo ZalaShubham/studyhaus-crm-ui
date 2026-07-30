@@ -21,7 +21,7 @@ export const replacePlaceholders = (templateString, studentData) => {
  */
 export const sendWhatsAppMessage = async (studentData, templateName, rawMessage) => {
   if (!studentData.phone) {
-    alert("Error: Student phone number is missing.");
+    window.showToast("Error: Student phone number is missing.", "error");
     return false;
   }
 

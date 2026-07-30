@@ -49,6 +49,7 @@ service cloud.firestore {
     match /students/{studentId} {
       allow read: if isStaff() || isOwnStudentRecord();
       allow write: if isOwnerOrAdmin() || isManager();
+      allow create: if isLoggedIn() && request.auth.uid == studentId;
     }
 
     match /oldStudents/{studentId} {
@@ -58,6 +59,7 @@ service cloud.firestore {
 
     match /admissions/{admissionId} {
       allow read, write: if isStaff();
+      allow read, write: if isLoggedIn() && request.auth.uid == admissionId;
     }
 
     match /payments/{paymentId} {

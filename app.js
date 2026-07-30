@@ -98,7 +98,16 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = 'toast toast-' + type;
   toast.textContent = message;
+  
+  if (typeof toast.showPopover === 'function') {
+    toast.setAttribute('popover', 'manual');
+  }
+  
   document.body.appendChild(toast);
+  
+  if (typeof toast.showPopover === 'function') {
+    toast.showPopover();
+  }
 
   // Animate in
   setTimeout(() => toast.classList.add('toast-visible'), 10);
@@ -113,14 +122,15 @@ function showToast(message, type = 'success') {
 const toastStyles = document.createElement('style');
 toastStyles.textContent = `
   .toast {
-    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
-    padding: 0.75rem 1.25rem; border-radius: 10px;
+    position: fixed; top: auto; left: auto; bottom: 1.5rem; right: 1.5rem; z-index: 99999;
+    padding: 0.75rem 1.25rem; border-radius: 10px; border: none;
     font-size: 13.5px; font-weight: 600; color: #fff;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    transform: translateY(20px); opacity: 0;
+    transform: translateY(20px); opacity: 0; margin: 0;
     transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     max-width: 320px;
   }
+
   .toast-visible { transform: translateY(0); opacity: 1; }
   .toast-success { background: #10b981; }
   .toast-info    { background: #3b82f6; }
@@ -143,6 +153,81 @@ window.alert = function(msg) {
   }
   
   window.showToast(msg, type);
+};
+
+// ==================== CUSTOM MODALS ====================
+if (!document.getElementById('modal-styles')) {
+  const modalStyles = document.createElement('style');
+  modalStyles.id = 'modal-styles';
+  modalStyles.textContent = `
+    @keyframes smoothPopup {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .smooth-modal {
+      animation: smoothPopup 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .smooth-modal::backdrop {
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  `;
+  document.head.appendChild(modalStyles);
+}
+
+window.showCustomConfirm = (title, message, confirmText = "Confirm", isDanger = false) => {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "card smooth-modal";
+    dialog.style.cssText = "border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a); max-width: 400px; margin: auto;";
+    dialog.innerHTML = `
+      <div style="padding: 1.5rem; text-align: center;">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">${title}</h3>
+        <p style="color: var(--text-secondary, #475569); margin-bottom: 1.5rem; font-size: 0.95rem;">${message}</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <button class="btn btn-ghost" id="confirm-cancel" style="flex: 1; border: 1px solid var(--border, #e2e8f0); border-radius: 999px;">Cancel</button>
+          <button class="btn btn-primary" id="confirm-ok" style="flex: 1; border: none; border-radius: 999px; color: #fff; ${isDanger ? 'background: #f43f5e;' : 'background: #0f172a;'}">${confirmText}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+    dialog.showModal();
+    dialog.querySelector("#confirm-cancel").onclick = () => { dialog.close(); dialog.remove(); resolve(false); };
+    dialog.querySelector("#confirm-ok").onclick = () => { dialog.close(); dialog.remove(); resolve(true); };
+  });
+};
+
+window.showCustomPrompt = (title, message, confirmText = "Submit", isDanger = false) => {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "card smooth-modal";
+    dialog.style.cssText = "border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a); max-width: 400px; margin: auto;";
+    dialog.innerHTML = `
+      <div style="padding: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; text-align: center;">${title}</h3>
+        <p style="color: var(--text-secondary, #475569); margin-bottom: 1rem; font-size: 0.95rem; text-align: center;">${message}</p>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <input type="text" id="prompt-input" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" autofocus />
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <button class="btn btn-ghost" id="prompt-cancel" style="flex: 1; border: 1px solid var(--border, #e2e8f0); border-radius: 999px;">Cancel</button>
+          <button class="btn btn-primary" id="prompt-ok" style="flex: 1; border: none; border-radius: 999px; color: #fff; ${isDanger ? 'background: #f43f5e;' : 'background: #0f172a;'}">${confirmText}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+    dialog.showModal();
+    dialog.querySelector("#prompt-cancel").onclick = () => { dialog.close(); dialog.remove(); resolve(null); };
+    dialog.querySelector("#prompt-ok").onclick = () => {
+      const val = dialog.querySelector("#prompt-input").value;
+      dialog.close(); dialog.remove(); resolve(val);
+    };
+  });
 };
 
 // ==================== TASK CHECKBOXES ====================

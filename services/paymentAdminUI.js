@@ -137,18 +137,19 @@ export const initPaymentAdminUI = () => {
 
   // Global Actions for buttons
   window.handleApprovePayment = async (id) => {
-    if (!confirm("Are you sure you want to APPROVE this payment? This will update their due date.")) return;
+    const confirmed = await window.showCustomConfirm("Approve Payment", "Are you sure you want to APPROVE this payment? This will update their due date.");
+    if (!confirmed) return;
     const approver = localStorage.getItem("userName") || "Admin";
     const res = await approvePayment(id, approver);
-    if (!res.success) alert("Error approving payment: " + res.error);
+    if (!res.success) window.showToast("Error approving payment: " + res.error, "error");
   };
 
   window.handleRejectPayment = async (id) => {
-    const remark = prompt("Please enter a reason for rejection:");
+    const remark = await window.showCustomPrompt("Reject Payment", "Please enter a reason for rejection:", "Reject", true);
     if (remark === null) return; // cancelled
     const approver = localStorage.getItem("userName") || "Admin";
     const res = await rejectPayment(id, approver, remark);
-    if (!res.success) alert("Error rejecting payment: " + res.error);
+    if (!res.success) window.showToast("Error rejecting payment: " + res.error, "error");
   };
 
   window.submitReceivePayment = async () => {
@@ -159,7 +160,7 @@ export const initPaymentAdminUI = () => {
     const transactionId = document.getElementById("rec-pay-txn").value.trim();
 
     if (!studentName || !planName || !amount) {
-      alert("Please fill in all required fields.");
+      window.showToast("Please fill in all required fields.", "warning");
       return;
     }
 
@@ -189,7 +190,7 @@ export const initPaymentAdminUI = () => {
       document.getElementById("receive-payment-form").reset();
       if(typeof showToast === 'function') showToast("Payment received successfully!");
     } else {
-      alert("Error: " + res.error);
+      window.showToast("Error: " + res.error, "error");
     }
   };
 

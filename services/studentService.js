@@ -1,4 +1,4 @@
-import { collection, doc, updateDoc, onSnapshot, getDocs, query, where, serverTimestamp } from "firebase/firestore";
+import { collection, doc, updateDoc, onSnapshot, getDocs, query, where, serverTimestamp, getDoc, addDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
 /**
@@ -69,6 +69,63 @@ export const updateStudentProfile = async (studentId, updates) => {
     await validateStudentUpdate(studentId, updates);
     updates.updatedAt = serverTimestamp();
     const docRef = doc(db, "students", studentId);
+    
+    // Check if seatNumber is being updated
+    if (updates.seatNumber !== undefined) {
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const oldData = snap.data();
+        if (oldData.seatNumber !== updates.seatNumber) {
+          const seatsRef = collection(db, "seats");
+          
+          // 1. Release old seat
+          if (oldData.seatNumber) {
+            const qOld = query(seatsRef, where("seatNumber", "==", oldData.seatNumber));
+            const oldSnap = await getDocs(qOld);
+            if (!oldSnap.empty) {
+              await updateDoc(doc(db, "seats", oldSnap.docs[0].id), {
+                status: "Available",
+                assignedStudentId: null,
+                assignedStudentName: null,
+                planType: null,
+                lastUpdated: serverTimestamp()
+              });
+            }
+          }
+          
+          // 2. Reserve new seat
+          if (updates.seatNumber) {
+            const qNew = query(seatsRef, where("seatNumber", "==", updates.seatNumber));
+            const newSnap = await getDocs(qNew);
+            if (!newSnap.empty) {
+              await updateDoc(doc(db, "seats", newSnap.docs[0].id), {
+                status: "Reserved",
+                assignedStudentId: studentId,
+                assignedStudentName: updates.name || oldData.name || "Unknown",
+                planType: updates.planName || oldData.planName || "Unknown",
+                lastUpdated: serverTimestamp()
+              });
+            } else {
+              // Create the seat if it doesn't exist
+              let floor = "Ground Floor";
+              if (updates.seatNumber.startsWith("B")) floor = "First Floor";
+              if (updates.seatNumber.startsWith("C")) floor = "Second Floor";
+              
+              await addDoc(seatsRef, {
+                seatNumber: updates.seatNumber,
+                floor: floor,
+                status: "Reserved",
+                assignedStudentId: studentId,
+                assignedStudentName: updates.name || oldData.name || "Unknown",
+                planType: updates.planName || oldData.planName || "Unknown",
+                lastUpdated: serverTimestamp()
+              });
+            }
+          }
+        }
+      }
+    }
+
     await updateDoc(docRef, updates);
     return { success: true };
   } catch (error) {

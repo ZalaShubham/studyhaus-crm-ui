@@ -20,7 +20,7 @@ const reportTitles = {
 export const openReportViewer = async (type) => {
   const role = localStorage.getItem("userRole");
   if (role === "Employee" && type === "dashboard") {
-    return alert("Permission Denied.");
+    return window.showToast("Permission Denied.", "error");
   }
 
   currentReportType = type;
@@ -58,7 +58,7 @@ window.handleReportFilterChange = async () => {
 
 window.handleReportExport = async (format) => {
   if (!currentReportData || currentReportData.rows.length === 0) {
-    return alert("No data to export.");
+    return window.showToast("No data to export.", "warning");
   }
   const title = reportTitles[currentReportType] || "Report";
   const filename = `${currentReportType}_report_${new Date().getTime()}`;

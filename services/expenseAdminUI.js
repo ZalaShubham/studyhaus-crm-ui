@@ -229,7 +229,7 @@ export const initExpenseAdminUI = () => {
         modal.style.display = "none";
         form.reset();
       } else {
-        alert("Failed to add expense: " + res.error);
+        window.showToast("Failed to add expense: " + res.error, "error");
       }
     });
   }

@@ -4,7 +4,7 @@
  */
 export const exportToCSV = (data, filename = "expenses_export.csv") => {
   if (!data || data.length === 0) {
-    alert("No data to export.");
+    window.showToast("No data to export.", "warning");
     return;
   }
 
@@ -46,7 +46,7 @@ export const exportToCSV = (data, filename = "expenses_export.csv") => {
  */
 export const exportToPDF = (data, filename = "Expenses_Report") => {
   if (!data || data.length === 0) {
-    alert("No data to export.");
+    window.showToast("No data to export.", "warning");
     return;
   }
 

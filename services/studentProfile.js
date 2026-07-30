@@ -324,13 +324,13 @@ window.submitStudentEdit = async (id) => {
     };
     const res = await updateStudentProfile(id, updates);
     if (res.success) {
-      alert("Profile updated successfully!");
+      window.showToast("Profile updated successfully!", "success");
       window.closeStudentProfile();
     } else {
-      alert("Error: " + res.error);
+      window.showToast("Error: " + res.error, "error");
     }
   } catch (e) {
-    alert("Error saving profile: " + e.message);
+    window.showToast("Error saving profile: " + e.message, "error");
   } finally {
     btn.textContent = "Save Changes";
     btn.disabled = false;
@@ -376,13 +376,14 @@ window.loadRenewalHistory = (studentId) => {
 };
 
 window.triggerSoftDelete = async (id) => {
-  if (confirm("Are you sure you want to delete this student? They will be moved to Old Students.")) {
+  const confirmed = await window.showCustomConfirm("Delete Student", "Are you sure you want to delete this student? They will be moved to Old Students.", "Delete", true);
+  if (confirmed) {
     const res = await softDeleteStudent(id);
     if (res.success) {
-      alert("Student deleted.");
+      window.showToast("Student deleted.", "success");
       window.closeStudentProfile();
     } else {
-      alert("Error: " + res.error);
+      window.showToast("Error: " + res.error, "error");
     }
   }
 };
@@ -407,14 +408,14 @@ window.triggerWhatsAppModal = (id) => {
 };
 
 window.handleConvertToOld = async (id, name) => {
-  const reason = prompt(`Convert ${name} to Old Student?\n\nEnter Reason (e.g., Membership Completed, Shifted, Left):`, "Membership Completed");
+  const reason = await window.showCustomPrompt("Convert to Old Student", `Convert ${name} to Old Student?<br><br>Enter Reason (e.g., Membership Completed, Shifted, Left):`, "Convert");
   if (reason) {
     const res = await convertToOldStudent(id, reason);
     if (res.success) {
-      alert(`${name} has been moved to Old Students.`);
+      window.showToast(`${name} has been moved to Old Students.`, "success");
       window.closeStudentProfile();
     } else {
-      alert("Error: " + res.error);
+      window.showToast("Error: " + res.error, "error");
     }
   }
 };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — Studyhaus CRM</title>
+  <title>Student Login — Studyhaus</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -13,14 +13,15 @@
     
     .auth-logo { text-align: center; margin-bottom: 2rem; }
     .auth-logo-flex { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
-    .auth-logo-icon { width: 34px; height: 34px; background: #17539a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
+    .auth-logo-icon { width: 34px; height: 34px; background: #059669; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
     .auth-logo-text { font-weight: 700; font-size: 1.25rem; color: #0f172a; }
     .auth-logo-sub { font-size: 0.85rem; color: #64748b; }
 
     .auth-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.02); width: 100%; border: 1px solid #e2e8f0; padding: 2rem; }
     .auth-title { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
     .auth-desc { font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.4; }
-    .auth-desc a { color: #64748b; text-decoration: underline; }
+    .auth-desc a { color: #059669; text-decoration: none; font-weight: 500; }
+    .auth-desc a:hover { text-decoration: underline; }
 
     .auth-tabs { display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-bottom: 1.5rem; }
     .auth-tab { flex: 1; text-align: center; font-size: 0.85rem; font-weight: 500; color: #64748b; padding: 8px 12px; border-radius: 6px; text-decoration: none; transition: all 0.2s; }
@@ -29,17 +30,17 @@
     .form-group { margin-bottom: 1.25rem; }
     .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #0f172a; margin-bottom: 8px; }
     .form-group input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: inherit; font-size: 0.9rem; color: #0f172a; outline: none; transition: border-color 0.2s, background 0.2s; }
-    .form-group input:focus { border-color: #94a3b8; background: white; }
+    .form-group input:focus { border-color: #059669; background: white; }
     .form-group input::placeholder { color: #94a3b8; }
 
-    .btn-submit { width: 100%; background: #111827; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-    .btn-submit:hover { background: #1f2937; }
+    .btn-submit { width: 100%; background: #059669; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: #047857; }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
     #error-message { color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; display: none; text-align: center; background: #fef2f2; border: 1px solid #fca5a5; padding: 8px; border-radius: 6px; }
     
     #global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
-    .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #111827; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #059669; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -54,29 +55,31 @@
       <div class="auth-logo-flex">
         <div class="auth-logo-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+            <path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
           </svg>
         </div>
         <div class="auth-logo-text">Studyhaus</div>
       </div>
-      <div class="auth-logo-sub">Admin portal</div>
+      <div class="auth-logo-sub">Student Portal</div>
     </div>
 
     <div class="auth-card">
-      <h1 class="auth-title">Sign in to your workspace</h1>
-      <p class="auth-desc">Owners, managers and staff only. Students use the <a href="student-login.html">student portal</a>.</p>
+      <h1 class="auth-title">Sign in to your account</h1>
+      <p class="auth-desc">Staff and managers, please use the <a href="login.html">admin portal</a>.</p>
 
       <div class="auth-tabs">
-        <a href="login.html" class="auth-tab active">Sign in</a>
-        <a href="register.html" class="auth-tab">Create account</a>
+        <a href="student-login.html" class="auth-tab active">Sign in</a>
+        <a href="student-register.html" class="auth-tab">Create account</a>
       </div>
 
       <div id="error-message"></div>
 
       <form id="login-form">
         <div class="form-group">
-          <label>Work email</label>
-          <input type="email" id="email" required placeholder="name@studyhaus.com" />
+          <label>Email address</label>
+          <input type="email" id="email" required placeholder="student@example.com" />
         </div>
         <div class="form-group">
           <label>Password</label>

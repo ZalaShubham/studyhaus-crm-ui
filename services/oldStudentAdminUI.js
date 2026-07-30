@@ -113,9 +113,10 @@ const renderOldStudents = (canRestore) => {
   }
 
   window.handleRestoreStudent = async (id, name) => {
-    if (confirm(`Restore ${name} to Active Students?\n\nThey will be restored without an assigned seat.`)) {
+    const confirmed = await window.showCustomConfirm("Restore Student", `Restore ${name} to Active Students?<br><br>They will be restored without an assigned seat.`);
+    if (confirmed) {
       const res = await restoreOldStudent(id);
-      if (!res.success) alert("Error restoring student: " + res.error);
+      if (!res.success) window.showToast("Error restoring student: " + res.error, "error");
     }
   };
 
