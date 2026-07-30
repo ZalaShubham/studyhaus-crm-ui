@@ -10,7 +10,8 @@ import { getAuth } from "firebase/auth";
  */
 export const fetchPlansForDropdown = async (isStudent) => {
   const plansRef = collection(db, "membershipPlans");
-  const q = isStudent ? query(plansRef, where("isManual", "==", false)) : plansRef;
+  // Fetch all plans so student sign up sees everything created in admin
+  const q = plansRef;
   const snapshot = await getDocs(q);
   
   const plans = [];
