@@ -64,7 +64,6 @@ export const initSeatMapUI = async () => {
     <div class="floor-tabs" style="display:inline-flex; gap:0.5rem; background:#f1f5f9; padding:4px; border-radius:999px; margin-bottom:1.5rem;">
       <button class="floor-tab active" data-floor="Ground Floor" style="border:none; background:#fff; color:#0f172a; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05);">Ground Floor</button>
       <button class="floor-tab" data-floor="First Floor" style="border:none; background:transparent; color:#475569; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer;">First Floor</button>
-      <button class="floor-tab" data-floor="Second Floor" style="border:none; background:transparent; color:#475569; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer;">Second Floor</button>
     </div>
 
     <!-- Main Floor Card -->
@@ -408,7 +407,7 @@ const updateSeatAnalysis = (seats) => {
 
     if (currentFilters.floor === "First Floor") {
       html = `
-        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+        <div style="background: #fff; padding: 3rem 2rem 3rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
           <!-- Door -->
           <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             DOOR
@@ -416,13 +415,23 @@ const updateSeatAnalysis = (seats) => {
           
           <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 800px; margin: 0 auto;">
             ${renderColHtml(generateRange('B', 1, 10))}
-            ${renderColHtml(generateRange('B', 11, 20))}
+            ${renderColHtml(generateRange('B', 20, 11))}
             
             <!-- Middle aisle -->
             <div style="width: 40px; flex-shrink: 0;"></div>
 
             ${renderColHtml(generateRange('B', 21, 30))}
-            ${renderColHtml(generateRange('B', 31, 40))}
+            ${renderColHtml(generateRange('B', 40, 31))}
+          </div>
+
+          <!-- Toilets -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
+            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
+              TOILET
+            </div>
+            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
+              TOILET
+            </div>
           </div>
         </div>
       `;
@@ -435,47 +444,26 @@ const updateSeatAnalysis = (seats) => {
           </div>
           
           <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto; align-items: flex-start;">
-            ${renderColHtml(generateRange('A', 1, 18))}
-            ${renderColHtml(generateRange('A', 19, 34))}
+            ${renderColHtml(generateRange('A', 1, 17))}
+            ${renderColHtml(generateRange('A', 34, 18))}
             
-            <!-- Middle section with seats 67 and 68 -->
+            <!-- Middle section with seats 63 to 68 -->
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 80px; flex-shrink: 0; align-self: center;">
+               ${renderSeatCard('A63')}
+               ${renderSeatCard('A64')}
+               ${renderSeatCard('A65')}
+               ${renderSeatCard('A66')}
                ${renderSeatCard('A67')}
                ${renderSeatCard('A68')}
             </div>
 
             ${renderColHtml(generateRange('A', 35, 48))}
-            ${renderColHtml(generateRange('A', 49, 66))}
-          </div>
-        </div>
-      `;
-    } else if (currentFilters.floor === "Second Floor") {
-      html = `
-        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
-          <!-- Door -->
-          <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-            DOOR
-          </div>
-          
-          <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto;">
-            ${renderColHtml(generateRange('C', 1, 8))}
-            ${renderColHtml(generateRange('C', 9, 16))}
-            
-            <!-- Aisle -->
-            <div style="width: 30px; flex-shrink: 0;"></div>
-
-            ${renderColHtml(generateRange('C', 17, 24))}
-
-            <!-- Aisle -->
-            <div style="width: 30px; flex-shrink: 0;"></div>
-
-            ${renderColHtml(generateRange('C', 25, 32))}
-            ${renderColHtml(generateRange('C', 33, 40))}
+            ${renderColHtml(generateRange('A', 62, 49))}
           </div>
         </div>
       `;
     } else {
-      // Fallback for Second Floor or other custom floors
+      // Fallback for other custom floors
       grid.style.display = "grid";
       grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(85px, 1fr))";
       grid.style.gap = "1rem";

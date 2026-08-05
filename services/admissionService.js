@@ -379,7 +379,7 @@ export const initAdmissionsUI = async () => {
 
           <div id="admin-payment-step-upi" style="display: none; padding: 1.5rem;">
             <div style="text-align: center; margin-bottom: 1.5rem;">
-              <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+              <img src="/payment-qr.jpeg" class="payment-qr-img" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
               <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay: <span style="color: var(--primary);">${amountText}</span></div>
             </div>
             <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -402,6 +402,17 @@ export const initAdmissionsUI = async () => {
       if (existing) existing.remove();
       document.body.insertAdjacentHTML('beforeend', modalHtml);
       document.getElementById("admin-payment-modal").showModal();
+      
+      // Fetch dynamic QR code
+      import("./settingsService.js").then(({ getSettings }) => {
+        getSettings().then(settings => {
+          if (settings.qrCodeUrl) {
+            document.querySelectorAll('.payment-qr-img').forEach(img => {
+              img.src = settings.qrCodeUrl;
+            });
+          }
+        });
+      });
       return;
     }
 
@@ -427,6 +438,15 @@ export const initAdmissionsUI = async () => {
         college: document.getElementById("adm-college")?.value || "",
         course: document.getElementById("adm-course")?.value || "",
         address: document.getElementById("adm-address")?.value || "",
+        remarks: document.getElementById("adm-remarks")?.value || "",
+        loginCredentials: (() => {
+          const id = document.getElementById("adm-login-id")?.value?.trim() || "";
+          const pass = document.getElementById("adm-login-pass")?.value?.trim() || "";
+          if (id && pass) return `${id} / ${pass}`;
+          if (id) return id;
+          if (pass) return pass;
+          return "";
+        })(),
         planId: planId,
         planName: plan ? plan.planName : "",
         seatAssigned: seatEl.value || "",

@@ -21,9 +21,9 @@ export const listenToOldStudents = (onUpdate, onError) => {
 
 /**
  * Converts an active student into an old student via Soft Delete.
- * Frees up their seat and records the exit reason.
+ * Frees up their seat and records the exit reason and job details.
  */
-export const convertToOldStudent = async (studentId, exitReason) => {
+export const convertToOldStudent = async (studentId, exitReason, jobDetails = "") => {
   try {
     const docRef = doc(db, "students", studentId);
     
@@ -35,8 +35,14 @@ export const convertToOldStudent = async (studentId, exitReason) => {
       seatNumber: "", // Release seat
       exitDate: exitDateStr,
       exitReason: exitReason,
+      jobDetails: jobDetails,
       updatedAt: serverTimestamp()
     });
+
+    try {
+      const userDocRef = doc(db, "users", studentId);
+      await updateDoc(userDocRef, { status: "Old", updatedAt: serverTimestamp() });
+    } catch(e) {}
 
     return { success: true };
   } catch (error) {
@@ -61,9 +67,31 @@ export const restoreOldStudent = async (studentId) => {
       updatedAt: serverTimestamp()
     });
 
+    try {
+      const userDocRef = doc(db, "users", studentId);
+      await updateDoc(userDocRef, { status: "Active", updatedAt: serverTimestamp() });
+    } catch(e) {}
+
     return { success: true };
   } catch (error) {
     console.error("Failed to restore student:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Updates the pending fee for an old student.
+ */
+export const updateOldStudentFee = async (studentId, amount) => {
+  try {
+    const docRef = doc(db, "students", studentId);
+    await updateDoc(docRef, {
+      pendingFee: parseFloat(amount) || 0,
+      updatedAt: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update pending fee:", error);
     return { success: false, error: error.message };
   }
 };

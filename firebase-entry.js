@@ -21,6 +21,7 @@ import { openReportViewer, closeReportViewer } from "./services/reportAdminUI.js
 import { initAnnouncementAdminUI } from "./services/announcementAdminUI.js";
 import { initStaffAdminUI } from "./services/staffAdminUI.js";
 import { initTasksAdminUI } from "./services/tasksAdminUI.js";
+import { initSettingsAdminUI } from "./services/settingsAdminUI.js";
 import "./services/whatsappModalUI.js"; // Auto-injects modal styles and functions
 
 // Expose the test function to the global window object
@@ -84,6 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initStaffAdminUI();
     // Initialize Tasks UI
     initTasksAdminUI();
+    // Initialize Settings Admin UI
+    initSettingsAdminUI();
   }
 });
 

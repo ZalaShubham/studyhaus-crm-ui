@@ -132,11 +132,29 @@ const renderTable = () => {
   }
 
   let html = "";
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
   processed.forEach(s => {
     const initials = s.name ? s.name.substring(0, 2).toUpperCase() : "??";
     const statusBadge = s.status === "Active" ? `<span class="badge badge-paid">Active</span>` 
                       : s.status === "Pending" || s.approvalStatus === "Pending" ? `<span class="badge badge-pending">Pending</span>`
                       : `<span class="badge badge-overdue">${s.status}</span>`;
+
+    let leavingDateHtml = `<span style="color:var(--text-muted);">N/A</span>`;
+    if (s.plannedExitDate) {
+      const exitD = new Date(s.plannedExitDate);
+      const diffTime = exitD - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays <= 3) {
+        leavingDateHtml = `<span class="badge" style="background:var(--danger); color:white; font-weight:600;">${s.plannedExitDate} (${diffDays < 0 ? 'Passed' : diffDays + 'd left'})</span>`;
+      } else if (diffDays <= 7) {
+        leavingDateHtml = `<span class="badge" style="background:var(--warning); color:white; font-weight:600;">${s.plannedExitDate} (${diffDays}d left)</span>`;
+      } else {
+        leavingDateHtml = `<span style="font-weight:500;">${s.plannedExitDate}</span>`;
+      }
+    }
 
     html += `
       <tr style="cursor:pointer;" onclick="window.openStudentProfile('${s.id}')">
@@ -153,6 +171,8 @@ const renderTable = () => {
         <td>${s.planName || "None"}</td>
         <td>${s.createdAt?.toDate ? new Date(s.createdAt.toDate()).toLocaleDateString() : 'N/A'}</td>
         <td>${s.paymentDueDate || "N/A"}</td>
+        <td>${leavingDateHtml}</td>
+        <td>${s.remarks || "-"}</td>
         <td>${statusBadge}</td>
         <td><button class="icon-btn-sm" onclick="event.stopPropagation(); window.openStudentProfile('${s.id}')">⋯</button></td>
       </tr>
@@ -253,7 +273,26 @@ const renderProfileModal = (s, role) => {
               <label>Emergency Contact</label>
               <input type="tel" id="edit-emergency" value="${s.parentPhone || ''}" ${!canEdit ? 'disabled' : ''} />
             </div>
+            <div class="form-group">
+              <label>Leaving Date (Optional)</label>
+              <input type="date" id="edit-leaving-date" value="${s.plannedExitDate || ''}" ${!canEdit ? 'disabled' : ''} />
+            </div>
             
+            <div class="form-group" style="grid-column: span 2;">
+              <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;" />
+            </div>
+
+            <div class="form-group">
+              <label>Remarks</label>
+              <input type="text" id="edit-remarks" value="${s.remarks || ''}" ${!canEdit ? 'disabled' : ''} />
+            </div>
+            ${isOwner ? `
+            <div class="form-group">
+              <label>Login Credentials (Admin view only)</label>
+              <input type="text" id="view-login-credentials" value="${s.loginCredentials || 'Loading...'}" readonly disabled style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;" />
+            </div>
+            ` : ''}
+
             <div class="form-group" style="grid-column: span 2;">
               <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;" />
             </div>
@@ -292,6 +331,24 @@ const renderProfileModal = (s, role) => {
   `;
   modal.showModal();
 
+  if (isOwner && !s.loginCredentials) {
+    import("./firestoreService.js").then(({ getDocument }) => {
+      getDocument("users", s.id).then(userDoc => {
+        const input = document.getElementById("view-login-credentials");
+        if (input) {
+          if (userDoc && userDoc.loginCredentials) {
+            input.value = userDoc.loginCredentials;
+          } else {
+            input.value = "Not set";
+          }
+        }
+      }).catch(() => {
+        const input = document.getElementById("view-login-credentials");
+        if (input) input.value = "Not set";
+      });
+    });
+  }
+
   if (s.selfieUrl) {
     loadStudentDocuments(s.id).then(docs => {
       if (docs && docs.selfie) {
@@ -321,6 +378,8 @@ window.submitStudentEdit = async (id) => {
       planName: planEl.options[planEl.selectedIndex]?.text || "",
       seatNumber: document.getElementById("edit-seat").value,
       status: document.getElementById("edit-status").value,
+      plannedExitDate: document.getElementById("edit-leaving-date").value,
+      remarks: document.getElementById("edit-remarks").value
     };
     const res = await updateStudentProfile(id, updates);
     if (res.success) {
@@ -407,15 +466,64 @@ window.triggerWhatsAppModal = (id) => {
   }
 };
 
-window.handleConvertToOld = async (id, name) => {
-  const reason = await window.showCustomPrompt("Convert to Old Student", `Convert ${name} to Old Student?<br><br>Enter Reason (e.g., Membership Completed, Shifted, Left):`, "Convert");
-  if (reason) {
-    const res = await convertToOldStudent(id, reason);
+window.handleConvertToOld = (id, name) => {
+  const dialog = document.createElement("dialog");
+  dialog.className = "card smooth-modal";
+  dialog.style.cssText = "border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a); max-width: 400px; margin: auto;";
+  
+  dialog.innerHTML = `
+    <div style="padding: 1.5rem;">
+      <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; text-align: center;">Convert to Old Student</h3>
+      <p style="color: var(--text-secondary, #475569); margin-bottom: 1.5rem; font-size: 0.95rem; text-align: center;">Convert ${name} to Old Student?</p>
+      
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; display: block;">Exit Reason <span style="color:red">*</span></label>
+        <input type="text" id="co-reason" class="input-field" placeholder="e.g., Membership Completed, Shifted" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border); border-radius:6px;" autofocus required />
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; display: block;">Job Details / Position (Optional)</label>
+        <input type="text" id="co-job" class="input-field" placeholder="e.g., Software Engineer at Google" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border); border-radius:6px;" />
+      </div>
+
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button class="btn btn-ghost" id="co-cancel" style="flex: 1; border: 1px solid var(--border); border-radius: 999px;">Cancel</button>
+        <button class="btn btn-primary" id="co-ok" style="flex: 1; border: none; border-radius: 999px; color: #fff; background: #0f172a;">Convert</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  dialog.showModal();
+
+  dialog.querySelector("#co-cancel").onclick = () => { 
+    dialog.close(); 
+    dialog.remove(); 
+  };
+  
+  dialog.querySelector("#co-ok").onclick = async () => {
+    const reason = dialog.querySelector("#co-reason").value.trim();
+    const jobDetails = dialog.querySelector("#co-job").value.trim();
+    
+    if (!reason) {
+      window.showToast("Exit Reason is required.", "error");
+      return;
+    }
+    
+    const btn = dialog.querySelector("#co-ok");
+    btn.textContent = "Converting...";
+    btn.disabled = true;
+
+    const res = await convertToOldStudent(id, reason, jobDetails);
+    
+    dialog.close();
+    dialog.remove();
+    
     if (res.success) {
       window.showToast(`${name} has been moved to Old Students.`, "success");
       window.closeStudentProfile();
     } else {
       window.showToast("Error: " + res.error, "error");
     }
-  }
+  };
 };

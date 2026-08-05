@@ -1,4 +1,4 @@
-import { createAnnouncement, listenToAnnouncements, deleteAnnouncement } from "./announcementService.js";
+import { createAnnouncement, listenToAnnouncements, deleteAnnouncement, getAllStudentsForDropdown } from "./announcementService.js";
 
 /**
  * Initializes the announcements UI listener
@@ -63,6 +63,39 @@ export const initAnnouncementAdminUI = () => {
 };
 
 /**
+ * Handles Audience Dropdown Change
+ */
+window.handleAudienceChange = async () => {
+  const audience = document.getElementById("ann-audience").value;
+  const group = document.getElementById("ann-specific-students-group");
+  const listDiv = document.getElementById("ann-specific-students-list");
+  
+  if (audience === "Specific Students") {
+    group.style.display = "block";
+    if (listDiv.children.length === 0) {
+      listDiv.innerHTML = `<div style="text-align:center; padding: 10px;">Loading students...</div>`;
+      const students = await getAllStudentsForDropdown();
+      if (students.length === 0) {
+        listDiv.innerHTML = `<div style="color:var(--text-muted); padding:10px;">No active students found.</div>`;
+      } else {
+        let checkboxesHtml = "";
+        students.forEach(s => {
+          checkboxesHtml += `
+            <div style="display:flex; align-items:center; margin-bottom:8px;">
+              <input type="checkbox" id="ann-std-${s.id}" value="${s.id}" class="ann-student-cb" style="margin-right:10px; width:18px; height:18px; cursor:pointer; -webkit-appearance:checkbox; appearance:checkbox;" />
+              <label for="ann-std-${s.id}" style="cursor:pointer; display:block; margin:0; line-height:1.2;">${s.name} ${s.phone ? `(${s.phone})` : ''}</label>
+            </div>
+          `;
+        });
+        listDiv.innerHTML = checkboxesHtml;
+      }
+    }
+  } else {
+    group.style.display = "none";
+  }
+};
+
+/**
  * Handles the submission of the announcement form
  */
 window.submitAnnouncement = async () => {
@@ -77,6 +110,16 @@ window.submitAnnouncement = async () => {
     scheduledFor: document.getElementById("ann-date").value || null,
     createdBy: localStorage.getItem("userName") || "Admin"
   };
+
+  if (data.audience === "Specific Students") {
+    const checkboxes = document.querySelectorAll(".ann-student-cb:checked");
+    data.targetStudentIds = Array.from(checkboxes).map(cb => cb.value);
+    if (data.targetStudentIds.length === 0) {
+      window.showToast("Please select at least one student.", "error");
+      if (btn) { btn.disabled = false; btn.textContent = "Schedule"; }
+      return;
+    }
+  }
 
   const res = await createAnnouncement(data);
   

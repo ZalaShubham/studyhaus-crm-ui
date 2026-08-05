@@ -1,4 +1,4 @@
-import { collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, deleteDoc, doc, getDocs, where } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
 /**
@@ -6,7 +6,7 @@ import { db } from "../firebase/firebase.js";
  */
 export const createAnnouncement = async (data) => {
   try {
-    const docRef = await addDoc(collection(db, "announcements"), {
+    const announcementData = {
       title: data.title,
       message: data.message,
       audience: data.audience || "All Students", // "All Students", "Active Only", etc.
@@ -15,11 +15,31 @@ export const createAnnouncement = async (data) => {
       createdBy: data.createdBy,
       createdAt: serverTimestamp(),
       status: "Active"
-    });
+    };
+
+    if (data.targetStudentIds && data.audience === "Specific Students") {
+      announcementData.targetStudentIds = data.targetStudentIds;
+    }
+
+    const docRef = await addDoc(collection(db, "announcements"), announcementData);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error creating announcement:", error);
     return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Gets all active students for dropdown selection
+ */
+export const getAllStudentsForDropdown = async () => {
+  try {
+    const q = query(collection(db, "students"), where("status", "==", "Active"));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, name: doc.data().name || "Unknown", phone: doc.data().phone || "" }));
+  } catch (err) {
+    console.error("Error fetching students for dropdown:", err);
+    return [];
   }
 };
 

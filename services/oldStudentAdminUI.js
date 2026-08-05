@@ -1,4 +1,5 @@
-import { listenToOldStudents, restoreOldStudent } from "./oldStudentService.js";
+import { listenToOldStudents, restoreOldStudent, updateOldStudentFee } from "./oldStudentService.js";
+import { generateOldStudentsPDF } from "./pdfService.js";
 
 let allOldStudents = [];
 
@@ -29,6 +30,16 @@ export const initOldStudentAdminUI = () => {
             <option value="All">All Reasons</option>
           </select>
         </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-left: 1rem;">
+          <select id="old-filter-fee-status" class="input-field" style="width:180px;">
+            <option value="All">All Fee Status</option>
+            <option value="Paid">Paid (No Dues)</option>
+            <option value="Pending Fees">Pending Fees</option>
+          </select>
+        </div>
+        <div style="margin-left: auto;">
+          <button class="btn btn-secondary" onclick="window.exportOldStudentsPDF()">Export PDF</button>
+        </div>
       </div>
     </div>
 
@@ -40,13 +51,16 @@ export const initOldStudentAdminUI = () => {
               <th>Student Info</th>
               <th>Last Seat</th>
               <th>Last Plan</th>
+              <th>Job Details</th>
               <th>Exit Date</th>
               <th>Exit Reason</th>
+              <th>Fee Status</th>
+              <th>Outstanding Amount</th>
               ${canRestore ? `<th>Actions</th>` : ""}
             </tr>
           </thead>
           <tbody id="old-tbody">
-            <tr><td colspan="${canRestore ? '6' : '5'}" style="text-align:center;">Loading old students...</td></tr>
+            <tr><td colspan="${canRestore ? '9' : '8'}" style="text-align:center;">Loading old students...</td></tr>
           </tbody>
         </table>
       </div>
@@ -57,6 +71,12 @@ export const initOldStudentAdminUI = () => {
   const renderList = () => renderOldStudents(canRestore);
   document.getElementById("old-search").addEventListener("input", renderList);
   document.getElementById("old-filter-reason").addEventListener("change", renderList);
+  document.getElementById("old-filter-fee-status").addEventListener("change", renderList);
+
+  window.exportOldStudentsPDF = () => {
+    const records = getFilteredOldStudents();
+    generateOldStudentsPDF(records);
+  };
 
   listenToOldStudents((records) => {
     allOldStudents = records;
@@ -88,6 +108,7 @@ const getFilteredOldStudents = () => {
   let filtered = [...allOldStudents];
   const search = document.getElementById("old-search").value.toLowerCase();
   const reason = document.getElementById("old-filter-reason").value;
+  const feeStatus = document.getElementById("old-filter-fee-status").value;
 
   if (search) {
     filtered = filtered.filter(s => 
@@ -97,6 +118,12 @@ const getFilteredOldStudents = () => {
     );
   }
   if (reason !== "All") filtered = filtered.filter(s => s.exitReason === reason);
+  
+  if (feeStatus === "Pending Fees") {
+    filtered = filtered.filter(s => s.pendingFee && s.pendingFee > 0);
+  } else if (feeStatus === "Paid") {
+    filtered = filtered.filter(s => !s.pendingFee || s.pendingFee <= 0);
+  }
 
   return filtered;
 };
@@ -108,7 +135,7 @@ const renderOldStudents = (canRestore) => {
   const filtered = getFilteredOldStudents();
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${canRestore ? '6' : '5'}" style="text-align:center;">No old students found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${canRestore ? '9' : '8'}" style="text-align:center;">No old students found.</td></tr>`;
     return;
   }
 
@@ -118,6 +145,11 @@ const renderOldStudents = (canRestore) => {
       const res = await restoreOldStudent(id);
       if (!res.success) window.showToast("Error restoring student: " + res.error, "error");
     }
+  };
+
+  window.handleUpdatePendingFee = async (id, amount) => {
+    const res = await updateOldStudentFee(id, amount);
+    if (!res.success) window.showToast("Error updating fee: " + res.error, "error");
   };
 
   let html = "";
@@ -137,8 +169,13 @@ const renderOldStudents = (canRestore) => {
         </td>
         <td style="color:var(--text-muted);">${s.seatNumber || "Unassigned"}</td>
         <td style="color:var(--text-muted);">${s.planName || "None"}</td>
+        <td style="color:var(--text-muted); font-size: 0.9rem;">${s.jobDetails || "N/A"}</td>
         <td style="font-weight:500;">${s.exitDate || "N/A"}</td>
         <td><span class="badge" style="background:#e5e7eb; color:#374151;">${s.exitReason || "Other"}</span></td>
+        <td style="font-weight: 600; color: ${s.pendingFee && s.pendingFee > 0 ? 'var(--warning)' : 'var(--success)'};">${s.pendingFee && s.pendingFee > 0 ? 'Pending' : 'Paid'}</td>
+        <td>
+          <input type="number" value="${s.pendingFee || 0}" onblur="window.handleUpdatePendingFee('${s.id}', this.value)" style="width: 80px; padding: 0.25rem 0.5rem; border: 1px solid var(--border); border-radius: 4px;" />
+        </td>
         ${canRestore ? `
         <td>
           <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="window.handleRestoreStudent('${s.id}', '${s.name}')">Restore</button>

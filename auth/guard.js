@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "../services/authService.js";
+import { onAuthStateChanged, logout } from "../services/authService.js";
 import { getDocument } from "../services/firestoreService.js";
 import { getRedirectUrlForRole } from "./login.js";
 import { protectRoute } from "./middleware.js";
@@ -18,7 +18,7 @@ export const initAuthGuard = () => {
   if (loader) loader.style.display = "flex";
 
   const currentPath = window.location.pathname;
-  const isPublicPage = currentPath.endsWith("login.html") || currentPath.endsWith("forgot-password.html") || currentPath.endsWith("register.html");
+  const isPublicPage = currentPath.endsWith("login.html") || currentPath.endsWith("forgot-password.html") || currentPath.endsWith("register.html") || currentPath.endsWith("unauthorized.html");
 
   onAuthStateChanged(async (user) => {
     if (user) {
@@ -87,10 +87,18 @@ export const initAuthGuard = () => {
           // ── Resolve display name ──────────────────────────────────────
           // Priority: Firestore name → email prefix → "User"
           let userDoc2 = null;
+          const actualDocId = localStorage.getItem("userId") || user.uid;
           try {
-            userDoc2 = await getDocument("users", user.uid);
-            if (!userDoc2) userDoc2 = await getDocument("students", user.uid);
+            userDoc2 = await getDocument("students", actualDocId);
+            if (!userDoc2) userDoc2 = await getDocument("users", actualDocId);
+            if (!userDoc2) userDoc2 = await getDocument("users", user.uid);
           } catch (_) {}
+
+          if (userDoc2 && (userDoc2.status === "disabled" || userDoc2.status === "Inactive" || userDoc2.status === "Old" || userDoc2.status === "Old Student")) {
+            localStorage.setItem("forceUnauthorized", "true");
+            await logout();
+            return;
+          }
 
           const displayName = (userDoc2 && userDoc2.name)
             ? userDoc2.name
@@ -148,6 +156,12 @@ export const initAuthGuard = () => {
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
       
+      if (localStorage.getItem("forceUnauthorized") === "true") {
+        localStorage.removeItem("forceUnauthorized");
+        window.location.href = "/unauthorized.html";
+        return;
+      }
+
       if (!isPublicPage) {
         // Redirect to login if on a protected page
         if (currentPath.startsWith("/student/")) {

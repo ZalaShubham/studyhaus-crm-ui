@@ -14,8 +14,7 @@ export const seedInitialSeats = async () => {
     console.log("Seeding initial 50 seats per floor...");
     const floors = [
       { prefix: 'A', name: 'Ground Floor' },
-      { prefix: 'B', name: 'First Floor' },
-      { prefix: 'C', name: 'Second Floor' }
+      { prefix: 'B', name: 'First Floor' }
     ];
 
     for (const floor of floors) {

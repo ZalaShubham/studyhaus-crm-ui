@@ -429,11 +429,18 @@
                 </div>
                 <div class="form-group" style="margin-bottom: 1rem;">
                   <label>Audience</label>
-                  <select id="ann-audience">
+                  <select id="ann-audience" onchange="window.handleAudienceChange && window.handleAudienceChange()">
                     <option value="All Students">All Students</option>
                     <option value="Active Students">Active Students Only</option>
                     <option value="Staff">Staff</option>
+                    <option value="Specific Students">Specific Students</option>
                   </select>
+                </div>
+                <div class="form-group" id="ann-specific-students-group" style="display: none; margin-bottom: 1rem;">
+                  <label>Select Students</label>
+                  <div id="ann-specific-students-list" style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; font-size: 13px;">
+                    <!-- Checkboxes injected by JS -->
+                  </div>
                 </div>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                   <label>Scheduled Date & Time (Optional)</label>
@@ -468,7 +475,6 @@
           <div class="floor-tabs">
             <button class="floor-tab active">Ground Floor</button>
             <button class="floor-tab">First Floor</button>
-            <button class="floor-tab">Second Floor</button>
           </div>
           <div class="card" style="padding: 1.5rem;">
             <div class="seat-floors">
@@ -522,30 +528,7 @@
                 <div class="seat available" title="F-20 - Available"><span>20</span></div>
               </div>
             </div>
-            <div class="card floor-card">
-              <div class="floor-title">Second Floor</div>
-              <div class="seat-grid">
-                <div class="seat occupied" title="S-01 - Raj Patel"><span>01</span></div>
-                <div class="seat available" title="S-02 - Available"><span>02</span></div>
-                <div class="seat occupied" title="S-03 - Navya Singh"><span>03</span></div>
-                <div class="seat occupied" title="S-04 - Aman Gupta"><span>04</span></div>
-                <div class="seat available" title="S-05 - Available"><span>05</span></div>
-                <div class="seat occupied" title="S-06 - Ishaan Verma"><span>06</span></div>
-                <div class="seat available" title="S-07 - Available"><span>07</span></div>
-                <div class="seat occupied" title="S-08 - Kavya Reddy"><span>08</span></div>
-                <div class="seat maintenance" title="S-09 - Maintenance"><span>09</span></div>
-                <div class="seat occupied" title="S-10 - Lokesh Rao"><span>10</span></div>
-                <div class="seat available" title="S-11 - Available"><span>11</span></div>
-                <div class="seat occupied" title="S-12 - Mila Shah"><span>12</span></div>
-                <div class="seat occupied" title="S-13 - Nikhil Joshi"><span>13</span></div>
-                <div class="seat reserved" title="S-14 - Reserved"><span>14</span></div>
-                <div class="seat available" title="S-15 - Available"><span>15</span></div>
-                <div class="seat occupied" title="S-16 - Ojas Shetty"><span>16</span></div>
-                <div class="seat occupied" title="S-17 - Pari Desai"><span>17</span></div>
-                <div class="seat available" title="S-18 - Available"><span>18</span></div>
-                <div class="seat occupied" title="S-19 - Ria Mishra"><span>19</span></div>
-                <div class="seat available" title="S-20 - Available"><span>20</span></div>
-              </div>
+
             </div>
           </div>
         </div></div>
@@ -710,16 +693,16 @@
                     <input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Email</label>
-                    <input type="email" id="adm-email" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Email *</label>
+                    <input type="email" id="adm-email" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth</label>
-                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" />
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth *</label>
+                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" / required >
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender</label>
-                    <select id="adm-gender" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender *</label>
+                    <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
                       <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
                   </div>

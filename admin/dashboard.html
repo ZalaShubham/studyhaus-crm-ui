@@ -374,12 +374,14 @@
                   <th style="cursor:pointer;" onclick="window.setSort('planName')">Plan ↕</th>
                   <th style="cursor:pointer;" onclick="window.setSort('createdAt')">Joined ↕</th>
                   <th style="cursor:pointer;" onclick="window.setSort('paymentDueDate')">Due Date ↕</th>
+                  <th style="cursor:pointer;" onclick="window.setSort('plannedExitDate')">Leaving Date ↕</th>
+                  <th style="cursor:pointer;" onclick="window.setSort('remarks')">Remarks ↕</th>
                   <th style="cursor:pointer;" onclick="window.setSort('status')">Status ↕</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="students-table-body">
-                <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+                <tr><td colspan="9" style="text-align:center;">Loading...</td></tr>
               </tbody>
             </table>
             
@@ -706,20 +708,20 @@
                     <input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Parent mobile</label>
-                    <input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Emergency Contact</label>
+                    <input type="tel" id="adm-parent-phone" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Email</label>
-                    <input type="email" id="adm-email" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Email *</label>
+                    <input type="email" id="adm-email" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
                     <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth</label>
                     <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender</label>
-                    <select id="adm-gender" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender *</label>
+                    <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
                       <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
                   </div>
@@ -734,6 +736,18 @@
                   <div class="form-group" style="grid-column: 1 / -1; margin:0;">
                     <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Address</label>
                     <textarea id="adm-address" rows="2" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;"></textarea>
+                  </div>
+                  <div class="form-group" style="margin:0; grid-column: span 2;">
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Remarks</label>
+                    <input type="text" id="adm-remarks" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                  </div>
+                  <div class="form-group" style="margin:0;">
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Login ID (Optional)</label>
+                    <input type="text" id="adm-login-id" placeholder="e.g. user@email.com" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #0f172a;" />
+                  </div>
+                  <div class="form-group" style="margin:0;">
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Login Password (Optional)</label>
+                    <input type="text" id="adm-login-pass" placeholder="e.g. password123" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #0f172a;" />
                   </div>
                   <div class="form-group" style="margin:0;">
                     <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Membership plan *</label>
@@ -1382,6 +1396,23 @@
                 <div class="form-group"><label>GST Number</label><input type="text" value="29ABCDE1234F1Z5" /></div>
                 <div class="form-group"><label>Opening Time</label><input type="time" value="06:00" /></div>
                 <div class="form-group"><label>Closing Time</label><input type="time" value="23:00" /></div>
+              </div>
+            </div>
+            <div class="card settings-card">
+              <div class="settings-section-title">Payment Settings</div>
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label>Upload QR Code Image</label>
+                  <input type="file" id="setting-qr-upload" accept="image/*" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border);" />
+                  <div style="margin-top: 0.5rem; text-align: center;">
+                    <img id="setting-qr-preview" src="" style="max-height: 150px; display: none; border: 1px solid var(--border); border-radius: 8px; margin: 0 auto;" />
+                  </div>
+                  <div style="margin-top: 1rem;">
+                    <label>Or enter Image URL</label>
+                    <input type="url" id="setting-qr-url" placeholder="https://example.com/qr.png" />
+                  </div>
+                  <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Upload a QR code or provide a direct link to it.</small>
+                </div>
               </div>
             </div>
             <div class="card settings-card">

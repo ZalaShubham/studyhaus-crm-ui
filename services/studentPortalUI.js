@@ -5,6 +5,7 @@ import { generateAttendancePDF } from "./pdfService.js";
 import { listenToMyPayments, submitPaymentRequest } from "./paymentService.js";
 import { listenToMyComplaints, submitComplaint } from "./complaintService.js";
 import { listenToRenewalHistory } from "./renewalService.js";
+import { getSettings } from "./settingsService.js";
 
 let currentStudent = null;
 let currentAttendance = [];
@@ -291,10 +292,10 @@ const renderPortal = () => {
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name *</label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.name || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile *</label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.phone || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email</label><input type="email" id="adm-email" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth</label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender</label>
-                <select id="adm-gender" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email *</label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth *</label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" / required ></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender *</label>
+                <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
                   <option value="">Select</option><option value="Male" ${s.gender === 'Male' ? 'selected' : ''}>Male</option><option value="Female" ${s.gender === 'Female' ? 'selected' : ''}>Female</option><option value="Other" ${s.gender === 'Other' ? 'selected' : ''}>Other</option>
                 </select>
               </div>
@@ -344,7 +345,7 @@ const renderPortal = () => {
         <!-- Step 2: Pay Now Form -->
         <div id="payment-step-2" style="padding: 1.5rem; display: none;">
           <div style="text-align: center; margin-bottom: 1.5rem;">
-            <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+            <img src="/payment-qr.jpeg" class="payment-qr-img" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
             <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay: <span id="payment-modal-amount" style="color: var(--primary);">₹--</span></div>
           </div>
           <div class="form-group">
@@ -559,7 +560,7 @@ const renderPortal = () => {
         <!-- Step 2: Pay Now Form (Directly) -->
         <div id="pending-payment-step-2" style="padding: 1.5rem;">
           <div style="text-align: center; margin-bottom: 1.5rem;">
-            <img src="/payment-qr.jpeg" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
+            <img src="/payment-qr.jpeg" class="payment-qr-img" alt="QR Code" style="width: 180px; height: 180px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;" onerror="this.onerror=null; this.src='https://via.placeholder.com/180?text=QR+Code';" />
             <div style="font-weight: 600; color: var(--text-primary);">Scan to Pay</div>
           </div>
           <div class="form-group">
@@ -747,7 +748,7 @@ const renderPortal = () => {
           <h3 style="margin-bottom: 1.5rem;">Submit Payment</h3>
           <div style="display:flex; gap: 2rem; align-items:flex-start; flex-wrap: wrap;">
             <div style="width: 160px; height: 160px; background: #fff; border: 1px solid var(--border); border-radius: 8px; display:flex; align-items:center; justify-content:center; overflow: hidden; flex-shrink: 0;">
-              <img src="/payment-qr.jpeg" alt="Scan to Pay" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/160?text=QR+Code';" />
+              <img src="/payment-qr.jpeg" class="payment-qr-img" alt="Scan to Pay" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/160?text=QR+Code';" />
             </div>
             <div style="flex:1; min-width: 300px;">
               <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
@@ -865,6 +866,15 @@ const renderPortal = () => {
       </div>
     </div>
   `;
+
+  // Fetch dynamic QR code
+  getSettings().then(settings => {
+    if (settings.qrCodeUrl) {
+      document.querySelectorAll('.payment-qr-img').forEach(img => {
+        img.src = settings.qrCodeUrl;
+      });
+    }
+  });
 
   setTimeout(() => { if (window.calculatePaymentAmount) window.calculatePaymentAmount(); }, 50);
 };

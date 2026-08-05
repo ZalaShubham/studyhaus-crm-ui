@@ -72,3 +72,49 @@ export const generateAttendancePDF = async (studentName, records, totalHours) =>
     return { success: false, error: error.message };
   }
 };
+
+export const generateOldStudentsPDF = async (records) => {
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js");
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Old Students Pending Fees Report", 14, 20);
+    doc.setFontSize(12);
+    doc.text(`Generated On: ${new Date().toLocaleDateString()}`, 14, 30);
+
+    const tableColumn = ["Name", "Phone", "Job Details", "Exit Date", "Exit Reason", "Fee Status", "Outstanding Amount"];
+    const tableRows = [];
+
+    records.forEach(r => {
+      tableRows.push([
+        r.name || "Unknown",
+        r.phone || "N/A",
+        r.jobDetails || "N/A",
+        r.exitDate || "N/A",
+        r.exitReason || "N/A",
+        r.pendingFee && r.pendingFee > 0 ? "Pending" : "Paid",
+        `Rs. ${r.pendingFee || 0}`
+      ]);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      theme: 'grid',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    doc.save(`Old_Students_Pending_Fees.pdf`);
+    return { success: true };
+    
+  } catch (error) {
+    console.error("PDF Generation Error:", error);
+    return { success: false, error: error.message };
+  }
+};

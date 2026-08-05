@@ -78,8 +78,8 @@ export const handleLogin = async (email, password) => {
       );
     }
     
-    if (userDoc.status === "disabled" || userDoc.status === "Inactive") {
-      throw new Error("Account Disabled or Inactive. Please contact administration.");
+    if (userDoc.status === "disabled" || userDoc.status === "Inactive" || userDoc.status === "Old" || userDoc.status === "Old Student") {
+      throw new Error("Account Disabled, Inactive, or Moved to Old Students. Please contact administration.");
     }
 
     localStorage.setItem("userRole", userDoc.role);

@@ -55,6 +55,10 @@ export const softDeleteStudent = async (studentId) => {
       status: "Old",
       updatedAt: serverTimestamp()
     });
+    try {
+      const userDocRef = doc(db, "users", studentId);
+      await updateDoc(userDocRef, { status: "Old", updatedAt: serverTimestamp() });
+    } catch(e) {}
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -109,7 +113,6 @@ export const updateStudentProfile = async (studentId, updates) => {
               // Create the seat if it doesn't exist
               let floor = "Ground Floor";
               if (updates.seatNumber.startsWith("B")) floor = "First Floor";
-              if (updates.seatNumber.startsWith("C")) floor = "Second Floor";
               
               await addDoc(seatsRef, {
                 seatNumber: updates.seatNumber,
@@ -127,6 +130,14 @@ export const updateStudentProfile = async (studentId, updates) => {
     }
 
     await updateDoc(docRef, updates);
+    
+    if (updates.status !== undefined) {
+      try {
+        const userDocRef = doc(db, "users", studentId);
+        await updateDoc(userDocRef, { status: updates.status, updatedAt: serverTimestamp() });
+      } catch (e) {}
+    }
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
