@@ -2,7 +2,7 @@
   "menu.dashboard": "ડેશબોર્ડ",
   "menu.students": "વિદ્યાર્થીઓ",
   "menu.seatMap": "બેઠક નકશો",
-  "menu.liveSeatMap": "લાઈવ બેઠક નકશો",
+  "menu.liveSeatMap": "લાઇવ સીટ નકશો",
   "menu.attendance": "હાજરી",
   "menu.payments": "ચુકવણી",
   "menu.visitors": "મુલાકાતીઓ",
@@ -177,5 +177,12 @@
   "settings.visitorLogDesc": "દરેક પ્રવેશ માટે મુલાકાતી લોગ જરૂરી છે",
   "nav.overview": "ઓવર વ્યૂ",
   "nav.system": "સિસ્ટમ",
-  "btn.saveChanges": "ફેરફારો સાચવો"
+  "btn.saveChanges": "ફેરફારો સાચવો",
+  "liveSeat.title": "લાઇવ સીટ નકશો",
+  "liveSeat.subtitle": "રીઅલ-ટાઇમ ઓક્યુપન્સી અને હાજરી.",
+  "liveSeat.liveActive": "લાઇવ અપડેટ સક્રિય",
+  "liveSeat.vacant": "ખાલી",
+  "liveSeat.present": "હાજર",
+  "liveSeat.noSeat": "સીટ નથી",
+  "liveSeat.seat": "સીટ"
 }

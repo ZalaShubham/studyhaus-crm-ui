@@ -177,5 +177,12 @@
   "settings.visitorLogDesc": "Require visitor log for every entry",
   "nav.overview": "Overview",
   "nav.system": "System",
-  "btn.saveChanges": "Save Changes"
+  "btn.saveChanges": "Save Changes",
+  "liveSeat.title": "Live Seat Map",
+  "liveSeat.subtitle": "Real-time occupancy and attendance.",
+  "liveSeat.liveActive": "Live Updates Active",
+  "liveSeat.vacant": "Vacant",
+  "liveSeat.present": "Present",
+  "liveSeat.noSeat": "No Seat",
+  "liveSeat.seat": "Seat"
 }

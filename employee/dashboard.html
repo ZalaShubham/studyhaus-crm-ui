@@ -52,6 +52,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M6 20h12"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg>
             <span data-i18n="menu.seatMap" data-i18n="menu.seatMap">Seat Map</span>
             </a>
+          <a class="nav-item" data-page="live-seat-map" onclick="navigate('live-seat-map')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            <span data-i18n="menu.liveSeatMap">Live Seat Map</span>
+            </a>
           <a class="nav-item" data-page="expenses" onclick="navigate('expenses')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             <span data-i18n="menu.expenses" data-i18n="menu.expenses">Expenses</span>
@@ -203,6 +207,9 @@
 
         <!-- Seats Page (Admin/Manager) -->
         <div class="page" id="page-seats"></div>
+
+        <!-- Live Seat Map Page -->
+        <div class="page" id="page-live-seat-map"></div>
 
         <!-- Expenses Page (Admin/Manager/Employee) -->
         <div class="page" id="page-expenses"></div>
