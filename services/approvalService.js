@@ -21,7 +21,7 @@ export const approveAdmission = async (admissionId) => {
 
     // Create in students collection
     const studentRef = doc(db, "students", admissionId);
-    await setDoc(studentRef, data);
+    await setDoc(studentRef, data, { merge: true });
 
     // Update the corresponding user document to Active
     const userRef = doc(db, "users", admissionId);

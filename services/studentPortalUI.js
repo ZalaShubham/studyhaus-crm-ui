@@ -85,8 +85,8 @@ export const initStudentPortalUI = () => {
     };
 
     const res = await updateStudentOwnProfile(currentStudent.id, updates);
-    if (res.success) window.showToast("Profile updated!", "success");
-    else window.showToast("Failed to update profile: " + res.error, "error");
+    if (res.success) window.showToast(window.t ? window.t('Profile updated!') || "Profile updated!" : "Profile updated!", "success");
+    else window.showToast(window.t ? window.t('Failed to update profile: ') || "Failed to update profile: " : "Failed to update profile: " + res.error, "error");
     
     btn.textContent = "Save Profile Changes";
     btn.disabled = false;
@@ -105,8 +105,8 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkIn(currentStudent, selectedSeat);
-    if (!res.success) window.showToast("Check-In Failed: " + res.error, "error");
-    else window.showToast("Checked in successfully!", "success");
+    if (!res.success) window.showToast(window.t ? window.t('Check-In Failed: ') || "Check-In Failed: " : "Check-In Failed: " + res.error, "error");
+    else window.showToast(window.t ? window.t('Checked in successfully!') || "Checked in successfully!" : "Checked in successfully!", "success");
     
     if (document.getElementById("btn-checkin")) {
       btn.textContent = "Check-In Now";
@@ -119,7 +119,7 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkOut(attendanceId, checkInTimestamp);
-    if (!res.success) window.showToast("Check-Out Failed: " + res.error, "error");
+    if (!res.success) window.showToast(window.t ? window.t('Check-Out Failed: ') || "Check-Out Failed: " : "Check-Out Failed: " + res.error, "error");
   };
 
   window.handleDownloadPDF = async () => {
@@ -131,7 +131,7 @@ export const initStudentPortalUI = () => {
     
     const calculated = calculateStudyHours(currentAttendance);
     const res = await generateAttendancePDF(currentStudent.name, currentAttendance, calculated.totalHours);
-    if (!res.success) window.showToast("Failed to generate PDF: " + res.error, "error");
+    if (!res.success) window.showToast(window.t ? window.t('Failed to generate PDF: ') || "Failed to generate PDF: " : "Failed to generate PDF: " + res.error, "error");
 
     btn.innerHTML = originalText;
     btn.disabled = false;
@@ -156,17 +156,17 @@ export const initStudentPortalUI = () => {
     const months = document.getElementById("payment-months").value;
     const amount = document.getElementById("payment-amount").value;
 
-    if (!txnId) return window.showToast("Please enter the Transaction ID.", "error");
+    if (!txnId) return window.showToast(window.t ? window.t('Please enter the Transaction ID.') || "Please enter the Transaction ID." : "Please enter the Transaction ID.", "error");
 
     btn.innerHTML = "Submitting...";
     btn.disabled = true;
 
     const res = await submitPaymentRequest(currentStudent, txnId, months, amount);
     if (res.success) {
-      window.showToast("Payment Request Submitted Successfully!", "success");
+      window.showToast(window.t ? window.t('Payment Request Submitted Successfully!') || "Payment Request Submitted Successfully!" : "Payment Request Submitted Successfully!", "success");
       document.getElementById("payment-txnid").value = "";
     } else {
-      window.showToast("Failed: " + res.error, "error");
+      window.showToast(window.t ? window.t('Failed: ') || "Failed: " : "Failed: " + res.error, "error");
     }
 
     btn.innerHTML = "Submit Payment Request";
@@ -183,11 +183,11 @@ export const initStudentPortalUI = () => {
 
     const res = await submitComplaint(currentStudent, category, description);
     if (res.success) {
-      window.showToast("Complaint Submitted Successfully!", "success");
+      window.showToast(window.t ? window.t('Complaint Submitted Successfully!') || "Complaint Submitted Successfully!" : "Complaint Submitted Successfully!", "success");
       document.getElementById("complaint-category").value = "";
       document.getElementById("complaint-description").value = "";
     } else {
-      window.showToast("Failed: " + res.error, "error");
+      window.showToast(window.t ? window.t('Failed: ') || "Failed: " : "Failed: " + res.error, "error");
     }
 
     btn.innerHTML = "Submit Complaint";
@@ -302,17 +302,21 @@ const renderPortal = () => {
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.college || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.course || ''}" /></div>
               <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">${s.address || ''}</textarea></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan *</label>
+              <div class="form-group" style="margin:0; grid-column: 1 / -1;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan *</label>
                 <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
                   <option value="">Choose plan (Loading...)</option>
                 </select>
               </div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Seat (optional)</label>
-                <select id="adm-seat" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
-                  <option value="">Loading...</option>
-                </select>
-              </div>
             </div>
+
+            <h3 style="font-size: 15px; margin: 0 0 1rem;">Seat Selection *</h3>
+            <div id="seat-selection-section" style="margin-bottom: 2rem; border: 1px solid var(--border-bright); border-radius: 12px; padding: 1rem;"></div>
+            <input type="hidden" id="selectedSeatNumber" />
+            <input type="hidden" id="selectedSeatId" />
+            
+            <h3 style="font-size: 15px; margin: 0 0 1rem;">Document Uploads *</h3>
+            <div id="doc-upload-section" style="margin-bottom: 1.5rem;"></div>
+
           </form>
         </div>
         <div style="width: 280px; position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
@@ -330,7 +334,7 @@ const renderPortal = () => {
       <dialog id="payment-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 450px; margin: auto;">
         <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
           <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Payment Options</h2>
-          <button onclick="document.getElementById('payment-modal').close()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+          <button onclick="window.closePaymentModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
         </div>
         
         <!-- Step 1: Choose Pay Now or Pay Later -->
@@ -382,22 +386,48 @@ const renderPortal = () => {
       });
     });
 
-    import("firebase/firestore").then(({ collection, query, where, getDocs }) => {
-      import("../firebase/firebase.js").then(({ db }) => {
-        const q = query(collection(db, "seats"), where("status", "==", "Available"));
-        getDocs(q).then(snap => {
-          const seatSelect = document.getElementById("adm-seat");
-          if (seatSelect) {
-            let html = `<option value=''>${snap.size} available</option>`;
-            snap.forEach(doc => { const st = doc.data(); html += `<option value="${st.seatNumber}">${st.seatNumber}</option>`; });
-            seatSelect.innerHTML = html;
-          }
-        });
-      });
+    import("./seatMapUI.js").then(({ initSeatMapUI }) => {
+      initSeatMapUI("signup", "seat-selection-section");
+    });
+    
+    import("./documentUploadService.js").then(({ initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments }) => {
+      window.getSelectedDocumentFiles = getSelectedDocumentFiles;
+      window.uploadAdmissionDocuments = uploadAdmissionDocuments;
+      initDocumentUploads("doc-upload-section");
     });
     
     // Add logic for modal flow
-    window.showPaymentModal = () => {
+    window.showPaymentModal = async () => {
+      const selectedSeatId = document.getElementById("selectedSeatId")?.value;
+      if (!selectedSeatId) {
+        return window.showToast(window.t ? window.t('Please select a seat from the Seat Map.') || "Please select a seat from the Seat Map." : "Please select a seat from the Seat Map.", "error");
+      }
+
+      if (window.getSelectedDocumentFiles) {
+        const files = window.getSelectedDocumentFiles();
+        if (!files.aadhaarFront || !files.aadhaarBack || !files.selfie) {
+          return window.showToast(window.t ? window.t('Please upload Aadhaar Front, Back, and your Photo.') || "Please upload Aadhaar Front, Back, and your Photo." : "Please upload Aadhaar Front, Back, and your Photo.", "error");
+        }
+      }
+
+      const btnSubmit = document.getElementById("btn-submit-admission");
+      const originalText = btnSubmit.innerHTML;
+      btnSubmit.innerHTML = "Reserving Seat...";
+      btnSubmit.disabled = true;
+
+      try {
+        const { assignSeat } = await import("./seatService.js");
+        const studentName = document.getElementById("adm-name").value || "New Student";
+        await assignSeat(selectedSeatId, { id: s.id, name: studentName });
+      } catch (e) {
+        btnSubmit.innerHTML = originalText;
+        btnSubmit.disabled = false;
+        return window.showToast(window.t ? window.t('Failed to reserve seat: ') || "Failed to reserve seat: " : "Failed to reserve seat: " + e.message, "error");
+      }
+      
+      btnSubmit.innerHTML = originalText;
+      btnSubmit.disabled = false;
+
       const modal = document.getElementById("payment-modal");
       document.getElementById("payment-step-1").style.display = "block";
       document.getElementById("payment-step-2").style.display = "none";
@@ -408,64 +438,59 @@ const renderPortal = () => {
       modal.showModal();
     };
 
+    window.closePaymentModal = async () => {
+      const modal = document.getElementById("payment-modal");
+      modal.close();
+      const selectedSeatId = document.getElementById("selectedSeatId")?.value;
+      if (selectedSeatId) {
+        try {
+          const { unassignSeat } = await import("./seatService.js");
+          await unassignSeat(selectedSeatId);
+          window.showToast(window.t ? window.t('Seat reservation released.') || "Seat reservation released." : "Seat reservation released.", "info");
+        } catch (e) {
+          console.error("Failed to release seat on cancel", e);
+        }
+      }
+    };
+
     window.showPaymentStep2 = () => {
       document.getElementById("payment-step-1").style.display = "none";
       document.getElementById("payment-step-2").style.display = "block";
-      
-      import("./documentUploadService.js").then(({ initDocumentUploads, getSelectedDocumentFiles, uploadAdmissionDocuments }) => {
-        window.getSelectedDocumentFiles = getSelectedDocumentFiles;
-        window.uploadAdmissionDocuments = uploadAdmissionDocuments;
-        initDocumentUploads("modal-doc-upload-section");
-        // Hide aadhar uploads, only show selfie but repurposed as screenshot
-        setTimeout(() => {
-          const d1 = document.getElementById('doc-card-aadhaarFront');
-          const d2 = document.getElementById('doc-card-aadhaarBack');
-          const d3 = document.getElementById('doc-card-selfie');
-          if (d1) d1.style.display = 'none';
-          if (d2) d2.style.display = 'none';
-          if (d3) {
-            d3.style.gridColumn = "1 / -1";
-            const lbl = d3.querySelector('div[style*="font-size:12px"]');
-            if (lbl) lbl.textContent = "Payment Screenshot (Optional)";
-            const icon = d3.querySelector('div[style*="font-size:1.5rem"]');
-            if (icon) icon.textContent = "🧾";
-          }
-        }, 100);
-      });
     };
 
     window.submitSelfAdmission = async (paymentMethod) => {
       let txnId = "";
-      let paymentScreenshotUrl = "";
       
       try {
         if (paymentMethod === "Paid") {
           txnId = document.getElementById("modal-txnid").value;
-          if (!txnId) return window.showToast("Please enter Transaction ID.", "warning");
+          if (!txnId) return window.showToast(window.t ? window.t('Please enter Transaction ID.') || "Please enter Transaction ID." : "Please enter Transaction ID.", "warning");
           
-          // Optional file upload handling
           const btn = document.getElementById("btn-modal-paid");
           btn.innerHTML = "Uploading & Submitting...";
           btn.disabled = true;
-
-          if (window.getSelectedDocumentFiles && window.uploadAdmissionDocuments) {
-            const files = window.getSelectedDocumentFiles();
-            if (files.selfie) {
-               const urlMap = await window.uploadAdmissionDocuments({ selfie: files.selfie }, s.id);
-               paymentScreenshotUrl = urlMap.selfieUrl || "";
-            }
-          }
         } else {
           const btn = document.querySelector("#payment-step-1 button.btn-ghost");
           btn.innerHTML = "Submitting...";
           btn.disabled = true;
         }
 
+        // Upload Admission Documents first if present
+        let docUrls = {};
+        if (window.getSelectedDocumentFiles && window.uploadAdmissionDocuments) {
+          const files = window.getSelectedDocumentFiles();
+          if (files.aadhaarFront || files.aadhaarBack || files.selfie) {
+             docUrls = await window.uploadAdmissionDocuments(files, s.id);
+          }
+        }
+
         // Collect form data
         const planEl = document.getElementById("adm-plan");
-        const seatEl = document.getElementById("adm-seat");
         const planId = planEl.value;
         const plan = (window.availablePlansList || []).find(p => p.id === planId);
+        
+        const selectedSeatNumber = document.getElementById("selectedSeatNumber")?.value || "";
+        const selectedSeatId = document.getElementById("selectedSeatId")?.value || "";
 
         const data = {
           name: document.getElementById("adm-name").value,
@@ -479,31 +504,45 @@ const renderPortal = () => {
           address: document.getElementById("adm-address")?.value || "",
           planId: planId,
           planName: plan ? plan.planName : "",
-          seatAssigned: seatEl.value || "",
+          seatNumber: selectedSeatNumber,
+          seatId: selectedSeatId,
           paymentMethod: paymentMethod,
           transactionId: txnId,
-          paymentScreenshotUrl: paymentScreenshotUrl,
+          paymentScreenshotUrl: "",
+          documents: docUrls,
+          loginCredentials: s.loginCredentials || "",
           termsAccepted: true
         };
         
         if (paymentMethod === "Pay Later") {
           const d = new Date();
-          d.setDate(d.getDate() + 3); // Default 3 days for pay later
+          d.setDate(d.getDate() + 3);
           data.paymentDueDate = d.toISOString().split('T')[0];
         }
 
         if (window.submitAdmission) {
+          // Note: window.submitAdmission takes (data, isSelfAdmission) as arguments
+          // wait, let me check admissionService.js
           const res = await window.submitAdmission(data, true);
           if (res.success) {
+            // Upgrade seat status to Occupied
+            if (selectedSeatId) {
+              try {
+                const { changeSeatStatus } = await import("./seatService.js");
+                await changeSeatStatus(selectedSeatId, "Occupied");
+              } catch(e) {
+                console.error("Failed to mark seat as occupied", e);
+              }
+            }
             if (paymentMethod === "Paid") {
-              window.showToast("Payment verified! You are now admitted and will be redirected to your dashboard.", "success");
+              window.showToast(window.t ? window.t('Payment verified! You are now admitted and will be redirected to your dashboard.') || "Payment verified! You are now admitted and will be redirected to your dashboard." : "Payment verified! You are now admitted and will be redirected to your dashboard.", "success");
             } else {
-              window.showToast("Admission request submitted successfully and is Pending Approval!", "success");
+              window.showToast(window.t ? window.t('Admission request submitted successfully and is Pending Approval!') || "Admission request submitted successfully and is Pending Approval!" : "Admission request submitted successfully and is Pending Approval!", "success");
             }
             document.getElementById("payment-modal").close();
             window.location.reload(); // reload to show pending or active state
           } else {
-            window.showToast("Error: " + res.error, "error");
+            window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
             document.getElementById("payment-modal").close();
             if (paymentMethod === "Paid") {
               const btn = document.getElementById("btn-modal-paid");
@@ -517,7 +556,7 @@ const renderPortal = () => {
           }
         }
       } catch (err) {
-        window.showToast("An unexpected error occurred: " + err.message, "error");
+        window.showToast(window.t ? window.t('An unexpected error occurred: ') || "An unexpected error occurred: " : "An unexpected error occurred: " + err.message, "error");
         if (paymentMethod === "Paid") {
           const btn = document.getElementById("btn-modal-paid");
           if(btn) { btn.innerHTML = "Mark as Paid & Submit"; btn.disabled = false; }
@@ -600,7 +639,7 @@ const renderPortal = () => {
 
     window.submitPendingPayment = async () => {
         const txnId = document.getElementById("pending-modal-txnid").value;
-        if (!txnId) return window.showToast("Please enter Transaction ID.", "warning");
+        if (!txnId) return window.showToast(window.t ? window.t('Please enter Transaction ID.') || "Please enter Transaction ID." : "Please enter Transaction ID.", "warning");
         
         const btn = document.getElementById("btn-pending-modal-paid");
         btn.innerHTML = "Uploading & Submitting...";
@@ -618,11 +657,11 @@ const renderPortal = () => {
         import("./admissionService.js").then(async ({ updateAdmissionPayment }) => {
            const res = await updateAdmissionPayment(s.id, txnId, paymentScreenshotUrl);
            if (res.success) {
-               window.showToast("Payment details updated successfully!", "success");
+               window.showToast(window.t ? window.t('Payment details updated successfully!') || "Payment details updated successfully!" : "Payment details updated successfully!", "success");
                document.getElementById("pending-payment-modal").close();
                window.location.reload();
            } else {
-               window.showToast("Error: " + res.error, "error");
+               window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
                btn.innerHTML = "Mark as Paid & Submit";
                btn.disabled = false;
            }
@@ -655,7 +694,7 @@ const renderPortal = () => {
     portalSection.innerHTML = `
       <div class="page-header">
         <div>
-          <h1>Welcome back, ${s.name}</h1>
+          <h1 data-i18n="studentPortal.welcome" data-i18n-args='{"name":"${s.name}"}'>${window.t ? window.t('studentPortal.welcome', {name: s.name}) : 'Welcome back, ' + s.name}</h1>
           <p class="page-subtitle">Here is your personal study portal.</p>
         </div>
         <div style="display:flex; gap:1rem;">
@@ -668,63 +707,63 @@ const renderPortal = () => {
         <div class="metric-card" style="align-items: center;">
           <div class="metric-icon violet" style="border-radius: 50%; font-weight: bold;">${initials}</div>
           <div>
-            <div class="metric-label">Membership Plan</div>
-            <div class="metric-value" style="font-size: 1.1rem;">${s.planName || 'None'}</div>
+            <div class="metric-label" data-i18n="studentPortal.plan">${window.t ? window.t('studentPortal.plan') : 'Membership Plan'}</div>
+            <div class="metric-value" style="font-size: 1.1rem;"><span data-i18n="studentPortal.none" style="display:${s.planName ? 'none' : 'inline'}">None</span><span style="display:${s.planName ? 'inline' : 'none'}">${s.planName || ''}</span></div>
           </div>
         </div>
         <div class="metric-card" style="align-items: center;">
           <div class="metric-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
           <div>
-            <div class="metric-label">Seat Number</div>
-            <div class="metric-value">${s.seatNumber || 'Unassigned'}</div>
+            <div class="metric-label" data-i18n="studentPortal.seatNum">${window.t ? window.t('studentPortal.seatNum') : 'Seat Number'}</div>
+            <div class="metric-value"><span data-i18n="studentPortal.unassigned" style="display:${s.seatNumber ? 'none' : 'inline'}">Unassigned</span><span style="display:${s.seatNumber ? 'inline' : 'none'}">${s.seatNumber || ''}</span></div>
           </div>
         </div>
         <div class="metric-card" style="align-items: center;">
           <div class="metric-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
           <div>
-            <div class="metric-label">Status</div>
-            <div class="metric-value">${s.status || 'Pending'}</div>
+            <div class="metric-label" data-i18n="studentPortal.status">${window.t ? window.t('studentPortal.status') : 'Status'}</div>
+            <div class="metric-value"><span data-i18n="studentPortal.pending" style="display:${s.status ? 'none' : 'inline'}">Pending</span><span style="display:${s.status ? 'inline' : 'none'}">${s.status || ''}</span></div>
           </div>
         </div>
         <div class="metric-card" style="align-items: center;">
           <div class="metric-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
           <div>
-            <div class="metric-label">Days Remaining</div>
-            <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} Days</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Due: ${s.paymentDueDate || 'N/A'}</div>
+            <div class="metric-label" data-i18n="studentPortal.daysRem">${window.t ? window.t('studentPortal.daysRem') : 'Days Remaining'}</div>
+            <div class="metric-value" style="color: ${daysRemaining < 5 ? 'var(--danger)' : 'inherit'}">${daysRemaining} <span data-i18n="studentPortal.days">Days</span></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;"><span data-i18n="studentPortal.due">Due:</span> ${s.paymentDueDate || 'N/A'}</div>
           </div>
         </div>
       </div>
       
       <div style="margin-top: 2rem;">
-        <h3 style="margin-bottom: 1rem;">Quick Links</h3>
+        <h3 style="margin-bottom: 1rem;" data-i18n="studentPortal.quickLinks">${window.t ? window.t('studentPortal.quickLinks') : 'Quick Links'}</h3>
         <div class="dashboard-grid">
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-payments')">
             <div class="avatar" style="background: var(--accent-violet);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <div>
-              <h4 style="margin: 0;">Payments & Renewals</h4>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">Submit payments and view history</div>
+              <h4 style="margin: 0;" data-i18n="studentPortal.paymentsTitle">${window.t ? window.t('studentPortal.paymentsTitle') : 'Payments & Renewals'}</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.paymentsDesc') : 'Submit payments and view history'}</div>
             </div>
           </div>
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-attendance')">
             <div class="avatar" style="background: var(--success);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div>
-              <h4 style="margin: 0;">Attendance</h4>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">View check-ins and hours</div>
+              <h4 style="margin: 0;" data-i18n="studentPortal.attendanceTitle">${window.t ? window.t('studentPortal.attendanceTitle') : 'Attendance'}</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.attendanceDesc') : 'View check-ins and hours'}</div>
             </div>
           </div>
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-complaints')">
             <div class="avatar" style="background: var(--danger);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div>
-              <h4 style="margin: 0;">Complaints</h4>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">Report issues and track status</div>
+              <h4 style="margin: 0;" data-i18n="studentPortal.complaintsTitle">${window.t ? window.t('studentPortal.complaintsTitle') : 'Complaints'}</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.complaintsDesc') : 'Report issues and track status'}</div>
             </div>
           </div>
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-profile')">
             <div class="avatar" style="background: var(--primary);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div>
-              <h4 style="margin: 0;">My Profile</h4>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">Update personal information</div>
+              <h4 style="margin: 0;" data-i18n="studentPortal.profileTitle">${window.t ? window.t('studentPortal.profileTitle') : 'My Profile'}</h4>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.profileDesc') : 'Update personal information'}</div>
             </div>
           </div>
         </div>
@@ -761,8 +800,8 @@ const renderPortal = () => {
           </div>
         </div>
 
-        <div class="card"><h3 style="margin-bottom: 1rem;">Renewal History</h3><table class="data-table"><thead><tr><th>Date</th><th>Plan</th><th>Period</th><th>Amount</th></tr></thead><tbody>${renewalsHtml}</tbody></table></div>
-        <div class="card"><h3 style="margin-bottom: 1rem;">My Payments</h3><table class="data-table"><thead><tr><th>Date</th><th>Period</th><th>Amount</th><th>Txn ID</th><th>Status</th></tr></thead><tbody>${paymentsHtml}</tbody></table></div>
+        <div class="card"><h3 style="margin-bottom: 1rem;">Renewal History</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Plan</th><th>Period</th><th data-i18n="table.amount">\${window.t ? window.t("table.amount") : "Amount"}</th></tr></thead><tbody>${renewalsHtml}</tbody></table></div>
+        <div class="card"><h3 style="margin-bottom: 1rem;">My Payments</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Period</th><th data-i18n="table.amount">\${window.t ? window.t("table.amount") : "Amount"}</th><th>Txn ID</th><th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th></tr></thead><tbody>${paymentsHtml}</tbody></table></div>
       </div>
     </div>
   `;
@@ -783,7 +822,7 @@ const renderPortal = () => {
             <h3 style="margin:0;">Recent Attendance</h3>
             <button id="btn-pdf" class="btn btn-ghost" onclick="window.handleDownloadPDF()">Download PDF</button>
           </div>
-          <table class="data-table"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th></tr></thead><tbody>${historyHtml}</tbody></table>
+          <table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Check In</th><th>Check Out</th><th>Duration</th><th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th></tr></thead><tbody>${historyHtml}</tbody></table>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 1;">
@@ -833,7 +872,7 @@ const renderPortal = () => {
             </div>
           </form>
         </div>
-        <div class="card"><h3 style="margin-bottom: 1rem;">My Complaints</h3><table class="data-table"><thead><tr><th>Date</th><th>Category</th><th>Details</th><th>Status</th></tr></thead><tbody>${complaintsHtml}</tbody></table></div>
+        <div class="card"><h3 style="margin-bottom: 1rem;">My Complaints</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Category</th><th>Details</th><th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th></tr></thead><tbody>${complaintsHtml}</tbody></table></div>
       </div>
     </div>
   `;

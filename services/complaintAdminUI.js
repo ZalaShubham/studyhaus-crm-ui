@@ -78,12 +78,12 @@ export const initComplaintAdminUI = () => {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Date</th>
+            <th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th>
             <th>Student</th>
-            <th>Seat</th>
+            <th data-i18n="table.seat">\${window.t ? window.t("table.seat") : "Seat"}</th>
             <th>Category</th>
             <th>Issue Description</th>
-            <th>Status</th>
+            <th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -164,10 +164,10 @@ export const initComplaintAdminUI = () => {
           }
         }
       } else {
-        window.showToast("Error resolving complaint: " + res.error, "error");
+        window.showToast(window.t ? window.t('Error resolving complaint: ') || "Error resolving complaint: " : "Error resolving complaint: " + res.error, "error");
       }
     } catch (err) {
-      window.showToast("Error: " + err.message, "error");
+      window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + err.message, "error");
     } finally {
       btn.innerText = "Mark Resolved";
       btn.disabled = false;
@@ -176,12 +176,12 @@ export const initComplaintAdminUI = () => {
 
   window.handleMarkInProgress = async (id) => {
     const res = await updateComplaintStatus(id, "In Progress");
-    if (!res.success) window.showToast("Error: " + res.error, "error");
+    if (!res.success) window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
   };
 
   window.handleMarkPending = async (id) => {
     const res = await updateComplaintStatus(id, "Pending");
-    if (!res.success) window.showToast("Error: " + res.error, "error");
+    if (!res.success) window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
   };
 
   // Start Listener

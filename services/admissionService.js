@@ -74,12 +74,12 @@ export const submitAdmission = async (formData, isStudent) => {
         // Self Registration (Pay Later)
         formData.approvalStatus = "Pending";
         formData.status = "Pending";
-        await setDoc(doc(db, "admissions", uid), formData);
+        await setDoc(doc(db, "admissions", uid), formData, { merge: true });
       } else {
         // Auto-Approved Student
         formData.approvalStatus = "Approved";
         formData.status = "Active";
-        await setDoc(doc(db, "students", uid), formData);
+        await setDoc(doc(db, "students", uid), formData, { merge: true });
       }
     } else {
       // Admin Admission

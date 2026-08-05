@@ -84,10 +84,10 @@ export const initVisitorAdminUI = async () => {
             <tr>
               <th>Date/Time</th>
               <th>Visitor Name</th>
-              <th>Phone</th>
+              <th data-i18n="table.phone">\${window.t ? window.t("table.phone") : "Phone"}</th>
               <th>Purpose</th>
               <th>Handled By</th>
-              <th>Status</th>
+              <th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th>
               ${canEdit ? `<th>Actions</th>` : ""}
             </tr>
           </thead>
@@ -233,7 +233,7 @@ const renderVisitors = (canEdit, canDelete) => {
         actions += `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="window.handleCompleteVisit('${v.id}')">Mark Completed</button> `;
       }
       if (canDelete) {
-        actions += `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem; color:var(--danger);" onclick="window.handleDeleteVisitor('${v.id}')">Delete</button>`;
+        actions += `<button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem; color:var(--danger);" onclick="window.handleDeleteVisitor('${v.id}')" data-i18n="btn.delete">${window.t ? window.t("btn.delete") : "Delete"}</button>`;
       }
     }
 
@@ -255,7 +255,7 @@ const renderVisitors = (canEdit, canDelete) => {
 
 const handleAddVisitor = async () => {
   if (allPurposes.length === 0) {
-    return window.showToast("No purposes available.", "warning");
+    return window.showToast(window.t ? window.t('No purposes available.') || "No purposes available." : "No purposes available.", "warning");
   }
 
   // Populate purposes dropdown
@@ -284,7 +284,7 @@ window.submitVisitorForm = async () => {
   const remarks = document.getElementById("add-vis-remarks").value.trim();
 
   if (!name || !phone || !purpose || !employeeName) {
-    window.showToast("Please fill in all required fields.", "warning");
+    window.showToast(window.t ? window.t('Please fill in all required fields.') || "Please fill in all required fields." : "Please fill in all required fields.", "warning");
     return;
   }
 
@@ -308,7 +308,7 @@ window.submitVisitorForm = async () => {
   btn.disabled = false;
 
   if (!res.success) {
-    window.showToast("Error: " + res.error, "error");
+    window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
   } else {
     document.getElementById("add-visitor-modal").close();
     if(typeof showToast === 'function') showToast("Visitor added successfully!");

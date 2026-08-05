@@ -6,15 +6,15 @@ let currentReportType = "";
 let currentReportData = null;
 
 const reportTitles = {
-  "dashboard": "Dashboard Summary Report",
-  "students": "Student Analytics Report",
-  "attendance": "Attendance Trend Report",
-  "payments": "Revenue & Collections Report",
-  "expenses": "Expense Analysis Report",
-  "complaints": "Complaint Resolution Report",
-  "visitors": "Visitor Analytics Report",
-  "renewals": "Membership Renewal Report",
-  "seats": "Seat Occupancy Report"
+  "dashboard": window.t ? window.t("report.dashboardTitle") : "Dashboard Summary Report",
+  "students": window.t ? window.t("report.studentTitle") : "Student Analytics Report",
+  "attendance": window.t ? window.t("report.attendanceTitle") : "Attendance Trend Report",
+  "payments": window.t ? window.t("report.paymentTitle") : "Revenue & Collections Report",
+  "expenses": window.t ? window.t("report.expenseTitle") : "Expense Analysis Report",
+  "complaints": window.t ? window.t("report.complaintTitle") : "Complaint Resolution Report",
+  "visitors": window.t ? window.t("report.visitorTitle") : "Visitor Analytics Report",
+  "renewals": window.t ? window.t("report.renewalTitle") : "Membership Renewal Report",
+  "seats": window.t ? window.t("report.seatTitle") : "Seat Occupancy Report"
 };
 
 export const openReportViewer = async (type) => {

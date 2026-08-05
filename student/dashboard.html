@@ -25,40 +25,40 @@
       <nav class="sidebar-nav">
         <!-- Overview -->
         <div class="nav-group">
-          <div class="nav-group-label">Overview</div>
+          <div class="nav-group-label" data-i18n="nav.overview">Overview</div>
           <a class="nav-item active" data-page="student-portal" onclick="navigate('student-portal')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            <span>Dashboard</span>
+            <span data-i18n="menu.dashboard">Dashboard</span>
           </a>
           <a class="nav-item" data-page="student-payments" onclick="navigate('student-payments')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span>Payments & Renewals</span>
+            <span data-i18n="menu.paymentsRenewals">Payments & Renewals</span>
           </a>
           <a class="nav-item" data-page="student-attendance" onclick="navigate('student-attendance')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span>Attendance</span>
+            <span data-i18n="menu.attendance">Attendance</span>
           </a>
           <a class="nav-item" data-page="student-complaints" onclick="navigate('student-complaints')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>Complaints</span>
+            <span data-i18n="menu.complaints">Complaints</span>
           </a>
           <a class="nav-item" data-page="student-profile" onclick="navigate('student-profile')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>My Profile</span>
+            <span data-i18n="menu.myProfile">My Profile</span>
           </a>
         </div>
 
         <!-- System -->
         <div class="nav-group">
-          <div class="nav-group-label">System</div>
+          <div class="nav-group-label" data-i18n="nav.system">System</div>
           <a class="nav-item" data-page="notifications" onclick="navigate('notifications')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>Notifications</span>
+            <span data-i18n="menu.notifications">Notifications</span>
             <span class="nav-badge">0</span>
           </a>
           <a class="nav-item" data-page="settings" onclick="navigate('settings')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            <span>Settings</span>
+            <span data-i18n="menu.settings">Settings</span>
           </a>
         </div>
       </nav>
@@ -572,7 +572,7 @@
               <form id="admission-form" onsubmit="event.preventDefault(); window.submitAdmissionForm();">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Full name *</label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.studentName">Full name </label>
                     <input type="text" id="adm-name" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
@@ -588,11 +588,11 @@
                     <input type="email" id="adm-email" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth *</label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.dob">Date of birth </label>
                     <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" / required >
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender *</label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.gender">Gender </label>
                     <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
                       <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
@@ -606,7 +606,7 @@
                     <input type="text" id="adm-course" placeholder="UPSC, CA, JEE..." style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="grid-column: 1 / -1; margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Address</label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.address">Address</label>
                     <textarea id="adm-address" rows="2" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;"></textarea>
                   </div>
                   <div class="form-group" style="margin:0;">
@@ -1125,68 +1125,68 @@
         <!-- Reports Page -->
         <div class="page" id="page-reports">
           <div class="page-header">
-            <div><h1>Reports</h1><p class="page-subtitle">Generate and download reports</p></div>
+            <div><h1>Reports</h1><p class="page-subtitle" data-i18n="report.subtitle">Generate and download reports</p></div>
           </div>
           <div class="report-grid">
             <div class="report-card" onclick="window.openReportViewer('dashboard')">
               <div class="report-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-              <div class="report-name">Dashboard Summary</div>
-              <div class="report-desc">Master P&L, Revenue vs Expenses</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.dashboardTitle">Dashboard Summary</div>
+              <div class="report-desc" data-i18n="report.dashboardDesc">Master P&L, Revenue vs Expenses</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('payments')">
               <div class="report-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-              <div class="report-name">Payment Report</div>
-              <div class="report-desc">All collections, dues, and breakdowns</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.paymentTitle">Payment Report</div>
+              <div class="report-desc" data-i18n="report.paymentDesc">All collections, dues, and breakdowns</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('students')">
               <div class="report-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-              <div class="report-name">Student Report</div>
-              <div class="report-desc">Active, inactive, and pending students list</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.studentTitle">Student Report</div>
+              <div class="report-desc" data-i18n="report.studentDesc">Active, inactive, and pending students list</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('attendance')">
               <div class="report-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polyline points="9 11 12 14 22 4"/></svg></div>
-              <div class="report-name">Attendance Report</div>
-              <div class="report-desc">Daily and monthly attendance records</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.attendanceTitle">Attendance Report</div>
+              <div class="report-desc" data-i18n="report.attendanceDesc">Daily and monthly attendance records</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('seats')">
               <div class="report-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><rect x="2" y="9" width="20" height="11" rx="2"/></svg></div>
-              <div class="report-name">Seat Occupancy Report</div>
-              <div class="report-desc">Seat utilization and floor-wise breakdown</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.seatTitle">Seat Occupancy Report</div>
+              <div class="report-desc" data-i18n="report.seatDesc">Seat utilization and floor-wise breakdown</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('expenses')">
               <div class="report-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-              <div class="report-name">Expense Report</div>
-              <div class="report-desc">Monthly expenses breakdown by category</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.expenseTitle">Expense Report</div>
+              <div class="report-desc" data-i18n="report.expenseDesc">Monthly expenses breakdown by category</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('membershipPlans')">
               <div class="report-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-              <div class="report-name">Membership Report</div>
-              <div class="report-desc">Plan distribution and tracking</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.membershipTitle">Membership Report</div>
+              <div class="report-desc" data-i18n="report.membershipDesc">Plan distribution and tracking</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('renewals')">
               <div class="report-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
-              <div class="report-name">Renewal Report</div>
-              <div class="report-desc">Historical log of all membership renewals</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.renewalTitle">Renewal Report</div>
+              <div class="report-desc" data-i18n="report.renewalDesc">Historical log of all membership renewals</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('visitors')">
               <div class="report-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-              <div class="report-name">Visitor Report</div>
-              <div class="report-desc">Walk-ins, inquiries and foot traffic</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.visitorTitle">Visitor Report</div>
+              <div class="report-desc" data-i18n="report.visitorDesc">Walk-ins, inquiries and foot traffic</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
             <div class="report-card" onclick="window.openReportViewer('complaints')">
               <div class="report-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-              <div class="report-name">Complaint Report</div>
-              <div class="report-desc">Student issues and resolution tracking</div>
-              <button class="btn btn-ghost btn-sm">View Report</button>
+              <div class="report-name" data-i18n="report.complaintTitle">Complaint Report</div>
+              <div class="report-desc" data-i18n="report.complaintDesc">Student issues and resolution tracking</div>
+              <button class="btn btn-ghost btn-sm" data-i18n="btn.viewReport">View Report</button>
             </div>
           </div>
         </div>
@@ -1241,29 +1241,37 @@
         <!-- Settings Page -->
         <div class="page" id="page-settings">
           <div class="page-header">
-            <div><h1>Settings</h1><p class="page-subtitle">Configure your reading space</p></div>
-            <button class="btn btn-primary">Save Changes</button>
+            <div><h1 data-i18n="menu.settings">Settings</h1><p class="page-subtitle" data-i18n="settings.configureReadingSpace">Configure your reading space</p></div>
+            <button class="btn btn-primary" data-i18n="btn.save">Save Changes</button>
           </div>
           <div class="settings-grid">
             <div class="card settings-card">
-              <div class="settings-section-title">Reading Space Info</div>
+              <div class="settings-section-title" data-i18n="settings.readingSpaceInfo">Reading Space Info</div>
               <div class="form-grid">
-                <div class="form-group full-width"><label>Space Name</label><input type="text" value="Studyhaus" /></div>
-                <div class="form-group full-width"><label>Address</label><textarea rows="2">123, MG Road, Bangalore - 560001</textarea></div>
-                <div class="form-group"><label>Phone</label><input type="tel" pattern="[0-9]{10}" title="Must be exactly 10 digits" value="+91 98765 43210" /></div>
-                <div class="form-group"><label>Email</label><input type="email" value="admin@studyhaus.com" /></div>
-                <div class="form-group"><label>GST Number</label><input type="text" value="29ABCDE1234F1Z5" /></div>
-                <div class="form-group"><label>Opening Time</label><input type="time" value="06:00" /></div>
-                <div class="form-group"><label>Closing Time</label><input type="time" value="23:00" /></div>
+                <div class="form-group full-width"><label data-i18n="settings.spaceName">Space Name</label><input type="text" value="Studyhaus" /></div>
+                <div class="form-group full-width"><label data-i18n="form.address">Address</label><textarea rows="2">123, MG Road, Bangalore - 560001</textarea></div>
+                <div class="form-group"><label data-i18n="form.phone">Phone</label><input type="tel" pattern="[0-9]{10}" title="Must be exactly 10 digits" value="+91 98765 43210" /></div>
+                <div class="form-group"><label data-i18n="form.email">Email</label><input type="email" value="admin@studyhaus.com" /></div>
+                <div class="form-group"><label data-i18n="settings.gstNumber">GST Number</label><input type="text" value="29ABCDE1234F1Z5" /></div>
+                <div class="form-group"><label data-i18n="settings.openingTime">Opening Time</label><input type="time" value="06:00" /></div>
+                <div class="form-group"><label data-i18n="settings.closingTime">Closing Time</label><input type="time" value="23:00" /></div>
               </div>
             </div>
             <div class="card settings-card">
-              <div class="settings-section-title">Preferences</div>
+              <div class="settings-section-title" data-i18n="settings.preferences">Preferences</div>
+
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label data-i18n="settings.systemLanguage">System Language</label>
+                <select id="setting-language">
+                  <option value="en">English</option>
+                  <option value="gu">Gujarati</option>
+                </select>
+              </div>
               <div class="settings-toggle-list">
-                <div class="settings-toggle"><div><div class="toggle-label">Send SMS on payment</div><div class="toggle-desc">Auto-send SMS receipt after each payment</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
-                <div class="settings-toggle"><div><div class="toggle-label">Renewal reminders</div><div class="toggle-desc">Alert students 3 days before plan expiry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
-                <div class="settings-toggle"><div><div class="toggle-label">Attendance notifications</div><div class="toggle-desc">Notify admin if student absent 3+ days</div></div><label class="toggle"><input type="checkbox" /></span></label></div>
-                <div class="settings-toggle"><div><div class="toggle-label">Visitor log</div><div class="toggle-desc">Require visitor log for every entry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label" data-i18n="settings.sendSMS">Send SMS on payment</div><div class="toggle-desc" data-i18n="settings.sendSMSDesc">Auto-send SMS receipt after each payment</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label" data-i18n="settings.renewalReminders">Renewal reminders</div><div class="toggle-desc" data-i18n="settings.renewalRemindersDesc">Alert students 3 days before plan expiry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label" data-i18n="settings.attendanceNotifications">Attendance notifications</div><div class="toggle-desc" data-i18n="settings.attendanceNotificationsDesc">Notify admin if student absent 3+ days</div></div><label class="toggle"><input type="checkbox" /></span></label></div>
+                <div class="settings-toggle"><div><div class="toggle-label" data-i18n="settings.visitorLog">Visitor log</div><div class="toggle-desc" data-i18n="settings.visitorLogDesc">Require visitor log for every entry</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
               </div>
             </div>
           </div>

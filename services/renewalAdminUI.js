@@ -118,11 +118,11 @@ window.submitRenewal = async (studentId, oldPlanName) => {
 
   const res = await processRenewal(data);
   if (res.success) {
-    window.showToast("Renewal processed successfully!", "success");
+    window.showToast(window.t ? window.t('Renewal processed successfully!') || "Renewal processed successfully!" : "Renewal processed successfully!", "success");
     document.getElementById("renewal-modal")?.close();
     window.closeStudentProfile(); // Assuming this is called from the profile modal
   } else {
-    window.showToast("Error: " + res.error, "error");
+    window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
     btn.disabled = false;
     btn.innerText = "Process Renewal";
   }
@@ -147,10 +147,10 @@ export const renderRenewalHistory = (studentId, containerId) => {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Date</th>
+            <th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th>
             <th>Plan Change</th>
             <th>Period</th>
-            <th>Amount</th>
+            <th data-i18n="table.amount">\${window.t ? window.t("table.amount") : "Amount"}</th>
             <th>Method</th>
           </tr>
         </thead>

@@ -152,8 +152,8 @@ const listenToPlans = () => {
       if (canEdit) {
         actionsHtml = `
           <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; gap: 1rem; font-size: 0.85rem;">
-            <a href="#" onclick="window.editPlan('${id}', '${plan.planName}', '${plan.price}'); return false;" style="color: var(--primary); text-decoration: none;">Edit</a>
-            <a href="#" onclick="window.deletePlan('${id}', '${plan.planName}'); return false;" style="color: var(--danger); text-decoration: none;">Delete</a>
+            <a href="#" onclick="window.editPlan('${id}', '${plan.planName}', '${plan.price}'); return false;" style="color: var(--primary); text-decoration: none;" data-i18n="btn.edit">${window.t ? window.t("btn.edit") : "Edit"}</a>
+            <a href="#" onclick="window.deletePlan('${id}', '${plan.planName}'); return false;" style="color: var(--danger); text-decoration: none;" data-i18n="btn.delete">${window.t ? window.t("btn.delete") : "Delete"}</a>
           </div>
         `;
       }
@@ -203,7 +203,7 @@ window.submitPlanForm = async () => {
   const notes = document.getElementById("add-plan-notes").value.trim();
 
   if (!name || !price || !duration) {
-    window.showToast("Please fill in all required fields.", "warning");
+    window.showToast(window.t ? window.t('Please fill in all required fields.') || "Please fill in all required fields." : "Please fill in all required fields.", "warning");
     return;
   }
 
@@ -229,7 +229,7 @@ window.submitPlanForm = async () => {
     document.getElementById("add-plan-modal").close();
     if(typeof showToast === 'function') showToast("Plan created successfully!");
   } catch (error) {
-    window.showToast("Error: " + error.message, "error");
+    window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + error.message, "error");
   } finally {
     btn.innerText = originalText;
     btn.disabled = false;
@@ -245,7 +245,7 @@ window.editPlan = async (id, currentName, currentPrice) => {
 
   const newPrice = Number(newPriceStr);
   if (isNaN(newPrice) || newPrice <= 0) {
-    window.showToast("Invalid price.", "error");
+    window.showToast(window.t ? window.t('Invalid price.') || "Invalid price." : "Invalid price.", "error");
     return;
   }
 
@@ -255,9 +255,9 @@ window.editPlan = async (id, currentName, currentPrice) => {
       price: newPrice,
       updatedAt: new Date().toISOString()
     });
-    window.showToast("Plan updated successfully!", "success");
+    window.showToast(window.t ? window.t('Plan updated successfully!') || "Plan updated successfully!" : "Plan updated successfully!", "success");
   } catch (error) {
-    window.showToast("Failed to update plan: " + error.message, "error");
+    window.showToast(window.t ? window.t('Failed to update plan: ') || "Failed to update plan: " : "Failed to update plan: " + error.message, "error");
   }
 };
 
@@ -270,9 +270,9 @@ window.deletePlan = async (id, planName) => {
     try {
       const docRef = doc(db, "membershipPlans", id);
       await deleteDoc(docRef);
-      window.showToast("Plan deleted.", "success");
+      window.showToast(window.t ? window.t('Plan deleted.') || "Plan deleted." : "Plan deleted.", "success");
     } catch (error) {
-      window.showToast("Failed to delete plan: " + error.message, "error");
+      window.showToast(window.t ? window.t('Failed to delete plan: ') || "Failed to delete plan: " : "Failed to delete plan: " + error.message, "error");
     }
   }
 };

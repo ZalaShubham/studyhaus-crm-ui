@@ -50,7 +50,7 @@ export const initAnnouncementAdminUI = () => {
           <div class="notif-content" style="flex: 1;">
             <div style="display:flex; justify-content:space-between;">
               <div class="notif-title">${a.title}</div>
-              <button class="btn btn-ghost" style="padding:2px 5px; color:var(--danger);" onclick="window.deleteAnnouncementHandler('${a.id}')">Delete</button>
+              <button class="btn btn-ghost" style="padding:2px 5px; color:var(--danger);" onclick="window.deleteAnnouncementHandler('${a.id}')" data-i18n="btn.delete">${window.t ? window.t("btn.delete") : "Delete"}</button>
             </div>
             <div class="notif-body">${a.message}</div>
             <div class="notif-time">${scheduledStr ? scheduledStr : 'Sent: ' + dateStr} · Audience: ${a.audience}</div>
@@ -115,7 +115,7 @@ window.submitAnnouncement = async () => {
     const checkboxes = document.querySelectorAll(".ann-student-cb:checked");
     data.targetStudentIds = Array.from(checkboxes).map(cb => cb.value);
     if (data.targetStudentIds.length === 0) {
-      window.showToast("Please select at least one student.", "error");
+      window.showToast(window.t ? window.t('Please select at least one student.') || "Please select at least one student." : "Please select at least one student.", "error");
       if (btn) { btn.disabled = false; btn.textContent = "Schedule"; }
       return;
     }
@@ -126,12 +126,12 @@ window.submitAnnouncement = async () => {
   if (btn) { btn.disabled = false; btn.textContent = "Schedule"; }
 
   if (res.success) {
-    window.showToast("Announcement scheduled successfully!", "success");
+    window.showToast(window.t ? window.t('Announcement scheduled successfully!') || "Announcement scheduled successfully!" : "Announcement scheduled successfully!", "success");
     
     document.getElementById("announcement-modal").close();
     document.getElementById("announcement-form").reset();
   } else {
-    window.showToast("Error: " + res.error, "error");
+    window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
   }
 };
 
@@ -143,9 +143,9 @@ window.deleteAnnouncementHandler = async (id) => {
   if (confirmed) {
     const res = await deleteAnnouncement(id);
     if (res.success) {
-      window.showToast("Announcement deleted", "success");
+      window.showToast(window.t ? window.t('Announcement deleted') || "Announcement deleted" : "Announcement deleted", "success");
     } else {
-      window.showToast("Error deleting announcement: " + res.error, "error");
+      window.showToast(window.t ? window.t('Error deleting announcement: ') || "Error deleting announcement: " : "Error deleting announcement: " + res.error, "error");
     }
   }
 };

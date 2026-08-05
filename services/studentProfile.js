@@ -287,7 +287,7 @@ const renderProfileModal = (s, role) => {
               <input type="text" id="edit-remarks" value="${s.remarks || ''}" ${!canEdit ? 'disabled' : ''} />
             </div>
             ${isOwner ? `
-            <div class="form-group">
+            <div class="form-group" style="grid-column: span 2;">
               <label>Login Credentials (Admin view only)</label>
               <input type="text" id="view-login-credentials" value="${s.loginCredentials || 'Loading...'}" readonly disabled style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;" />
             </div>

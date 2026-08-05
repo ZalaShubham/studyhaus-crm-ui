@@ -11,6 +11,7 @@ import { initAttendanceAdminUI } from "./services/attendanceAdminUI.js";
 import { initPaymentAdminUI } from "./services/paymentAdminUI.js";
 import { initComplaintAdminUI } from "./services/complaintAdminUI.js";
 import { initSeatMapUI } from "./services/seatMapUI.js";
+import { initLiveSeatMapUI } from "./services/liveSeatMapUI.js";
 import { initExpenseAdminUI } from "./services/expenseAdminUI.js";
 import { initVisitorAdminUI } from "./services/visitorAdminUI.js";
 import { initMessageLogAdminUI } from "./services/messageLogAdminUI.js";
@@ -22,6 +23,7 @@ import { initAnnouncementAdminUI } from "./services/announcementAdminUI.js";
 import { initStaffAdminUI } from "./services/staffAdminUI.js";
 import { initTasksAdminUI } from "./services/tasksAdminUI.js";
 import { initSettingsAdminUI } from "./services/settingsAdminUI.js";
+import "./services/translationService.js";
 import "./services/whatsappModalUI.js"; // Auto-injects modal styles and functions
 
 // Expose the test function to the global window object
@@ -69,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initComplaintAdminUI();
     // Initialize Seat Map viewer
     initSeatMapUI();
+    // Initialize Live Seat Map viewer
+    initLiveSeatMapUI();
     // Initialize Expense viewer
     initExpenseAdminUI();
     // Initialize Visitor viewer

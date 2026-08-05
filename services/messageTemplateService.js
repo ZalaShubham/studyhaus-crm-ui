@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
 const DEFAULT_TEMPLATES = [
@@ -43,3 +43,21 @@ export const fetchAllTemplates = async () => {
   snap.forEach(doc => templates.push({ id: doc.id, ...doc.data() }));
   return templates;
 };
+
+export const addTemplate = async (templateData) => {
+  const templatesRef = collection(db, "messageTemplates");
+  const docRef = await addDoc(templatesRef, templateData);
+  return { id: docRef.id, ...templateData };
+};
+
+export const updateTemplate = async (id, templateData) => {
+  const docRef = doc(db, "messageTemplates", id);
+  await updateDoc(docRef, templateData);
+  return { id, ...templateData };
+};
+
+export const deleteTemplate = async (id) => {
+  const docRef = doc(db, "messageTemplates", id);
+  await deleteDoc(docRef);
+};
+
