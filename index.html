@@ -681,7 +681,7 @@
               <form id="admission-form" onsubmit="event.preventDefault(); window.submitAdmissionForm();">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.studentName">Full name </label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.studentName">Full name *</label>
                     <input type="text" id="adm-name" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
@@ -697,11 +697,11 @@
                     <input type="email" id="adm-email" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.dob">Date of birth </label>
-                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" / required >
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.dob">Date of birth *</label>
+                    <input type="date" id="adm-dob" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.gender">Gender </label>
+                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;" data-i18n="form.gender">Gender *</label>
                     <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
                       <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
@@ -1358,20 +1358,20 @@
             <div class="card settings-card">
               <div class="settings-section-title">Reading Space Info</div>
               <div class="form-grid">
-                <div class="form-group full-width"><label data-i18n="settings.spaceName">Space Name</label><input type="text" value="Studyhaus" /></div>
-                <div class="form-group full-width"><label data-i18n="form.address">Address</label><textarea rows="2">123, MG Road, Bangalore - 560001</textarea></div>
-                <div class="form-group"><label data-i18n="form.phone">Phone</label><input type="tel" pattern="[0-9]{10}" title="Must be exactly 10 digits" value="+91 98765 43210" /></div>
-                <div class="form-group"><label data-i18n="form.email">Email</label><input type="email" value="admin@studyhaus.com" /></div>
-                <div class="form-group"><label data-i18n="settings.gstNumber">GST Number</label><input type="text" value="29ABCDE1234F1Z5" /></div>
-                <div class="form-group"><label data-i18n="settings.openingTime">Opening Time</label><input type="time" value="06:00" /></div>
-                <div class="form-group"><label data-i18n="settings.closingTime">Closing Time</label><input type="time" value="23:00" /></div>
+                <div class="form-group full-width"><label data-i18n="settings.spaceName" for="settings-space-name">Space Name</label><input id="settings-space-name" type="text" value="Studyhaus" /></div>
+                <div class="form-group full-width"><label data-i18n="form.address" for="settings-address">Address</label><textarea id="settings-address" rows="2">123, MG Road, Bangalore - 560001</textarea></div>
+                <div class="form-group"><label data-i18n="form.phone" for="settings-phone">Phone</label><input id="settings-phone" type="tel" pattern="[0-9]{10}" title="Must be exactly 10 digits" value="+91 98765 43210" /></div>
+                <div class="form-group"><label data-i18n="form.email" for="settings-email">Email</label><input id="settings-email" type="email" value="admin@studyhaus.com" /></div>
+                <div class="form-group"><label data-i18n="settings.gstNumber" for="settings-gst">GST Number</label><input id="settings-gst" type="text" value="29ABCDE1234F1Z5" /></div>
+                <div class="form-group"><label data-i18n="settings.openingTime" for="settings-opening">Opening Time</label><input id="settings-opening" type="time" value="06:00" /></div>
+                <div class="form-group"><label data-i18n="settings.closingTime" for="settings-closing">Closing Time</label><input id="settings-closing" type="time" value="23:00" /></div>
               </div>
             </div>
             <div class="card settings-card">
               <div class="settings-section-title">Preferences</div>
 
               <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label data-i18n="settings.systemLanguage">System Language</label>
+                <label data-i18n="settings.systemLanguage" for="setting-language">System Language</label>
                 <select id="setting-language">
                   <option value="en">English</option>
                   <option value="gu">Gujarati</option>

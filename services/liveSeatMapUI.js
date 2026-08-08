@@ -9,10 +9,14 @@ let currentFloor = "Ground Floor";
 let unsubSeats = null;
 let unsubAttendance = null;
 
-// Helpers
+// Helpers — IST-aware date (India is UTC+5:30)
 const getTodayStr = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  // Add 5h30m to UTC so the date matches IST local date even near midnight
+  const now = new Date();
+  const istOffset = 5 * 60 + 30; // minutes
+  const istMs = now.getTime() + istOffset * 60 * 1000;
+  const d = new Date(istMs);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
 };
 
 // NOTE: NO zero-padding — matches Firestore seat numbers exactly ("A1", "A34", not "A01")
@@ -27,26 +31,38 @@ const generateRange = (prefix, start, end) => {
 };
 
 const fetchMissingPhotos = async (records) => {
-  let fetchedAny = false;
   for (const rec of records) {
     if (studentPhotos[rec.studentId] === undefined) {
       try {
-        const snap = await getDoc(doc(db, "studentDocuments", rec.studentId));
-        studentPhotos[rec.studentId] = (snap.exists() && snap.data().selfie) ? snap.data().selfie : null;
-        if (snap.exists() && snap.data().selfie) fetchedAny = true;
+        // Primary: studentDocuments/{id}.selfie (uploaded during admission)
+        const docsSnap = await getDoc(doc(db, "studentDocuments", rec.studentId));
+        let photoUrl = (docsSnap.exists() && docsSnap.data().selfie) ? docsSnap.data().selfie : null;
+
+        // Fallback: students/{id}.selfieUrl
+        if (!photoUrl) {
+          const stuSnap = await getDoc(doc(db, "students", rec.studentId));
+          photoUrl = (stuSnap.exists() && stuSnap.data().selfieUrl) ? stuSnap.data().selfieUrl : null;
+        }
+
+        studentPhotos[rec.studentId] = photoUrl; // null means "checked, no photo"
       } catch (e) {
         studentPhotos[rec.studentId] = null;
       }
     }
   }
-  if (fetchedAny) renderLiveMap();
+  // Always re-render after resolving photos — even if all are null
+  renderLiveMap();
 };
 
 // ─────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────
 export const initLiveSeatMapUI = () => {
-  const container = document.getElementById("page-live-seat-map");
+  initLiveSeatMapInTab("page-live-seat-map");
+};
+
+export const initLiveSeatMapInTab = (containerId) => {
+  const container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = `
@@ -130,8 +146,9 @@ export const initLiveSeatMapUI = () => {
 // FIRESTORE LISTENERS
 // ─────────────────────────────────────────────────────────────
 const startListeners = () => {
-  if (unsubSeats) unsubSeats();
-  if (unsubAttendance) unsubAttendance();
+  // Tear down any existing listeners before re-subscribing (prevents duplicates)
+  if (unsubSeats) { unsubSeats(); unsubSeats = null; }
+  if (unsubAttendance) { unsubAttendance(); unsubAttendance = null; }
 
   unsubSeats = onSnapshot(collection(db, "seats"), (snap) => {
     allSeats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -139,15 +156,27 @@ const startListeners = () => {
   });
 
   const today = getTodayStr();
+
+  // Use checkOut==null as the query — this is a single-field filter that
+  // catches ALL currently-present students, including records created before
+  // the `status` field was added to the attendance schema.
+  // Firestore can query null values with a single-field auto-index (no composite index needed).
+  // We then filter by today's date client-side to exclude any stale open sessions from previous days.
   const q = query(
     collection(db, "attendance"),
-    where("date", "==", today),
     where("checkOut", "==", null)
   );
   unsubAttendance = onSnapshot(q, (snap) => {
-    activeAttendance = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Filter to today's date only (handles stale records from days where app crashed before checkout)
+    activeAttendance = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.date === today);
     renderLiveMap();
     fetchMissingPhotos(activeAttendance);
+  }, (err) => {
+    console.error("[LiveSeatMap] Firestore attendance query error:", err);
+    const grid = document.getElementById("live-seat-grid");
+    if (grid) grid.innerHTML = `<div style="text-align:center;padding:2rem;color:#ef4444;">Error loading attendance data: ${err.message}</div>`;
   });
 };
 
@@ -168,51 +197,85 @@ const renderLiveMap = () => {
 
     if (!seatExists) {
       return `
-        <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; height:80px; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:13px;">
+        <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; height:90px; display:grid; place-items:center; color:#94a3b8; font-size:13px;">
           ${seatNumStr}
         </div>
       `;
     }
 
+
     const att = activeAttendance.find(a => a.seatNumber === String(seatNumStr));
 
     if (att) {
-      // PRESENT — seat number + colored avatar + student name
+      // PRESENT — show photo or colored initial avatar
       const name = att.studentName || '?';
       const firstName = name.split(' ')[0];
       const initial = firstName.charAt(0).toUpperCase();
 
-      // Generate a consistent color from the initial
       const colors = [
         '#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f43f5e'
       ];
-      const colorIndex = initial.charCodeAt(0) % colors.length;
-      const avatarColor = colors[colorIndex];
+      const avatarColor = colors[initial.charCodeAt(0) % colors.length];
+
+      // Check-in time badge
+      let checkInBadge = '';
+      if (att.checkIn) {
+        const t = new Date(att.checkIn);
+        const hh = String(t.getHours()).padStart(2,'0');
+        const mm = String(t.getMinutes()).padStart(2,'0');
+        checkInBadge = `<div style="font-size:9px; color:#dc2626; font-weight:500; letter-spacing:0.3px; text-align:center;">${hh}:${mm}</div>`;
+      }
+
+      // Use real photo if available, else initial avatar
+      const photoUrl = studentPhotos[att.studentId];
+      const avatarHtml = photoUrl
+        ? `<img src="${photoUrl}" alt="${name}"
+            style="width:38px; height:38px; border-radius:50%; object-fit:cover;
+                   border:2px solid #fca5a5; flex-shrink:0;"
+            onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+           <div style="display:none; width:38px; height:38px; border-radius:50%; background:${avatarColor};
+                       color:#fff; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0;">${initial}</div>`
+        : `<div style="width:38px; height:38px; border-radius:50%; background:${avatarColor};
+                       color:#fff; display:flex; align-items:center; justify-content:center;
+                       font-size:15px; font-weight:700; flex-shrink:0;">${initial}</div>`;
 
       return `
-        <div title="${name}"
-          style="background:#fef2f2; border:1.5px solid #fecaca; color:#991b1b; border-radius:10px; height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:default; overflow:hidden; padding:6px; transition:transform 0.15s; box-shadow:0 1px 3px rgba(239,68,68,0.12);"
-          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239,68,68,0.2)';"
-          onmouseout="this.style.transform='none'; this.style.boxShadow='0 1px 3px rgba(239,68,68,0.12)';">
-          <div style="font-size:11px; font-weight:700; color:#dc2626; line-height:1;">${seatNumStr}</div>
-          <div style="width:32px; height:32px; border-radius:50%; background:${avatarColor}; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0;">${initial}</div>
-          <div style="font-size:10px; font-weight:600; color:#991b1b; max-width:80px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1;">${firstName}</div>
+        <div style="background:#fef2f2; border:1.5px solid #fecaca; color:#991b1b; border-radius:10px;
+                 width:100%; height:90px; box-sizing:border-box;
+                 display:flex; flex-direction:column; align-items:center;
+                 justify-content:center; gap:3px; cursor:default; overflow:hidden; padding:6px;
+                 box-shadow:0 1px 3px rgba(239,68,68,0.12);">
+          <div style="font-size:10px; font-weight:700; color:#dc2626; line-height:1; text-align:center;">${seatNumStr}</div>
+          <div style="display:flex; align-items:center; justify-content:center; position:relative;">
+            ${avatarHtml}
+            <div style="position:absolute; bottom:-1px; right:-2px; width:11px; height:11px;
+                        background:#22c55e; border-radius:50%; border:1.5px solid #fff;"></div>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#991b1b; max-width:78px; white-space:nowrap;
+                      overflow:hidden; text-overflow:ellipsis; line-height:1; text-align:center;">${firstName}</div>
+          ${checkInBadge}
         </div>
       `;
     } else {
-      // VACANT — clean green card with seat number
+      // VACANT — clean green card, number perfectly centered
       return `
-        <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:10px; height:80px; display:flex; align-items:center; justify-content:center; cursor:default; transition:transform 0.15s;"
-          onmouseover="this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.transform='none';">
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:10px;
+                    width:100%; height:90px; box-sizing:border-box;
+                    display:grid; place-items:center; cursor:default;">
           <div style="font-size:15px; font-weight:600;">${seatNumStr}</div>
         </div>
       `;
     }
+
+
+
   };
 
+
   const renderColHtml = (arr) => {
-    let html = `<div style="display:flex; flex-direction:column; gap:0.5rem; flex:1;">`;
+    // No align-items here — default is 'stretch', so every card fills the full column width.
+    // This ensures seat numbers are always centered inside a consistent-width card.
+    let html = `<div style="display:flex; flex-direction:column; gap:0.5rem; flex:1; min-width:0;">`;
     arr.forEach(n => { html += renderSeatCard(n); });
     html += `</div>`;
     return html;

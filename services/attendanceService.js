@@ -31,6 +31,8 @@ const validateCheckIn = async (student, selectedSeatNumber) => {
     }
   }
 
+  const today = getTodayStr();
+
   // Check for existing Active session
   const q = query(
     collection(db, "attendance"),
@@ -38,8 +40,42 @@ const validateCheckIn = async (student, selectedSeatNumber) => {
     where("status", "==", "Active")
   );
   const snap = await getDocs(q);
+
   if (!snap.empty) {
-    throw new Error("You already have an active check-in session.");
+    for (const sessionDoc of snap.docs) {
+      const sessionData = sessionDoc.data();
+
+      if (sessionData.date === today) {
+        // Already checked in TODAY — block the duplicate
+        throw new Error("Student is already checked in for today.");
+      } else {
+        // Stale session from a previous day (student left without checking out).
+        // Auto-close it so today's check-in can proceed.
+        const checkOutTime = new Date().getTime();
+        const checkInTime = sessionData.checkIn || checkOutTime;
+        const durationHours = Math.max(0, Math.round((checkOutTime - checkInTime) / (1000 * 60 * 60) * 100) / 100);
+
+        await updateDoc(sessionDoc.ref, {
+          checkOut: checkOutTime,
+          duration: durationHours,
+          status: "Completed",
+          autoClosedReason: "Stale session — student did not check out the previous day.",
+          updatedAt: serverTimestamp()
+        });
+
+        // Free up the seat that was marked Occupied from the stale session
+        if (sessionData.seatNumber) {
+          const seatQ = query(collection(db, "seats"), where("seatNumber", "==", sessionData.seatNumber));
+          const seatSnap = await getDocs(seatQ);
+          if (!seatSnap.empty) {
+            const seatDoc = seatSnap.docs[0];
+            const sData = seatDoc.data();
+            const newStatus = sData.assignedStudentId ? "Reserved" : "Available";
+            await updateDoc(seatDoc.ref, { status: newStatus, lastUpdated: serverTimestamp() });
+          }
+        }
+      }
+    }
   }
 
   return finalSeat;

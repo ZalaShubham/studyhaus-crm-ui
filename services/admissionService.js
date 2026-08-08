@@ -231,11 +231,22 @@ export const initAdmissionsUI = async () => {
     try {
       const q = query(collection(db, "seats"), where("status", "==", "Available"));
       const snap = await getDocs(q);
-      let availableCount = snap.size;
-      let html = `<option value=''>${availableCount} available</option>`;
+      let validSeats = [];
       snap.forEach(doc => {
         const s = doc.data();
-        html += `<option value="${s.seatNumber}">${s.seatNumber}</option>`;
+        if (s.seatNumber && String(s.seatNumber).trim() !== "" && String(s.seatNumber) !== "undefined") {
+          const seatStr = String(s.seatNumber).trim();
+          if (/^[AB]/i.test(seatStr)) {
+            validSeats.push(seatStr);
+          }
+        }
+      });
+      
+      validSeats.sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+      
+      let html = `<option value=''>${validSeats.length} available</option>`;
+      validSeats.forEach(seat => {
+        html += `<option value="${seat}">${seat}</option>`;
       });
       seatSelect.innerHTML = html;
     } catch (e) {

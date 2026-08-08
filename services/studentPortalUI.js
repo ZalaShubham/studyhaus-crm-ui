@@ -31,7 +31,6 @@ export const initStudentPortalUI = () => {
   document.getElementById("page-student-payments").innerHTML = "";
   document.getElementById("page-student-attendance").innerHTML = "";
   document.getElementById("page-student-complaints").innerHTML = "";
-  document.getElementById("page-student-profile").innerHTML = "";
 
   unsubscribePortal = listenToStudentPortalData(async (studentData) => {
     currentStudent = studentData;
@@ -73,25 +72,6 @@ export const initStudentPortalUI = () => {
   });
 
   // Actions
-  window.saveStudentPortalProfile = async () => {
-    const btn = document.getElementById("btn-portal-save");
-    btn.textContent = "Saving...";
-    btn.disabled = true;
-
-    const updates = {
-      email: document.getElementById("portal-edit-email").value,
-      address: document.getElementById("portal-edit-address").value,
-      parentPhone: document.getElementById("portal-edit-parent").value
-    };
-
-    const res = await updateStudentOwnProfile(currentStudent.id, updates);
-    if (res.success) window.showToast(window.t ? window.t('Profile updated!') || "Profile updated!" : "Profile updated!", "success");
-    else window.showToast(window.t ? window.t('Failed to update profile: ') || "Failed to update profile: " : "Failed to update profile: " + res.error, "error");
-    
-    btn.textContent = "Save Profile Changes";
-    btn.disabled = false;
-  };
-
   window.handleCheckIn = async () => {
     let selectedSeat = null;
     const isRotational = (currentStudent.planName || "").toLowerCase().includes("rotational");
@@ -119,7 +99,15 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkOut(attendanceId, checkInTimestamp);
-    if (!res.success) window.showToast(window.t ? window.t('Check-Out Failed: ') || "Check-Out Failed: " : "Check-Out Failed: " + res.error, "error");
+    if (!res.success) {
+      window.showToast(window.t ? window.t('Check-Out Failed: ') || "Check-Out Failed: " : "Check-Out Failed: " + res.error, "error");
+      if (document.getElementById("btn-checkout")) {
+        btn.textContent = "Check-Out Now";
+        btn.disabled = false;
+      }
+    } else {
+      window.showToast(window.t ? window.t('Checked out successfully!') || "Checked out successfully!" : "Checked out successfully!", "success");
+    }
   };
 
   window.handleDownloadPDF = async () => {
@@ -148,6 +136,18 @@ export const initStudentPortalUI = () => {
     const total = basePrice * months;
     document.getElementById("payment-amount-display").innerText = `₹${total}`;
     document.getElementById("payment-amount").value = total;
+
+    let startDate = new Date(); // Fallback to today
+    if (currentStudent.paymentDueDate) {
+      const parsedDate = new Date(currentStudent.paymentDueDate);
+      if (!isNaN(parsedDate.getTime())) {
+        startDate = parsedDate;
+      }
+    }
+    
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + months);
+    document.getElementById("payment-end-date").innerText = endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   window.handlePaymentSubmit = async () => {
@@ -270,9 +270,9 @@ const renderPortal = () => {
 
   let attendanceActionHtml = "";
   if (activeSession) {
-    attendanceActionHtml = `<button id="btn-checkout" class="btn btn-primary" style="background: var(--danger); border-color: var(--danger);" onclick="window.handleCheckOut('${activeSession.id}', ${activeSession.checkIn})">Check-Out Now</button>`;
+    attendanceActionHtml = `<button id="btn-checkout" class="btn" style="background: #ef4444 !important; color: #ffffff !important; border: none; box-shadow: 0 1px 2px rgba(239,68,68,0.2);" onclick="window.handleCheckOut('${activeSession.id}', ${activeSession.checkIn})">Check-Out Now</button>`;
   } else {
-    attendanceActionHtml = `<button id="btn-checkin" class="btn btn-primary" onclick="window.handleCheckIn()">Check-In Now</button>`;
+    attendanceActionHtml = `<button id="btn-checkin" class="btn" style="background: var(--primary) !important; color: #ffffff !important; border: none;" onclick="window.handleCheckIn()">Check-In Now</button>`;
   }
 
   // 1. DASHBOARD PAGE (Overview)
@@ -289,12 +289,12 @@ const renderPortal = () => {
         <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
           <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name *</label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.name || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile *</label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.phone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.name || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.phone || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email *</label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth *</label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" / required ></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender *</label>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth <span style="color:#e53e3e;">*</span></label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" required /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender <span style="color:#e53e3e;">*</span></label>
                 <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
                   <option value="">Select</option><option value="Male" ${s.gender === 'Male' ? 'selected' : ''}>Male</option><option value="Female" ${s.gender === 'Female' ? 'selected' : ''}>Female</option><option value="Other" ${s.gender === 'Other' ? 'selected' : ''}>Other</option>
                 </select>
@@ -302,7 +302,7 @@ const renderPortal = () => {
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.college || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.course || ''}" /></div>
               <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">${s.address || ''}</textarea></div>
-              <div class="form-group" style="margin:0; grid-column: 1 / -1;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan *</label>
+              <div class="form-group" style="margin:0; grid-column: 1 / -1;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan <span style="color:#e53e3e;">*</span></label>
                 <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
                   <option value="">Choose plan (Loading...)</option>
                 </select>
@@ -683,7 +683,7 @@ const renderPortal = () => {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     navItems.forEach(item => {
       const dp = item.getAttribute('data-page');
-      const allowedForStudent = ["student-portal", "student-payments", "student-attendance", "student-complaints", "student-profile", "notifications", "settings"];
+      const allowedForStudent = ["student-portal", "student-payments", "student-attendance", "student-complaints", "notifications", "settings"];
       if (allowedForStudent.includes(dp)) {
         item.style.display = 'flex';
       } else {
@@ -739,31 +739,24 @@ const renderPortal = () => {
         <h3 style="margin-bottom: 1rem;" data-i18n="studentPortal.quickLinks">${window.t ? window.t('studentPortal.quickLinks') : 'Quick Links'}</h3>
         <div class="dashboard-grid">
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-payments')">
-            <div class="avatar" style="background: var(--accent-violet);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #8b5cf6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <div>
               <h4 style="margin: 0;" data-i18n="studentPortal.paymentsTitle">${window.t ? window.t('studentPortal.paymentsTitle') : 'Payments & Renewals'}</h4>
               <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.paymentsDesc') : 'Submit payments and view history'}</div>
             </div>
           </div>
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-attendance')">
-            <div class="avatar" style="background: var(--success);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div>
               <h4 style="margin: 0;" data-i18n="studentPortal.attendanceTitle">${window.t ? window.t('studentPortal.attendanceTitle') : 'Attendance'}</h4>
               <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.attendanceDesc') : 'View check-ins and hours'}</div>
             </div>
           </div>
           <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-complaints')">
-            <div class="avatar" style="background: var(--danger);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div>
               <h4 style="margin: 0;" data-i18n="studentPortal.complaintsTitle">${window.t ? window.t('studentPortal.complaintsTitle') : 'Complaints'}</h4>
               <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.complaintsDesc') : 'Report issues and track status'}</div>
-            </div>
-          </div>
-          <div class="card" style="cursor: pointer; display: flex; align-items: center; gap: 1rem;" onclick="navigate('student-profile')">
-            <div class="avatar" style="background: var(--primary);"><svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <div>
-              <h4 style="margin: 0;" data-i18n="studentPortal.profileTitle">${window.t ? window.t('studentPortal.profileTitle') : 'My Profile'}</h4>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">${window.t ? window.t('studentPortal.profileDesc') : 'Update personal information'}</div>
             </div>
           </div>
         </div>
@@ -783,22 +776,92 @@ const renderPortal = () => {
     <div class="form-grid" style="margin-top: 1rem;">
       <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
         <!-- Submit Payment Request -->
-        <div class="card" style="border-left: 4px solid var(--accent-violet); max-width: 800px;">
-          <h3 style="margin-bottom: 1.5rem;">Submit Payment</h3>
+        <div class="card" style="border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 800px; padding: 2rem;">
+          <div style="display: flex; align-items: center; margin-bottom: 1.5rem; gap: 0.75rem; color: #0369a1;">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <h3 style="margin: 0; font-size: 1.25rem;">Renew Subscription</h3>
+          </div>
+
           <div style="display:flex; gap: 2rem; align-items:flex-start; flex-wrap: wrap;">
-            <div style="width: 160px; height: 160px; background: #fff; border: 1px solid var(--border); border-radius: 8px; display:flex; align-items:center; justify-content:center; overflow: hidden; flex-shrink: 0;">
-              <img src="/payment-qr.jpeg" class="payment-qr-img" alt="Scan to Pay" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/160?text=QR+Code';" />
-            </div>
-            <div style="flex:1; min-width: 300px;">
+            <!-- LEFT SIDE: Form & Details -->
+            <div style="flex: 1; min-width: 350px;">
+              
+              <!-- Student Info Block -->
+              <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div class="avatar" style="width: 50px; height: 50px; background: var(--primary); font-size: 1.2rem;">${initials}</div>
+                <div>
+                  <h4 style="margin: 0; color: #0369a1; font-size: 1.1rem;">${s.name}</h4>
+                  <div style="font-size: 0.85rem; color: #0c4a6e; margin-top:2px;">Phone: ${s.phone}</div>
+                  <div style="font-size: 0.85rem; color: #0c4a6e;">Seat: ${s.seatNumber || 'Rotational'}</div>
+                </div>
+              </div>
+
+              <!-- Current Expiry Block -->
+              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="#64748b" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <div>
+                  <div style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Current Subscription Ends</div>
+                  <div style="font-size: 1rem; font-weight: 600; color: #334155;">${s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</div>
+                </div>
+              </div>
+
+              <!-- NEW DATES BLOCK -->
+              <div style="margin-bottom: 1.5rem;">
+                <label style="font-size: 0.75rem; font-weight: 600; color: #ef4444; text-transform: uppercase; margin-bottom: 0.5rem; display: block;">Dates *</label>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="text-align: center; flex:1;">
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #16a34a; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> START</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #15803d; margin-top: 6px;" id="payment-start-date">${s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Today'}</div>
+                  </div>
+                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="#86efac" stroke-width="2" fill="none" style="margin: 0 1rem;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  <div style="text-align: center; flex:1;">
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #16a34a; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> END</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #15803d; margin-top: 6px;" id="payment-end-date">--</div>
+                  </div>
+                </div>
+              </div>
+
               <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
-                <div class="form-group"><label>Renewal Period</label><select id="payment-months" onchange="window.calculatePaymentAmount()"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option></select></div>
-                <div class="form-group"><label>Amount to Pay</label><div id="payment-amount-display" style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">₹--</div><input type="hidden" id="payment-amount" value="0" /></div>
-                <div class="form-group full-width"><label>UPI Transaction ID *</label><input type="text" id="payment-txnid" required /></div>
-                <div class="form-group full-width"><button type="submit" id="btn-submit-payment" class="btn btn-primary">Submit Payment Request</button></div>
+                <div class="form-group">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: #ef4444; text-transform: uppercase;">Duration *</label>
+                  <select id="payment-months" onchange="window.calculatePaymentAmount()" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline:none; background:#fff;">
+                    <option value="1">1 Month</option>
+                    <option value="2">2 Months</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Amount (₹)</label>
+                  <div id="payment-amount-display" style="font-size: 1.25rem; font-weight: 700; color: #334155; padding: 6px 0;">₹--</div>
+                  <input type="hidden" id="payment-amount" value="0" />
+                </div>
+                <div class="form-group full-width">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">UPI Transaction ID *</label>
+                  <input type="text" id="payment-txnid" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline:none;" placeholder="Enter your 12-digit UPI Txn ID" />
+                </div>
+                <div class="form-group full-width" style="display:flex; gap: 1rem; margin-top: 1rem;">
+                  <button type="button" class="btn btn-ghost" style="flex: 1; background: #f1f5f9; color: #475569;" onclick="document.getElementById('payment-txnid').value=''">✕ Cancel</button>
+                  <button type="submit" id="btn-submit-payment" class="btn btn-primary" style="flex: 2; background: #22c55e; border-color: #22c55e; color: #fff;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    Submit Renewal Request
+                  </button>
+                </div>
               </form>
             </div>
+
+            <!-- RIGHT SIDE: QR Code -->
+            <div style="width: 220px; display:flex; flex-direction: column; align-items:center; gap: 1rem; padding: 1.5rem 1rem; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+              <h4 style="margin:0; font-size: 0.9rem; color: #475569; text-align:center;">Scan to Pay</h4>
+              <div style="width: 160px; height: 160px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; display:flex; align-items:center; justify-content:center; overflow: hidden;">
+                <img src="/payment-qr.jpeg" class="payment-qr-img" alt="Scan to Pay" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/160?text=QR+Code';" />
+              </div>
+              <p style="font-size: 0.75rem; color: #64748b; text-align: center; margin: 0; line-height: 1.4;">Pay using GPay, PhonePe, or Paytm and enter the Txn ID here.</p>
+            </div>
+
           </div>
         </div>
+
 
         <div class="card"><h3 style="margin-bottom: 1rem;">Renewal History</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Plan</th><th>Period</th><th data-i18n="table.amount">\${window.t ? window.t("table.amount") : "Amount"}</th></tr></thead><tbody>${renewalsHtml}</tbody></table></div>
         <div class="card"><h3 style="margin-bottom: 1rem;">My Payments</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Period</th><th data-i18n="table.amount">\${window.t ? window.t("table.amount") : "Amount"}</th><th>Txn ID</th><th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th></tr></thead><tbody>${paymentsHtml}</tbody></table></div>
@@ -807,11 +870,26 @@ const renderPortal = () => {
   `;
 
   // 3. ATTENDANCE PAGE
+  attendanceActionHtml = "";
+  if (activeSession) {
+    attendanceActionHtml = `<button class="btn btn-primary" id="btn-checkout" onclick="window.handleCheckOut('${activeSession.id}', ${activeSession.checkIn})" style="background:#ef4444; border:none; box-shadow:0 1px 2px rgba(239,68,68,0.2);">Check Out</button>`;
+  } else {
+    attendanceActionHtml = `
+      <button class="btn btn-primary" id="btn-checkin" onclick="window.handleCheckIn()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Check In
+      </button>
+    `;
+  }
+
   document.getElementById("page-student-attendance").innerHTML = `
     <div class="page-header">
       <div>
         <h1>Attendance</h1>
         <p class="page-subtitle">Track your daily study hours.</p>
+      </div>
+      <div>
+        ${attendanceActionHtml}
       </div>
     </div>
     
@@ -873,35 +951,6 @@ const renderPortal = () => {
           </form>
         </div>
         <div class="card"><h3 style="margin-bottom: 1rem;">My Complaints</h3><table class="data-table"><thead><tr><th data-i18n="table.date">\${window.t ? window.t("table.date") : "Date"}</th><th>Category</th><th>Details</th><th data-i18n="table.status">\${window.t ? window.t("table.status") : "Status"}</th></tr></thead><tbody>${complaintsHtml}</tbody></table></div>
-      </div>
-    </div>
-  `;
-
-  // 5. PROFILE PAGE
-  document.getElementById("page-student-profile").innerHTML = `
-    <div class="page-header">
-      <div>
-        <h1>My Profile</h1>
-        <p class="page-subtitle">Update your personal information.</p>
-      </div>
-    </div>
-    
-    <div class="form-grid" style="margin-top: 1rem;">
-      <div style="display: flex; flex-direction: column; gap: 2rem; grid-column: span 2;">
-        <!-- Profile Module -->
-        <div class="card" style="max-width: 600px;">
-          <h3 style="margin-bottom: 1.5rem;">Edit Details</h3>
-          <form onsubmit="event.preventDefault(); window.saveStudentPortalProfile();">
-            <div class="form-grid">
-              <div class="form-group full-width"><label>Email</label><input type="email" id="portal-edit-email" value="${s.email || ''}" /></div>
-              <div class="form-group full-width"><label>Parent Contact</label><input type="tel" id="portal-edit-parent" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group full-width"><label>Address</label><textarea id="portal-edit-address" rows="2" style="resize:none;">${s.address || ''}</textarea></div>
-            </div>
-            <div style="margin-top: 1.5rem;">
-              <button type="submit" id="btn-portal-save" class="btn btn-primary">Save Profile Changes</button>
-            </div>
-          </form>
-        </div>
       </div>
     </div>
   `;

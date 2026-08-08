@@ -1,12 +1,129 @@
 import { listenToAllSeats, assignSeat, unassignSeat, changeSeatStatus, seedInitialSeats, addSingleSeat } from "./seatService.js";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
+import { initLiveSeatMapInTab } from "./liveSeatMapUI.js";
 
 let allSeats = [];
 let unsubscribe = null;
 let currentFilters = { status: "All", search: "", floor: "Ground Floor" };
 
-export const initSeatMapUI = async () => {
+export const initSeatMapUI = async (mode, containerId) => {
+  // ── SIGNUP / SELF-ADMISSION MODE ─────────────────────────────────────────
+  if (mode === "signup" && containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = `
+      <div style="padding: 0.5rem 0 0.75rem;">
+        <!-- Floor tabs -->
+        <div style="display:inline-flex; gap:0.5rem; background:#f1f5f9; padding:4px; border-radius:999px; margin-bottom:1rem;">
+          <button id="signup-tab-ground" onclick="window._signupSwitchFloor('Ground Floor')"
+            style="border:none; background:#fff; color:#0f172a; padding:5px 14px; border-radius:999px; font-weight:500; font-size:12px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+            Ground Floor
+          </button>
+          <button id="signup-tab-first" onclick="window._signupSwitchFloor('First Floor')"
+            style="border:none; background:transparent; color:#475569; padding:5px 14px; border-radius:999px; font-weight:500; font-size:12px; cursor:pointer;">
+            First Floor
+          </button>
+        </div>
+        <!-- Legend -->
+        <div style="display:flex; gap:0.75rem; margin-bottom:0.75rem; flex-wrap:wrap;">
+          <span style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:500;">● Available</span>
+          <span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:500;">● Occupied</span>
+          <span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:500;">● Reserved</span>
+          <span style="background:#0f172a; color:#fff; border:1px solid #0f172a; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;">✓ Selected</span>
+        </div>
+        <!-- Seat grid -->
+        <div id="signup-seat-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(70px,1fr)); gap:0.6rem; max-height:260px; overflow-y:auto; padding-right:4px;"></div>
+        <div id="signup-selected-label" style="margin-top:0.6rem; font-size:13px; color:#475569; min-height:20px;"></div>
+      </div>
+    `;
+
+    let signupAllSeats = [];
+    let signupCurrentFloor = "Ground Floor";
+    let signupSelectedId = null;
+
+    const renderSignupSeats = () => {
+      const grid = document.getElementById("signup-seat-grid");
+      if (!grid) return;
+
+      const floorSeats = signupAllSeats.filter(s => (s.floor || "Ground Floor") === signupCurrentFloor);
+
+      if (floorSeats.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:#94a3b8;font-size:13px;">No seats on this floor yet.</div>`;
+        return;
+      }
+
+      grid.innerHTML = floorSeats.map(seat => {
+        const isSelected = seat.id === signupSelectedId;
+        const isPickable = seat.status === "Available";
+
+        let bg = "#f8fafc", border = "1px solid #e2e8f0", color = "#0f172a", cursor = "not-allowed", opacity = "0.55";
+        if (seat.status === "Available")   { bg = "#f0fdf4"; border = "1px solid #bbf7d0"; color = "#166534"; cursor = "pointer"; opacity = "1"; }
+        if (seat.status === "Occupied")    { bg = "#fef2f2"; border = "1px solid #fecaca"; color = "#991b1b"; }
+        if (seat.status === "Reserved")    { bg = "#fffbeb"; border = "1px solid #fde68a"; color = "#92400e"; }
+        if (seat.status === "Maintenance") { bg = "#eff6ff"; border = "1px solid #bfdbfe"; color = "#1e40af"; }
+
+        if (isSelected) { bg = "#0f172a"; border = "2px solid #0f172a"; color = "#fff"; cursor = "pointer"; opacity = "1"; }
+
+        return `
+          <div
+            onclick="window._signupSelectSeat('${seat.id}', '${seat.seatNumber}', ${isPickable})"
+            title="${seat.status}${!isPickable ? ' – not selectable' : ''}"
+            style="background:${bg}; border:${border}; color:${color}; opacity:${opacity};
+                   border-radius:8px; height:46px; display:flex; align-items:center;
+                   justify-content:center; cursor:${cursor}; transition:box-shadow 0.15s, border-color 0.15s;
+                   font-size:13px; font-weight:600;"
+            onmouseover="if(${isPickable}) { this.style.boxShadow='0 0 0 2px currentColor'; }"
+            onmouseout="this.style.boxShadow='none';"
+          >
+            ${isSelected ? "✓ " : ""}${seat.seatNumber}
+          </div>
+        `;
+      }).join("");
+    };
+
+    window._signupSwitchFloor = (floor) => {
+      signupCurrentFloor = floor;
+      const gBtn = document.getElementById("signup-tab-ground");
+      const fBtn = document.getElementById("signup-tab-first");
+      if (gBtn && fBtn) {
+        if (floor === "Ground Floor") {
+          gBtn.style.background = "#fff"; gBtn.style.color = "#0f172a"; gBtn.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
+          fBtn.style.background = "transparent"; fBtn.style.color = "#475569"; fBtn.style.boxShadow = "none";
+        } else {
+          fBtn.style.background = "#fff"; fBtn.style.color = "#0f172a"; fBtn.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
+          gBtn.style.background = "transparent"; gBtn.style.color = "#475569"; gBtn.style.boxShadow = "none";
+        }
+      }
+      renderSignupSeats();
+    };
+
+    window._signupSelectSeat = (seatId, seatNumber, isPickable) => {
+      if (!isPickable) {
+        window.showToast && window.showToast("This seat is not available. Please choose a green (Available) seat.", "warning");
+        return;
+      }
+      signupSelectedId = seatId;
+      const numInput = document.getElementById("selectedSeatNumber");
+      const idInput  = document.getElementById("selectedSeatId");
+      if (numInput) numInput.value = seatNumber;
+      if (idInput)  idInput.value  = seatId;
+      const label = document.getElementById("signup-selected-label");
+      if (label) label.innerHTML = `<span style="color:#166534; font-weight:600;">✓ Seat ${seatNumber} selected</span>`;
+      renderSignupSeats();
+    };
+
+    // Listen for live seat updates
+    listenToAllSeats((records) => {
+      signupAllSeats = records;
+      renderSignupSeats();
+    });
+
+    return; // ── end signup mode ───────────────────────────────────────────
+  }
+
+  // ── NORMAL ADMIN / SEAT MAP PAGE MODE ────────────────────────────────────
   const container = document.getElementById("page-seats");
   if (!container) return; 
 
@@ -41,10 +158,10 @@ export const initSeatMapUI = async () => {
       </div>
     </div>
 
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <h1>Seat Map</h1>
-        <p class="page-subtitle" id="seat-subtitle">Loading...</p>
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 1.5rem;">
+        <button id="view-tab-existing" class="view-tab active" style="background:transparent; border:none; border-bottom: 2px solid #0f172a; padding: 0.5rem 0; font-size: 18px; font-weight: 600; color: #0f172a; cursor: pointer;">Seat Map</button>
+        <button id="view-tab-live" class="view-tab" style="background:transparent; border:none; border-bottom: 2px solid transparent; padding: 0.5rem 0; font-size: 18px; font-weight: 600; color: #64748b; cursor: pointer;">Live Seat Map</button>
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <button class="btn btn-ghost" style="background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 16px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filter</button>
@@ -52,29 +169,34 @@ export const initSeatMapUI = async () => {
       </div>
     </div>
     
-    <!-- Seat Legend -->
-    <div class="seat-legend" style="display:flex; gap:1rem; margin-bottom:1.5rem;">
-      <span class="legend-pill" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.available">Available</span></span>
-      <span class="legend-pill" style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.occupied">Occupied</span></span>
-      <span class="legend-pill" style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.reserved">Reserved</span></span>
-      <span class="legend-pill" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.maintenance">Maintenance</span></span>
-    </div>
+    <div id="seatmap-view-existing">
+      <div style="margin-bottom: 1rem;"><p class="page-subtitle" id="seat-subtitle">Loading...</p></div>
+      <!-- Seat Legend -->
+      <div class="seat-legend" style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+        <span class="legend-pill" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.available">Available</span></span>
+        <span class="legend-pill" style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.occupied">Occupied</span></span>
+        <span class="legend-pill" style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.reserved">Reserved</span></span>
+        <span class="legend-pill" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span><span data-i18n="status.maintenance">Maintenance</span></span>
+      </div>
 
-    <!-- Floor Tabs -->
-    <div class="floor-tabs" style="display:inline-flex; gap:0.5rem; background:#f1f5f9; padding:4px; border-radius:999px; margin-bottom:1.5rem;">
-      <button class="floor-tab active" data-floor="Ground Floor" style="border:none; background:#fff; color:#0f172a; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05);" data-i18n="floor.ground">Ground Floor</button>
-      <button class="floor-tab" data-floor="First Floor" style="border:none; background:transparent; color:#475569; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer;" data-i18n="floor.first">First Floor</button>
-    </div>
+      <!-- Floor Tabs -->
+      <div class="floor-tabs" style="display:inline-flex; gap:0.5rem; background:#f1f5f9; padding:4px; border-radius:999px; margin-bottom:1.5rem;">
+        <button class="floor-tab active" data-floor="Ground Floor" style="border:none; background:#fff; color:#0f172a; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05);" data-i18n="floor.ground">Ground Floor</button>
+        <button class="floor-tab" data-floor="First Floor" style="border:none; background:transparent; color:#475569; padding:6px 16px; border-radius:999px; font-weight:500; font-size:13px; cursor:pointer;" data-i18n="floor.first">First Floor</button>
+      </div>
 
-    <!-- Main Floor Card -->
-    <div class="card" style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:2rem;">
-      <h3 style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:4px;" id="current-floor-title" data-i18n="floor.ground">Ground Floor</h3>
-      <p style="font-size:13px; color:#94a3b8; margin-bottom:1.5rem;">Section A · Section B · click a seat for details</p>
-      
-      <div id="seat-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 1rem;">
-        <div style="text-align:center; grid-column: 1 / -1; padding: 2rem; color: #94a3b8;">Loading live seat map...</div>
+      <!-- Main Floor Card -->
+      <div class="card" style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:2rem;">
+        <h3 style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:4px;" id="current-floor-title" data-i18n="floor.ground">Ground Floor</h3>
+        <p style="font-size:13px; color:#94a3b8; margin-bottom:1.5rem;">Section A · Section B · click a seat for details</p>
+        
+        <div id="seat-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 1rem;">
+          <div style="text-align:center; grid-column: 1 / -1; padding: 2rem; color: #94a3b8;">Loading live seat map...</div>
+        </div>
       </div>
     </div>
+    
+    <div id="seatmap-view-live" style="display:none;"></div>
   `;
 
   if (!document.getElementById("add-seat-modal")) {
@@ -100,6 +222,48 @@ export const initSeatMapUI = async () => {
       </dialog>
     `;
     document.body.appendChild(modalDiv.firstElementChild);
+  }
+
+  // View Tab Listeners
+  let liveMapInitialized = false;
+  const tabExisting = document.getElementById("view-tab-existing");
+  const tabLive = document.getElementById("view-tab-live");
+  const viewExisting = document.getElementById("seatmap-view-existing");
+  const viewLive = document.getElementById("seatmap-view-live");
+
+  if (tabExisting && tabLive) {
+    tabExisting.addEventListener("click", () => {
+      tabExisting.classList.add("active");
+      tabExisting.style.borderBottomColor = "#0f172a";
+      tabExisting.style.color = "#0f172a";
+      
+      tabLive.classList.remove("active");
+      tabLive.style.borderBottomColor = "transparent";
+      tabLive.style.color = "#64748b";
+
+      viewExisting.style.display = "block";
+      viewLive.style.display = "none";
+      document.getElementById("btn-add-seat").style.display = "inline-block";
+    });
+
+    tabLive.addEventListener("click", () => {
+      tabLive.classList.add("active");
+      tabLive.style.borderBottomColor = "#0f172a";
+      tabLive.style.color = "#0f172a";
+      
+      tabExisting.classList.remove("active");
+      tabExisting.style.borderBottomColor = "transparent";
+      tabExisting.style.color = "#64748b";
+
+      viewExisting.style.display = "none";
+      viewLive.style.display = "block";
+      document.getElementById("btn-add-seat").style.display = "none";
+
+      if (!liveMapInitialized) {
+        initLiveSeatMapInTab("seatmap-view-live");
+        liveMapInitialized = true;
+      }
+    });
   }
 
   // Floor Tab Listeners
@@ -386,10 +550,10 @@ const updateSeatAnalysis = (seats) => {
             background: ${bg}; border: ${border}; color: ${text}; 
             border-radius: 8px; height: 50px; display: flex; 
             align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s;
+            cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
           "
-          onmouseover="this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.transform='none';"
+          onmouseover="this.style.boxShadow='0 0 0 2px currentColor';"
+          onmouseout="this.style.boxShadow='none';"
         >
           <div style="font-size: 14px; font-weight: 600;">${seat.seatNumber}</div>
         </div>
