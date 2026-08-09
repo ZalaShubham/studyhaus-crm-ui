@@ -215,7 +215,7 @@ const renderComplaintAdminTable = () => {
   filtered.forEach(c => {
     let badgeClass = "badge-pending";
     if (c.status === "Resolved" || c.status === "Closed") badgeClass = "badge-paid";
-    if (c.status === "In Progress") badgeClass = "badge-absent"; // Orange-ish or red
+    if (c.status === "In Progress") badgeClass = "badge-info";
 
     let actionsHtml = `<div style="display:flex; gap:0.25rem; justify-content:flex-end; flex-wrap:wrap;">
       ${c.status !== "Pending" ? `<button class="btn btn-ghost" style="color:var(--text-muted); font-size:10px; padding:2px 6px; border:1px solid var(--border); border-radius:4px;" onclick="window.handleMarkPending('${c.id}')">Pending</button>` : ''}

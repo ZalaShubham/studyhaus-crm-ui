@@ -3,6 +3,8 @@ import { calculateVisitorAnalytics } from "./visitorAnalytics.js";
 
 let allVisitors = [];
 let allPurposes = [];
+let unsubPurposes = null;
+let unsubVisitors = null;
 
 export const initVisitorAdminUI = async () => {
   const container = document.getElementById("page-visitors");
@@ -147,12 +149,14 @@ export const initVisitorAdminUI = async () => {
   document.getElementById("btn-add-visitor").addEventListener("click", () => handleAddVisitor());
 
   // Listeners
-  listenToVisitorPurposes((purposes) => {
+  if (unsubPurposes) unsubPurposes();
+  unsubPurposes = listenToVisitorPurposes((purposes) => {
     allPurposes = purposes;
     populatePurposeDropdown();
   });
 
-  listenToVisitors((records) => {
+  if (unsubVisitors) unsubVisitors();
+  unsubVisitors = listenToVisitors((records) => {
     allVisitors = records;
     updateAnalyticsUI();
     renderVis();

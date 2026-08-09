@@ -137,8 +137,9 @@ export const checkOut = async (attendanceId, checkInTimestamp) => {
 
     const now = new Date();
     const checkOutTime = now.getTime();
+    const safeCheckIn = checkInTimestamp || attData.checkIn || checkOutTime;
     
-    let durationHours = (checkOutTime - checkInTimestamp) / (1000 * 60 * 60);
+    let durationHours = (checkOutTime - safeCheckIn) / (1000 * 60 * 60);
     if (durationHours < 0) durationHours = 0;
     durationHours = Math.round(durationHours * 100) / 100;
 

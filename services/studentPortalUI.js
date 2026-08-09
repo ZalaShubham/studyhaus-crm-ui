@@ -237,7 +237,7 @@ const renderPortal = () => {
     currentComplaints.forEach(c => {
       let badgeClass = "badge-pending";
       if (c.status === "Resolved" || c.status === "Closed") badgeClass = "badge-paid";
-      if (c.status === "In Progress") badgeClass = "badge-absent";
+      if (c.status === "In Progress") badgeClass = "badge-info";
       
       const resNote = c.resolutionNote ? `<br><small style="color:var(--text-muted)"><i>Admin: ${c.resolutionNote}</i></small>` : "";
       
