@@ -52,8 +52,8 @@ export const initPaymentAdminUI = () => {
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <h3 style="font-size:15px; font-weight:600; color:#0f172a;">Recent transactions</h3>
         <div style="display:flex; gap:1rem;">
-          <input type="text" id="payment-search" placeholder="Search..." style="padding:6px 12px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;" />
-          <select id="payment-filter-status" class="pay-filter-select" style="padding:6px 12px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;">
+          <input type="text" id="payment-search" placeholder="Search..." style="padding:6px 12px; border-radius:8px; border: 1px solid var(--border); font-size:13px;" />
+          <select id="payment-filter-status" class="pay-filter-select" style="padding:6px 12px; border-radius:8px; border: 1px solid var(--border); font-size:13px;">
             <option value="All">All Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Paid</option>

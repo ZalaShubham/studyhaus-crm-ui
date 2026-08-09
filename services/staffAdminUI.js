@@ -15,11 +15,11 @@ export const initStaffAdminUI = () => {
         <form id="form-add-staff" onsubmit="event.preventDefault(); window.submitAddStaff()" style="padding:1.5rem;">
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Name</label>
-            <input type="text" id="staff-name" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="text" id="staff-name" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Role</label>
-            <select id="staff-role" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; background:#fff;">
+            <select id="staff-role" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px; background: var(--bg-card);">
               <option value="Manager">Manager</option>
               <option value="Receptionist">Receptionist</option>
               <option value="Security">Security</option>
@@ -28,11 +28,11 @@ export const initStaffAdminUI = () => {
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Contact</label>
-            <input type="text" id="staff-contact" required class="input-field" placeholder="+91 ..." style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="text" id="staff-contact" required class="input-field" placeholder="+91 ..." style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div class="form-group" style="margin-bottom:1.5rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Salary (₹)</label>
-            <input type="number" id="staff-salary" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="number" id="staff-salary" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
             <button type="button" class="btn btn-ghost" onclick="document.getElementById('add-staff-modal').close()" style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:999px; background:transparent;">Cancel</button>

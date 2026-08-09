@@ -28,7 +28,7 @@ export const initComplaintAdminUI = () => {
           
           <div class="form-group" style="margin-bottom:1.5rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Resolution Note (Optional)</label>
-            <textarea id="resolve-complaint-note" rows="3" class="input-field" placeholder="E.g., Replaced the faulty bulb." style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; resize:vertical; font-family:inherit;"></textarea>
+            <textarea id="resolve-complaint-note" rows="3" class="input-field" placeholder="E.g., Replaced the faulty bulb." style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px; resize:vertical; font-family:inherit;"></textarea>
           </div>
           <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
             <button type="button" class="btn btn-ghost" onclick="document.getElementById('resolve-complaint-modal').close()" style="padding:8px 16px; border:1px solid #e2e8f0; border-radius:999px; background:transparent;">Cancel</button>

@@ -44,10 +44,10 @@ content = content.replace(
 
 // 3. DOB required
 content = content.replace(
-  `<label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth</label>
-                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" />`,
-  `<label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth *</label>
-                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" required />`
+  `<label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Date of birth</label>
+                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary);" />`,
+  `<label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Date of birth *</label>
+                    <input type="date" id="adm-dob" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary);" required />`
 );
 
 // 4. Payment Settings

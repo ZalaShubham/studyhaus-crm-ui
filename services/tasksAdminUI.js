@@ -15,19 +15,19 @@ export const initTasksAdminUI = () => {
         <form id="form-add-task" onsubmit="event.preventDefault(); window.submitAddTask()" style="padding:1.5rem;">
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Task Description</label>
-            <input type="text" id="task-title" required class="input-field" placeholder="e.g. Check AC unit" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="text" id="task-title" required class="input-field" placeholder="e.g. Check AC unit" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Assigned To</label>
-            <input type="text" id="task-assignee" required class="input-field" placeholder="Name" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="text" id="task-assignee" required class="input-field" placeholder="Name" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Due Date</label>
-            <input type="date" id="task-due-date" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px;" />
+            <input type="date" id="task-due-date" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px;" />
           </div>
           <div class="form-group" style="margin-bottom:1.5rem;">
             <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:#475569;">Priority</label>
-            <select id="task-priority" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; background:#fff;">
+            <select id="task-priority" required class="input-field" style="width:100%; box-sizing:border-box; padding:0.5rem; border: 1px solid var(--border); border-radius:6px; background: var(--bg-card);">
               <option value="Urgent">Urgent</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>

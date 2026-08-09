@@ -36,52 +36,52 @@ const replacement = `<!-- Admissions Page -->
               <form id="admission-form" onsubmit="event.preventDefault(); window.submitAdmissionForm();">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Student Name *</label>
-                    <input type="text" id="adm-name" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Student Name *</label>
+                    <input type="text" id="adm-name" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Mobile *</label>
-                    <input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Mobile *</label>
+                    <input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Parent mobile</label>
-                    <input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Parent mobile</label>
+                    <input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Email</label>
-                    <input type="email" id="adm-email" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Email</label>
+                    <input type="email" id="adm-email" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Date of birth *</label>
-                    <input type="date" id="adm-dob" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Date of birth *</label>
+                    <input type="date" id="adm-dob" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary);" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Gender *</label>
-                    <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Gender *</label>
+                    <select id="adm-gender" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary); background: var(--bg-card);">
                       <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
                     </select>
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">College / Institute</label>
-                    <input type="text" id="adm-college" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">College / Institute</label>
+                    <input type="text" id="adm-college" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Course</label>
-                    <input type="text" id="adm-course" placeholder="UPSC, CA, JEE..." style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;" />
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Course</label>
+                    <input type="text" id="adm-course" placeholder="UPSC, CA, JEE..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;" />
                   </div>
                   <div class="form-group" style="grid-column: 1 / -1; margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Address</label>
-                    <textarea id="adm-address" rows="2" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;"></textarea>
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Address</label>
+                    <textarea id="adm-address" rows="2" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;"></textarea>
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Membership plan *</label>
-                    <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Membership plan *</label>
+                    <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary); background: var(--bg-card);">
                       <option value="">Choose plan</option>
                     </select>
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 6px; display: block;">Seat (optional)</label>
-                    <select id="adm-seat" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #64748b; background: #fff;">
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">Seat (optional)</label>
+                    <select id="adm-seat" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text-primary); background: var(--bg-card);">
                       <option value="">Loading...</option>
                     </select>
                   </div>

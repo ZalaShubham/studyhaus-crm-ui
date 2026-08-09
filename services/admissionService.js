@@ -395,7 +395,7 @@ export const initAdmissionsUI = async () => {
             </div>
             <div class="form-group" style="margin-bottom: 1.5rem;">
               <label>Transaction ID *</label>
-              <input type="text" id="admin-txn-id" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+              <input type="text" id="admin-txn-id" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" placeholder="Enter UPI Ref ID" />
             </div>
             <button type="button" class="btn btn-primary" onclick="window.finalizeAdminPayment('Paid (UPI)')" style="width: 100%; padding: 12px; font-size: 15px;">Mark as Paid & Submit</button>
           </div>
@@ -403,7 +403,7 @@ export const initAdmissionsUI = async () => {
           <div id="admin-payment-step-later" style="display: none; padding: 1.5rem;">
             <div class="form-group" style="margin-bottom: 1.5rem;">
               <label>Payment Due Date *</label>
-              <input type="date" id="admin-due-date" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" />
+              <input type="date" id="admin-due-date" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" />
             </div>
             <button type="button" class="btn btn-primary" onclick="window.finalizeAdminPayment('Pay Later')" style="width: 100%; padding: 12px; font-size: 15px;">Confirm Pay Later</button>
           </div>

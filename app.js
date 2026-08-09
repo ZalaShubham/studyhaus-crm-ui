@@ -17,11 +17,11 @@ function toggleTheme() {
   const sun  = document.getElementById('icon-sun');
 
   if (isLight) {
-    moon.style.display = 'none';
-    sun.style.display  = 'block';
+    if (moon) moon.style.display = 'block';
+    if (sun)  sun.style.display  = 'none';
   } else {
-    moon.style.display = 'block';
-    sun.style.display  = 'none';
+    if (moon) moon.style.display = 'none';
+    if (sun)  sun.style.display  = 'block';
   }
   // Persist preference
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
@@ -29,10 +29,16 @@ function toggleTheme() {
 
 // Apply saved theme on load
 (function applyTheme() {
-  if (localStorage.getItem('theme') === 'light') {
+  const isLight = localStorage.getItem('theme') === 'light';
+  if (isLight) {
     document.body.classList.add('light-mode');
-    const moon = document.getElementById('icon-moon');
-    const sun  = document.getElementById('icon-sun');
+  }
+  const moon = document.getElementById('icon-moon');
+  const sun  = document.getElementById('icon-sun');
+  if (isLight) {
+    if (moon) moon.style.display = 'block';
+    if (sun)  sun.style.display  = 'none';
+  } else {
     if (moon) moon.style.display = 'none';
     if (sun)  sun.style.display  = 'block';
   }

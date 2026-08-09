@@ -289,21 +289,21 @@ const renderPortal = () => {
         <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
           <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.name || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.phone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;" value="${s.email || ''}" readonly /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth <span style="color:#e53e3e;">*</span></label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.dob || ''}" required /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.name || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.phone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.parentPhone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);" value="${s.email || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth <span style="color:#e53e3e;">*</span></label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.dob || ''}" required /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender <span style="color:#e53e3e;">*</span></label>
-                <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+                <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);">
                   <option value="">Select</option><option value="Male" ${s.gender === 'Male' ? 'selected' : ''}>Male</option><option value="Female" ${s.gender === 'Female' ? 'selected' : ''}>Female</option><option value="Other" ${s.gender === 'Other' ? 'selected' : ''}>Other</option>
                 </select>
               </div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.college || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" value="${s.course || ''}" /></div>
-              <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">${s.address || ''}</textarea></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.college || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.course || ''}" /></div>
+              <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">${s.address || ''}</textarea></div>
               <div class="form-group" style="margin:0; grid-column: 1 / -1;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan <span style="color:#e53e3e;">*</span></label>
-                <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;">
+                <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);">
                   <option value="">Choose plan (Loading...)</option>
                 </select>
               </div>
@@ -354,7 +354,7 @@ const renderPortal = () => {
           </div>
           <div class="form-group">
             <label>Transaction ID *</label>
-            <input type="text" id="modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+            <input type="text" id="modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" placeholder="Enter UPI Ref ID" />
           </div>
           <div class="form-group" style="margin-bottom: 1.5rem;">
             <div id="modal-doc-upload-section"></div>
@@ -604,7 +604,7 @@ const renderPortal = () => {
           </div>
           <div class="form-group">
             <label>Transaction ID *</label>
-            <input type="text" id="pending-modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;" placeholder="Enter UPI Ref ID" />
+            <input type="text" id="pending-modal-txnid" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" placeholder="Enter UPI Ref ID" />
           </div>
           <div class="form-group" style="margin-bottom: 1.5rem;">
             <div id="pending-modal-doc-upload-section"></div>
@@ -824,7 +824,7 @@ const renderPortal = () => {
               <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
                 <div class="form-group">
                   <label style="font-size: 0.75rem; font-weight: 600; color: #ef4444; text-transform: uppercase;">Duration *</label>
-                  <select id="payment-months" onchange="window.calculatePaymentAmount()" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline:none; background:#fff;">
+                  <select id="payment-months" onchange="window.calculatePaymentAmount()" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline:none; background: var(--bg-card);">
                     <option value="1">1 Month</option>
                     <option value="2">2 Months</option>
                     <option value="3">3 Months</option>
