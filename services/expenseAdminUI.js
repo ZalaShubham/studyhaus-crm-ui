@@ -56,9 +56,7 @@ export const initExpenseAdminUI = () => {
             </div>
             <div style="flex:1;">
               <label style="display:block; font-size:13px; font-weight:500; color:var(--text-secondary); margin-bottom:4px;">Status</label>
-              <select id="exp-status" required style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg-card); color:var(--text-primary);">
-                <option value="Paid">Paid</option>
-              </select>
+              <input type="text" id="exp-status" value="Paid" readonly style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg-card); color:var(--text-primary); cursor:default; outline:none;">
             </div>
           </div>
           <div style="margin-bottom:1.5rem;">
