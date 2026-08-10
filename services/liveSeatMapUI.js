@@ -303,18 +303,14 @@ const renderLiveMap = () => {
       <div style="background:#fff; padding:3rem 2rem 2rem 2rem; border-radius:12px; position:relative; border:1px solid #e2e8f0; min-width:900px;">
         <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); background:#f1f5f9; border:1px solid #e2e8f0; border-top:none; padding:0.5rem 2.5rem; border-radius:0 0 12px 12px; font-weight:700; color:#475569; letter-spacing:2px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">DOOR</div>
         <div style="display:flex; gap:1.5rem; justify-content:center; max-width:900px; margin:0 auto; align-items:flex-start;">
-          ${renderColHtml(generateRange('A', 1, 17))}
-          ${renderColHtml(generateRange('A', 34, 18))}
+          ${renderColHtml(generateRange('A', 1, 18))}
+          ${renderColHtml(generateRange('A', 34, 19))}
           <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; width:80px; flex-shrink:0; align-self:center;">
-            ${renderSeatCard('A63')}
-            ${renderSeatCard('A64')}
-            ${renderSeatCard('A65')}
-            ${renderSeatCard('A66')}
             ${renderSeatCard('A67')}
             ${renderSeatCard('A68')}
           </div>
           ${renderColHtml(generateRange('A', 35, 48))}
-          ${renderColHtml(generateRange('A', 62, 49))}
+          ${renderColHtml(generateRange('A', 66, 49))}
         </div>
       </div>
     `;

@@ -73,13 +73,16 @@ export const initStudentPortalUI = () => {
 
   // Actions
   window.handleCheckIn = async () => {
-    let selectedSeat = null;
-    const isRotational = (currentStudent.planName || "").toLowerCase().includes("rotational");
-    if (isRotational) {
-      selectedSeat = await window.showCustomPrompt("Seat Required", "You are on a Rotational Plan.<br>Please enter the Seat Number you are occupying today (e.g., A01):");
-      if (!selectedSeat) return; // cancelled
-      selectedSeat = selectedSeat.trim().toUpperCase();
-    }
+    const defaultSeat = currentStudent.seatNumber || "";
+    let selectedSeat = await window.showCustomPrompt(
+      "Seat Required",
+      "Please enter the Seat Number you are occupying today (e.g., A01):",
+      "Check-In",
+      false,
+      defaultSeat
+    );
+    if (!selectedSeat) return; // cancelled
+    selectedSeat = selectedSeat.trim().toUpperCase();
 
     const btn = document.getElementById("btn-checkin");
     btn.textContent = "Processing...";

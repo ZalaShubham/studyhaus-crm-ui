@@ -208,7 +208,7 @@ window.showCustomConfirm = (title, message, confirmText = "Confirm", isDanger = 
   });
 };
 
-window.showCustomPrompt = (title, message, confirmText = "Submit", isDanger = false) => {
+window.showCustomPrompt = (title, message, confirmText = "Submit", isDanger = false, defaultValue = "") => {
   return new Promise((resolve) => {
     const dialog = document.createElement("dialog");
     dialog.className = "card smooth-modal";
@@ -218,7 +218,7 @@ window.showCustomPrompt = (title, message, confirmText = "Submit", isDanger = fa
         <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; text-align: center;">${title}</h3>
         <p style="color: var(--text-secondary, #475569); margin-bottom: 1rem; font-size: 0.95rem; text-align: center;">${message}</p>
         <div class="form-group" style="margin-bottom: 1.5rem;">
-          <input type="text" id="prompt-input" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" autofocus />
+          <input type="text" id="prompt-input" value="${defaultValue}" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" autofocus />
         </div>
         <div style="display: flex; gap: 1rem; justify-content: center;">
           <button class="btn btn-ghost" id="prompt-cancel" style="flex: 1; border: 1px solid var(--border, #e2e8f0); border-radius: 999px;">Cancel</button>

@@ -95,3 +95,20 @@ export const updateOldStudentFee = async (studentId, amount) => {
     return { success: false, error: error.message };
   }
 };
+
+/**
+ * Updates the current position for an old student.
+ */
+export const updateOldStudentPosition = async (studentId, position) => {
+  try {
+    const docRef = doc(db, "students", studentId);
+    await updateDoc(docRef, {
+      currentPosition: position || "",
+      updatedAt: serverTimestamp()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update current position:", error);
+    return { success: false, error: error.message };
+  }
+};

@@ -58,7 +58,6 @@ export const initExpenseAdminUI = () => {
               <label style="display:block; font-size:13px; font-weight:500; color:var(--text-secondary); margin-bottom:4px;">Status</label>
               <select id="exp-status" required style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg-card); color:var(--text-primary);">
                 <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
               </select>
             </div>
           </div>

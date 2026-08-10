@@ -170,9 +170,21 @@ export const initAttendanceAdminUI = () => {
       const studentDoc = studentSnap.docs[0];
       const studentData = { id: studentDoc.id, ...studentDoc.data() };
 
-      const res = await checkIn(studentData, seatNumber ? seatNumber.toUpperCase() : null);
-      if (res.success) {
+      let finalSeatNumber = seatNumber;
+      if (!finalSeatNumber) {
         document.getElementById("qr-scan-modal").close();
+        finalSeatNumber = await window.showCustomPrompt(
+          "Seat Required", 
+          `Enter seat number for ${studentData.name} (e.g. A01):`, 
+          "Check-In", 
+          false, 
+          studentData.seatNumber || ""
+        );
+        if (!finalSeatNumber) return;
+      }
+
+      const res = await checkIn(studentData, finalSeatNumber ? finalSeatNumber.toUpperCase() : null);
+      if (res.success) {
         if(typeof showToast === 'function') showToast("Student checked in successfully!");
         else window.showToast("Student checked in successfully!", "success");
       } else {
@@ -391,7 +403,17 @@ const renderTable = () => {
     if (!student) return;
     
     try {
-      const res = await checkIn(student, student.seatNumber || null);
+      const defaultSeat = student.seatNumber || "";
+      let seatNumber = await window.showCustomPrompt(
+        "Seat Required", 
+        `Enter seat number for ${student.name} (e.g. A01):`, 
+        "Check-In", 
+        false, 
+        defaultSeat
+      );
+      if (!seatNumber) return; 
+
+      const res = await checkIn(student, seatNumber.toUpperCase());
       if (res.success) {
         if(typeof showToast === 'function') showToast("Marked as Present!");
       } else {

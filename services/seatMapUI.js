@@ -164,7 +164,7 @@ export const initSeatMapUI = async (mode, containerId) => {
         <button id="view-tab-live" class="view-tab" style="background:transparent; border:none; border-bottom: 2px solid transparent; padding: 0.5rem 0; font-size: 18px; font-weight: 600; color: #64748b; cursor: pointer;">Live Seat Map</button>
       </div>
       <div style="display: flex; gap: 0.75rem;">
-        <button class="btn btn-ghost" style="background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 16px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filter</button>
+        <button class="btn btn-ghost" id="btn-filter-seats" style="background: #fff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 16px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> Filter</button>
         <button class="btn btn-primary" id="btn-add-seat" style="background: #0f172a; color: #fff; border-radius: 999px; padding: 6px 16px;">+ Add seat</button>
       </div>
     </div>
@@ -222,6 +222,42 @@ export const initSeatMapUI = async (mode, containerId) => {
       </dialog>
     `;
     document.body.appendChild(modalDiv.firstElementChild);
+  }
+
+  if (!document.getElementById("filter-seat-modal")) {
+    const filterModalDiv = document.createElement("div");
+    filterModalDiv.innerHTML = `
+      <dialog id="filter-seat-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card, #fff); color: var(--text-primary, #0f172a);">
+        <div style="padding: 1.5rem; min-width: 400px; max-width: 500px; max-height: 85vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0;">Filter Seats</h2>
+            <button class="btn btn-ghost" onclick="document.getElementById('filter-seat-modal').close()" style="padding: 0.25rem 0.5rem; background: transparent; border: none; font-size: 18px; cursor: pointer;">✕</button>
+          </div>
+          <form id="filter-seat-form" onsubmit="event.preventDefault(); window.applySeatFilters()">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Search (Seat No or Name)</label>
+              <input type="text" id="filter-seat-search" placeholder="e.g. A01 or John" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;" />
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary);">Status</label>
+              <select id="filter-seat-status" class="input-field" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border:1px solid var(--border, #e2e8f0); border-radius:6px;">
+                <option value="All">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="Occupied">Occupied</option>
+                <option value="Reserved">Reserved</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button type="button" class="btn btn-ghost" onclick="window.clearSeatFilters()" style="padding:8px 16px; border:1px solid var(--border, #e2e8f0); border-radius:999px; background:transparent;">Clear Filters</button>
+              <button type="submit" class="btn btn-primary" style="padding:8px 16px; border:none; border-radius:999px; background:#0f172a; color:#fff;">Apply</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    `;
+    document.body.appendChild(filterModalDiv.firstElementChild);
   }
 
   // View Tab Listeners
@@ -294,27 +330,56 @@ export const initSeatMapUI = async (mode, containerId) => {
 
   window.submitAddSeatForm = async () => {
     const seatNumber = document.getElementById("add-seat-number").value;
-    if (!seatNumber || seatNumber.trim() === "") return;
-    
+    if (!seatNumber) {
+      window.showToast("Please enter a seat number.", "warning");
+      return;
+    }
+
     const btn = document.getElementById("btn-save-seat");
     const originalText = btn.innerText;
     btn.innerText = "Saving...";
     btn.disabled = true;
 
-    const res = await addSingleSeat(seatNumber.trim().toUpperCase(), currentFilters.floor);
-    
-    btn.innerText = originalText;
-    btn.disabled = false;
-
-    if (res.success) {
-      document.getElementById("add-seat-modal").close();
-      if(typeof showToast === 'function') showToast("Seat added successfully to " + currentFilters.floor + "!");
-    } else {
-      window.showToast("Failed to add seat: " + res.error, "error");
+    try {
+      const res = await addSingleSeat(seatNumber.trim().toUpperCase(), currentFilters.floor);
+      if (res.success) {
+        document.getElementById("add-seat-modal").close();
+        document.getElementById("add-seat-number").value = "";
+        if(typeof showToast === 'function') showToast("Seat added successfully to " + currentFilters.floor + "!");
+        else window.showToast("Seat added successfully to " + currentFilters.floor + "!", "success");
+      } else {
+        window.showToast("Failed to add seat: " + res.error, "error");
+      }
+    } catch (e) {
+      window.showToast("Error adding seat: " + e.message, "error");
+    } finally {
+      btn.innerText = originalText;
+      btn.disabled = false;
     }
   };
 
-  
+  const btnFilter = document.getElementById("btn-filter-seats");
+  if (btnFilter) {
+    btnFilter.addEventListener("click", () => {
+      document.getElementById("filter-seat-search").value = currentFilters.search;
+      document.getElementById("filter-seat-status").value = currentFilters.status;
+      document.getElementById("filter-seat-modal").showModal();
+    });
+  }
+
+  window.applySeatFilters = () => {
+    currentFilters.search = document.getElementById("filter-seat-search").value.trim();
+    currentFilters.status = document.getElementById("filter-seat-status").value;
+    document.getElementById("filter-seat-modal").close();
+    renderSeatMap();
+  };
+
+  window.clearSeatFilters = () => {
+    currentFilters.search = "";
+    currentFilters.status = "All";
+    document.getElementById("filter-seat-modal").close();
+    renderSeatMap();
+  };
   let currentSelectedSeat = null;
   const seatModal = document.getElementById("seat-action-modal");
   const modalTitle = document.getElementById("seat-modal-title");
@@ -519,7 +584,7 @@ const updateSeatAnalysis = (seats) => {
     };
 
     const renderSeatCard = (seatNumStr) => {
-      let seat = filtered.find(s => s.seatNumber === String(seatNumStr));
+      let seat = allSeats.find(s => s.seatNumber === String(seatNumStr) && s.floor === currentFilters.floor);
       
       if (!seat) {
         return `
@@ -533,6 +598,15 @@ const updateSeatAnalysis = (seats) => {
             ${seatNumStr}
           </div>
         `;
+      }
+
+      let isFilteredOut = false;
+      if (currentFilters.status !== "All" && seat.status !== currentFilters.status) isFilteredOut = true;
+      if (currentFilters.search) {
+        const q = currentFilters.search.toLowerCase();
+        const sn = (seat.seatNumber||"").toLowerCase();
+        const asn = (seat.assignedStudentName||"").toLowerCase();
+        if (!sn.includes(q) && !asn.includes(q)) isFilteredOut = true;
       }
 
       let bg = "#f8fafc", border = "1px solid #e2e8f0", text = "#0f172a";
@@ -551,6 +625,7 @@ const updateSeatAnalysis = (seats) => {
             border-radius: 8px; height: 50px; display: flex; 
             align-items: center; justify-content: center;
             cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+            opacity: ${isFilteredOut ? '0.15' : '1'};
           "
           onmouseover="this.style.boxShadow='0 0 0 2px currentColor';"
           onmouseout="this.style.boxShadow='none';"
@@ -608,21 +683,17 @@ const updateSeatAnalysis = (seats) => {
           </div>
           
           <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto; align-items: flex-start;">
-            ${renderColHtml(generateRange('A', 1, 17))}
-            ${renderColHtml(generateRange('A', 34, 18))}
+            ${renderColHtml(generateRange('A', 1, 18))}
+            ${renderColHtml(generateRange('A', 34, 19))}
             
-            <!-- Middle section with seats 63 to 68 -->
+            <!-- Middle section with seats 67 and 68 -->
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 80px; flex-shrink: 0; align-self: center;">
-               ${renderSeatCard('A63')}
-               ${renderSeatCard('A64')}
-               ${renderSeatCard('A65')}
-               ${renderSeatCard('A66')}
                ${renderSeatCard('A67')}
                ${renderSeatCard('A68')}
             </div>
 
             ${renderColHtml(generateRange('A', 35, 48))}
-            ${renderColHtml(generateRange('A', 62, 49))}
+            ${renderColHtml(generateRange('A', 66, 49))}
           </div>
         </div>
       `;

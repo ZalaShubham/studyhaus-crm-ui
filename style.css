@@ -1439,6 +1439,28 @@ body.light-mode .theme-toggle {
   color: var(--text-muted);
 }
 
+input:focus, select:focus, textarea:focus, button:focus, *:focus, *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.input-field {
+  background: var(--bg-base);
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0.45rem 0.75rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-field:focus {
+  border-color: var(--accent-emerald) !important;
+  outline: none !important;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

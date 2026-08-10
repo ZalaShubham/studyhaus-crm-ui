@@ -1,4 +1,4 @@
-import { listenToOldStudents, restoreOldStudent, updateOldStudentFee } from "./oldStudentService.js";
+import { listenToOldStudents, restoreOldStudent, updateOldStudentFee, updateOldStudentPosition } from "./oldStudentService.js";
 import { generateOldStudentsPDF } from "./pdfService.js";
 
 let allOldStudents = [];
@@ -30,7 +30,12 @@ export const initOldStudentAdminUI = () => {
             <option value="All">All Reasons</option>
           </select>
         </div>
-        <div style="display:flex; align-items:center; gap:0.5rem; margin-left: 1rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-left: 0.5rem;">
+          <select id="old-filter-position" class="input-field" style="width:180px;">
+            <option value="All">All Positions</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-left: 0.5rem;">
           <select id="old-filter-fee-status" class="input-field" style="width:180px;">
             <option value="All">All Fee Status</option>
             <option value="Paid">Paid (No Dues)</option>
@@ -52,6 +57,7 @@ export const initOldStudentAdminUI = () => {
               <th>Last Seat</th>
               <th>Last Plan</th>
               <th>Job Details</th>
+              <th>Current Position</th>
               <th>Exit Date</th>
               <th>Exit Reason</th>
               <th>Fee Status</th>
@@ -60,7 +66,7 @@ export const initOldStudentAdminUI = () => {
             </tr>
           </thead>
           <tbody id="old-tbody">
-            <tr><td colspan="${canRestore ? '9' : '8'}" style="text-align:center;">Loading old students...</td></tr>
+            <tr><td colspan="${canRestore ? '10' : '9'}" style="text-align:center;">Loading old students...</td></tr>
           </tbody>
         </table>
       </div>
@@ -71,6 +77,7 @@ export const initOldStudentAdminUI = () => {
   const renderList = () => renderOldStudents(canRestore);
   document.getElementById("old-search").addEventListener("input", renderList);
   document.getElementById("old-filter-reason").addEventListener("change", renderList);
+  document.getElementById("old-filter-position").addEventListener("change", renderList);
   document.getElementById("old-filter-fee-status").addEventListener("change", renderList);
 
   window.exportOldStudentsPDF = () => {
@@ -81,8 +88,28 @@ export const initOldStudentAdminUI = () => {
   listenToOldStudents((records) => {
     allOldStudents = records;
     populateReasonDropdown();
+    populatePositionDropdown();
     renderList();
   });
+};
+
+const populatePositionDropdown = () => {
+  const filterSelect = document.getElementById("old-filter-position");
+  if (!filterSelect) return;
+  const currentVal = filterSelect.value;
+  
+  const positions = new Set();
+  allOldStudents.forEach(s => {
+    if (s.currentPosition && s.currentPosition.trim()) positions.add(s.currentPosition.trim());
+  });
+
+  let html = `<option value="All">All Positions</option>`;
+  Array.from(positions).sort().forEach(p => {
+    html += `<option value="${p}">${p}</option>`;
+  });
+  
+  filterSelect.innerHTML = html;
+  filterSelect.value = currentVal || "All";
 };
 
 const populateReasonDropdown = () => {
@@ -108,6 +135,7 @@ const getFilteredOldStudents = () => {
   let filtered = [...allOldStudents];
   const search = document.getElementById("old-search").value.toLowerCase();
   const reason = document.getElementById("old-filter-reason").value;
+  const position = document.getElementById("old-filter-position").value;
   const feeStatus = document.getElementById("old-filter-fee-status").value;
 
   if (search) {
@@ -118,6 +146,7 @@ const getFilteredOldStudents = () => {
     );
   }
   if (reason !== "All") filtered = filtered.filter(s => s.exitReason === reason);
+  if (position !== "All") filtered = filtered.filter(s => (s.currentPosition && s.currentPosition.trim()) === position);
   
   if (feeStatus === "Pending Fees") {
     filtered = filtered.filter(s => s.pendingFee && s.pendingFee > 0);
@@ -135,7 +164,7 @@ const renderOldStudents = (canRestore) => {
   const filtered = getFilteredOldStudents();
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${canRestore ? '9' : '8'}" style="text-align:center;">No old students found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${canRestore ? '10' : '9'}" style="text-align:center;">No old students found.</td></tr>`;
     return;
   }
 
@@ -150,6 +179,12 @@ const renderOldStudents = (canRestore) => {
   window.handleUpdatePendingFee = async (id, amount) => {
     const res = await updateOldStudentFee(id, amount);
     if (!res.success) window.showToast("Error updating fee: " + res.error, "error");
+  };
+
+  window.handleUpdateCurrentPosition = async (id, position) => {
+    const res = await updateOldStudentPosition(id, position);
+    if (!res.success) window.showToast("Error updating position: " + res.error, "error");
+    else window.showToast("Position updated", "success");
   };
 
   let html = "";
@@ -170,6 +205,9 @@ const renderOldStudents = (canRestore) => {
         <td style="color:var(--text-muted);">${s.seatNumber || "Unassigned"}</td>
         <td style="color:var(--text-muted);">${s.planName || "None"}</td>
         <td style="color:var(--text-muted); font-size: 0.9rem;">${s.jobDetails || "N/A"}</td>
+        <td>
+          <input type="text" value="${s.currentPosition || ''}" placeholder="E.g. SDE" onblur="window.handleUpdateCurrentPosition('${s.id}', this.value)" style="width: 120px; padding: 0.25rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; background: var(--bg-card); color: var(--text-primary);" />
+        </td>
         <td style="font-weight:500;">${s.exitDate || "N/A"}</td>
         <td><span class="badge" style="background:#e5e7eb; color:#374151;">${s.exitReason || "Other"}</span></td>
         <td style="font-weight: 600; color: ${s.pendingFee && s.pendingFee > 0 ? 'var(--warning)' : 'var(--success)'};">${s.pendingFee && s.pendingFee > 0 ? 'Pending' : 'Paid'}</td>
