@@ -98,48 +98,7 @@
         </div>
         <p class="form-hint" style="margin-bottom: 1.5rem;">Minimum 8 characters.</p>
 
-        <h3 class="section-title">Student Details</h3>
-        
-        <div class="form-group">
-          <label>Mobile <span style="color:#e53e3e;">*</span></label>
-          <input type="tel" pattern="[0-9]{10}" id="mobile" required placeholder="10-digit number" />
-        </div>
-        
-        <div class="form-group">
-          <label>Parent mobile</label>
-          <input type="tel" pattern="[0-9]{10}" id="parentMobile" placeholder="10-digit number" />
-        </div>
 
-        <div style="display: flex; gap: 1rem;">
-          <div class="form-group" style="flex: 1;">
-            <label><span data-i18n="form.dob">Date of Birth</span> <span style="color:#e53e3e;">*</span></label>
-            <input type="date" id="dob" style="color: var(--text-primary);" required />
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label><span data-i18n="form.gender">Gender</span> <span style="color:#e53e3e;">*</span></label>
-            <select id="gender" required>
-              <option value="">Select</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>College / Institute</label>
-          <input type="text" id="college" />
-        </div>
-        
-        <div class="form-group">
-          <label>Course</label>
-          <input type="text" id="course" placeholder="UPSC, CA, JEE..." />
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label data-i18n="form.address">Address</label>
-          <textarea id="address" rows="2"></textarea>
-        </div>
 
         
         <button type="submit" class="btn-submit" id="submit-btn" data-i18n="btn.register">Create account</button>
@@ -177,8 +136,6 @@
       const fullName = document.getElementById("fullName").value.trim();
       const email    = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const dob      = document.getElementById("dob").value;
-      const gender   = document.getElementById("gender").value;
 
       if (!fullName) {
         errorDiv.textContent = "Student Name is required.";
@@ -190,16 +147,6 @@
         errorDiv.style.display = "block";
         return;
       }
-      if (!dob) {
-        errorDiv.textContent = "Date of Birth is required.";
-        errorDiv.style.display = "block";
-        return;
-      }
-      if (!gender) {
-        errorDiv.textContent = "Gender is required.";
-        errorDiv.style.display = "block";
-        return;
-      }
 
       loader.style.display = "flex";
       submitBtn.disabled = true;
@@ -207,13 +154,6 @@
       const role = "Student";
       
       const studentData = {
-        phone: document.getElementById("mobile").value,
-        parentPhone: document.getElementById("parentMobile").value,
-        dob,
-        gender,
-        college: document.getElementById("college").value,
-        course: document.getElementById("course").value,
-        address: document.getElementById("address").value,
         loginCredentials: email + " / " + password
       };
 

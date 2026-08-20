@@ -34,7 +34,7 @@ export const initSeatMapUI = async (mode, containerId) => {
           <span style="background:#0f172a; color:#fff; border:1px solid #0f172a; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;">✓ Selected</span>
         </div>
         <!-- Seat grid -->
-        <div id="signup-seat-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(70px,1fr)); gap:0.6rem; max-height:260px; overflow-y:auto; padding-right:4px;"></div>
+        <div id="signup-seat-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(70px,1fr)); gap:0.6rem; max-height:450px; overflow-y:auto; padding-right:4px;"></div>
         <div id="signup-selected-label" style="margin-top:0.6rem; font-size:13px; color:#475569; min-height:20px;"></div>
       </div>
     `;
@@ -50,11 +50,32 @@ export const initSeatMapUI = async (mode, containerId) => {
       const floorSeats = signupAllSeats.filter(s => (s.floor || "Ground Floor") === signupCurrentFloor);
 
       if (floorSeats.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:#94a3b8;font-size:13px;">No seats on this floor yet.</div>`;
+        grid.style.display = "block";
+        grid.innerHTML = `<div style="text-align:center;padding:1.5rem;color:#94a3b8;font-size:13px;">No seats on this floor yet.</div>`;
         return;
       }
 
-      grid.innerHTML = floorSeats.map(seat => {
+      const generateRange = (prefix, start, end) => {
+        const arr = [];
+        if (start <= end) {
+          for (let i = start; i <= end; i++) arr.push(`${prefix}${i}`);
+        } else {
+          for (let i = start; i >= end; i--) arr.push(`${prefix}${i}`);
+        }
+        return arr;
+      };
+
+      const renderSignupSeatCard = (seatNumStr) => {
+        let seat = floorSeats.find(s => s.seatNumber === String(seatNumStr));
+        
+        if (!seat) {
+          return `
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; height: 46px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px; cursor: not-allowed; opacity: 0.55; width: 100%;" title="Seat not available">
+              ${seatNumStr}
+            </div>
+          `;
+        }
+
         const isSelected = seat.id === signupSelectedId;
         const isPickable = seat.status === "Available";
 
@@ -73,14 +94,115 @@ export const initSeatMapUI = async (mode, containerId) => {
             style="background:${bg}; border:${border}; color:${color}; opacity:${opacity};
                    border-radius:8px; height:46px; display:flex; align-items:center;
                    justify-content:center; cursor:${cursor}; transition:box-shadow 0.15s, border-color 0.15s;
-                   font-size:13px; font-weight:600;"
+                   font-size:13px; font-weight:600; width: 100%;"
             onmouseover="if(${isPickable}) { this.style.boxShadow='0 0 0 2px currentColor'; }"
             onmouseout="this.style.boxShadow='none';"
           >
             ${isSelected ? "✓ " : ""}${seat.seatNumber}
           </div>
         `;
-      }).join("");
+      };
+
+      const renderSignupColHtml = (arr) => {
+        let colHtml = `<div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">`;
+        arr.forEach(num => { colHtml += renderSignupSeatCard(num); });
+        colHtml += `</div>`;
+        return colHtml;
+      };
+
+      let html = "";
+      if (signupCurrentFloor === "First Floor") {
+        html = `
+          <div style="background: #fff; padding: 2rem 1rem 2rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; margin-bottom: 1rem; overflow-x: auto;">
+            <!-- Door -->
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.25rem 1.5rem; border-radius: 0 0 8px 8px; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+              DOOR
+            </div>
+            
+            <div style="display: flex; gap: 0.75rem; justify-content: center; min-width: max-content; width: 100%;">
+              ${renderSignupColHtml(generateRange('B', 1, 10))}
+              ${renderSignupColHtml(generateRange('B', 20, 11))}
+              
+              <!-- Middle aisle -->
+              <div style="width: 20px; flex-shrink: 0;"></div>
+
+              ${renderSignupColHtml(generateRange('B', 21, 30))}
+              ${renderSignupColHtml(generateRange('B', 40, 31))}
+            </div>
+
+            <!-- Toilets -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
+              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+                TOILET
+              </div>
+              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+                TOILET
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (signupCurrentFloor === "Ground Floor") {
+        html = `
+          <div style="background: #fff; padding: 2rem 1rem 1rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; overflow-x: auto;">
+            <!-- Door -->
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.25rem 1.5rem; border-radius: 0 0 8px 8px; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+              DOOR
+            </div>
+            
+            <div style="display: flex; gap: 0.75rem; justify-content: center; min-width: max-content; width: 100%; align-items: flex-start;">
+              ${renderSignupColHtml(generateRange('A', 1, 18))}
+              ${renderSignupColHtml(generateRange('A', 34, 19))}
+              
+              <!-- Middle section with seats 67 and 68 -->
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 50px; flex-shrink: 0; align-self: center;">
+                 ${renderSignupSeatCard('A67')}
+                 ${renderSignupSeatCard('A68')}
+              </div>
+
+              ${renderSignupColHtml(generateRange('A', 35, 48))}
+              ${renderSignupColHtml(generateRange('A', 66, 49))}
+            </div>
+          </div>
+        `;
+      } else {
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(70px,1fr))";
+        grid.style.gap = "0.6rem";
+        
+        let fallbackHtml = floorSeats.map(seat => {
+          const isSelected = seat.id === signupSelectedId;
+          const isPickable = seat.status === "Available";
+
+          let bg = "#f8fafc", border = "1px solid #e2e8f0", color = "#0f172a", cursor = "not-allowed", opacity = "0.55";
+          if (seat.status === "Available")   { bg = "#f0fdf4"; border = "1px solid #bbf7d0"; color = "#166534"; cursor = "pointer"; opacity = "1"; }
+          if (seat.status === "Occupied")    { bg = "#fef2f2"; border = "1px solid #fecaca"; color = "#991b1b"; }
+          if (seat.status === "Reserved")    { bg = "#fffbeb"; border = "1px solid #fde68a"; color = "#92400e"; }
+          if (seat.status === "Maintenance") { bg = "#eff6ff"; border = "1px solid #bfdbfe"; color = "#1e40af"; }
+
+          if (isSelected) { bg = "#0f172a"; border = "2px solid #0f172a"; color = "#fff"; cursor = "pointer"; opacity = "1"; }
+
+          return `
+            <div
+              onclick="window._signupSelectSeat('${seat.id}', '${seat.seatNumber}', ${isPickable})"
+              title="${seat.status}${!isPickable ? ' – not selectable' : ''}"
+              style="background:${bg}; border:${border}; color:${color}; opacity:${opacity};
+                     border-radius:8px; height:46px; display:flex; align-items:center;
+                     justify-content:center; cursor:${cursor}; transition:box-shadow 0.15s, border-color 0.15s;
+                     font-size:13px; font-weight:600;"
+              onmouseover="if(${isPickable}) { this.style.boxShadow='0 0 0 2px currentColor'; }"
+              onmouseout="this.style.boxShadow='none';"
+            >
+              ${isSelected ? "✓ " : ""}${seat.seatNumber}
+            </div>
+          `;
+        }).join("");
+        
+        grid.innerHTML = fallbackHtml;
+        return;
+      }
+
+      grid.style.display = "block";
+      grid.innerHTML = html;
     };
 
     window._signupSwitchFloor = (floor) => {
