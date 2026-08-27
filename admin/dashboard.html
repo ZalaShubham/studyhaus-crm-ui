@@ -118,7 +118,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span data-i18n="menu.visitors" data-i18n="menu.visitors">Visitors</span>
             </a>
-          <a class="nav-item" data-page="reports" onclick="navigate('reports')">
+          <a class="nav-item" data-page="documents" onclick="navigate('documents')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span data-i18n="menu.documents" data-i18n="form.documents" data-i18n="menu.documents">Documents</span>
             </a>
@@ -830,7 +830,9 @@
               <p class="page-subtitle">Collections, invoices, and outstanding dues.</p>
             </div>
             <div style="display: flex; gap: 0.75rem;">
-              <button class="btn btn-ghost" style="background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border); border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+              <button class="btn btn-secondary" onclick="window.handlePaymentExport('csv')" id="btn-export-pay-csv">Export CSV</button>
+              <button class="btn btn-secondary" onclick="window.handlePaymentExport('excel')" id="btn-export-pay-excel">Export Excel</button>
+              <button class="btn btn-primary" onclick="window.handlePaymentExport('pdf')" id="btn-export-pay-pdf">Export PDF</button>
               <button class="btn btn-primary" style="background:var(--primary); color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;">+ Receive payment</button>
             </div>
           </div>
@@ -1201,7 +1203,8 @@
         <div class="page" id="page-documents">
           <div class="page-header">
             <div><h1 data-i18n="form.documents">Documents</h1><p class="page-subtitle">Student IDs, agreements and receipts</p></div>
-            <button class="btn btn-primary">+ Upload</button>
+            <button class="btn btn-primary" onclick="document.getElementById('generic-doc-upload').click()">+ Upload</button>
+            <input type="file" id="generic-doc-upload" style="display:none;" onchange="window.uploadGenericDocument(this)" />
           </div>
           <div class="card">
             <div class="docs-grid">

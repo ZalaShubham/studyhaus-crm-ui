@@ -46,6 +46,22 @@ function toggleTheme() {
 
 // ==================== NAVIGATION ====================
 function navigate(page) {
+  // SPA Authorization check
+  const role = localStorage.getItem("userRole");
+  if (role === "Employee") {
+    const restrictedPages = ["admissions", "expenses", "analytics", "reports", "settings", "staff", "old-students", "message-logs", "memberships"];
+    if (restrictedPages.includes(page)) {
+      if (typeof showToast === 'function') showToast("Access Denied: You do not have permission to view this page.", "error");
+      return;
+    }
+  } else if (role === "Student") {
+    const restrictedPages = ["admissions", "expenses", "analytics", "reports", "staff", "students", "seats", "message-logs", "memberships", "visitors", "attendance", "payments", "complaints"];
+    if (restrictedPages.includes(page)) {
+      if (typeof showToast === 'function') showToast("Access Denied.", "error");
+      return;
+    }
+  }
+
   // Hide all pages
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // Show target page
@@ -59,6 +75,11 @@ function navigate(page) {
       item.classList.add('active');
     }
   });
+
+  // Load dynamic data for specific pages
+  if (page === 'documents' && typeof window.renderGlobalDocuments === 'function') {
+    window.renderGlobalDocuments();
+  }
 
   // On mobile, close sidebar after navigation
   if (window.innerWidth <= 768) {
@@ -309,6 +330,7 @@ if (saveBtn) {
 // ==================== COLLECT PAYMENT BUTTONS ====================
 document.querySelectorAll('.btn-xs').forEach(btn => {
   btn.addEventListener('click', function (e) {
+    if (this.hasAttribute('onclick') || this.id) return;
     e.stopPropagation();
     const text = this.textContent.trim();
     if (text === 'Collect') showToast('Payment collected successfully!', 'success');
@@ -322,6 +344,7 @@ document.querySelectorAll('.btn-xs').forEach(btn => {
 document.querySelectorAll('.btn-primary').forEach(btn => {
   if (!btn.closest('.admission-form-card') && btn.id !== 'save-settings') {
     btn.addEventListener('click', function (e) {
+      if (this.hasAttribute('onclick') || this.id) return;
       const text = this.textContent.trim();
       if (text.includes('New admission') || text.includes('Add Student')) {
         navigate('admissions');
@@ -468,4 +491,69 @@ document.addEventListener('DOMContentLoaded', () => {
       card.style.transform = 'translateY(0)';
     }, i * 60);
   });
+
+window.uploadGenericDocument = async (input) => {
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+    if (typeof showToast === 'function') showToast(`Uploading ${file.name}...`, 'info');
+    try {
+      if (typeof window.uploadGlobalDocument !== 'function') {
+        throw new Error("uploadGlobalDocument not found in window. Ensure firebase-entry.js is loaded.");
+      }
+      await window.uploadGlobalDocument(file, file.name, "Generic Document");
+      if (typeof showToast === 'function') showToast('Document uploaded successfully!', 'success');
+      input.value = ''; // reset
+      if (typeof window.renderGlobalDocuments === 'function') {
+        window.renderGlobalDocuments();
+      }
+    } catch (e) {
+      console.error("Upload error:", e);
+      if (typeof showToast === 'function') showToast(`Upload failed: ${e.message}`, 'error');
+    }
+  }
+};
+
+window.renderGlobalDocuments = async () => {
+  const container = document.getElementById("document-list-container");
+  if (!container) return;
+  
+  container.innerHTML = `<div style="text-align:center;padding:2rem;"><div class="spinner" style="margin:0 auto;"></div><p>Loading documents...</p></div>`;
+  try {
+    if (typeof window.loadGlobalDocuments !== 'function') {
+      throw new Error("loadGlobalDocuments not found.");
+    }
+    const docs = await window.loadGlobalDocuments();
+    if (docs.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="text-align:center;padding:3rem 1rem;">
+          <div class="empty-icon" style="font-size:3rem;opacity:0.5;margin-bottom:1rem;">📄</div>
+          <p style="color:var(--text-secondary);">No documents found</p>
+        </div>`;
+      return;
+    }
+    
+    let html = `<div style="display:grid;gap:1rem;">`;
+    docs.forEach(doc => {
+      const date = new Date(doc.uploadedAt).toLocaleString();
+      let icon = doc.fileType.includes("pdf") ? "📕" : doc.fileType.includes("image") ? "🖼️" : "📄";
+      html += `
+        <div class="data-card" style="display:flex;align-items:center;padding:1rem;gap:1rem;">
+          <div style="font-size:2rem;background:var(--bg-elevated);border-radius:8px;padding:10px;">${icon}</div>
+          <div style="flex:1;min-width:0;">
+            <h4 style="margin:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${doc.title}</h4>
+            <p style="margin:4px 0 0;font-size:12px;color:var(--text-muted);">${date}</p>
+          </div>
+          <a href="${doc.base64Data}" download="${doc.fileName}" class="btn btn-secondary" style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download
+          </a>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = `<p style="color:var(--danger);text-align:center;">Failed to load documents.</p>`;
+  }
+};
+
 });

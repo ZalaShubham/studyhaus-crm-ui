@@ -3,7 +3,8 @@ let currentLanguage = localStorage.getItem('appLanguage') || 'en';
 
 export const loadTranslations = async (lang = currentLanguage) => {
   try {
-    const response = await fetch(`../translations/${lang}.json`);
+    const prefix = window.location.pathname.match(/\/(admin|employee|student)\//) ? '../' : './';
+    const response = await fetch(`${prefix}translations/${lang}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load ${lang}.json`);
     }

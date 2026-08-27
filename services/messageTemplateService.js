@@ -25,6 +25,9 @@ const DEFAULT_TEMPLATES = [
 ];
 
 export const seedInitialTemplates = async () => {
+  const role = localStorage.getItem("userRole");
+  if (role === "Student") return;
+
   const templatesRef = collection(db, "messageTemplates");
   const snap = await getDocs(templatesRef);
   

@@ -6,7 +6,13 @@ import { ROLES, hasPermission } from "./roles.js";
  * @param {string} role - Current user's role
  * @param {string} path - Current URL path
  */
-export const protectRoute = (role, path) => {
+export const protectRoute = (rawRole, path) => {
+  // Normalize role to handle common aliases
+  let role = rawRole;
+  if (role === "Admin" || role === "owner" || role === "admin" || role === "Owner") {
+    role = ROLES.OWNER;
+  }
+
   // If unauthorized page, anyone logged in can view it (usually to see the "Go Back" button)
   if (path.includes("unauthorized.html")) return;
 
@@ -42,7 +48,12 @@ export const protectRoute = (role, path) => {
 /**
  * Helper to get default route for redirecting from root
  */
-const getDefaultRoute = (role) => {
+const getDefaultRoute = (rawRole) => {
+  let role = rawRole;
+  if (role === "Admin" || role === "owner" || role === "admin" || role === "Owner") {
+    role = ROLES.OWNER;
+  }
+
   switch (role) {
     case ROLES.OWNER: return "/admin/dashboard.html";
     case ROLES.MANAGER: return "/manager/dashboard.html";

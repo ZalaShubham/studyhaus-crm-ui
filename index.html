@@ -114,7 +114,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span data-i18n="menu.visitors">Visitors</span>
             </a>
-          <a class="nav-item" data-page="reports" onclick="navigate('reports')">
+          <a class="nav-item" data-page="documents" onclick="navigate('documents')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span data-i18n="menu.documents" data-i18n="form.documents">Documents</span>
             </a>
@@ -1162,7 +1162,8 @@
         <div class="page" id="page-documents">
           <div class="page-header">
             <div><h1 data-i18n="form.documents">Documents</h1><p class="page-subtitle">Student IDs, agreements and receipts</p></div>
-            <button class="btn btn-primary">+ Upload</button>
+            <button class="btn btn-primary" onclick="document.getElementById('generic-doc-upload').click()">+ Upload</button>
+            <input type="file" id="generic-doc-upload" style="display:none;" onchange="window.uploadGenericDocument(this)" />
           </div>
           <div class="card">
             <div class="docs-grid">

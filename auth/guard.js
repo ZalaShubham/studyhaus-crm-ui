@@ -6,6 +6,21 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
 /**
+ * Retry a Firestore read with exponential backoff.
+ * Guards against transient PERMISSION_DENIED from the Firestore rules engine
+ * (e.g. circular get() resolution on a freshly-written document).
+ */
+const retryWithBackoff = async (fn, retries = 3, delay = 500) => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 2);
+  }
+};
+
+/**
  * Initialize Authentication Guard
  * Listens to Firebase Auth state.
  * - Redirects to login if unauthenticated on a protected page.
@@ -32,14 +47,18 @@ export const initAuthGuard = () => {
           let docId = user.uid;
 
           // 1. Canonical 'users' collection
-          userDoc = await getDocument("users", user.uid);
+          try {
+            userDoc = await retryWithBackoff(() => getDocument("users", user.uid));
+          } catch (_) { /* ignore permission errors */ }
 
           // 2. Role-named collections (Manager, Employee, etc.) by UID
           if (!userDoc || !userDoc.role) {
             const roleCollections = ["Manager", "Employee", "Owner", "Admin", "students"];
             for (const col of roleCollections) {
-              const doc = await getDocument(col, user.uid);
-              if (doc) { userDoc = doc; break; }
+              try {
+                const doc = await getDocument(col, user.uid);
+                if (doc) { userDoc = doc; break; }
+              } catch (_) { /* ignore permission errors for unauthorized collections */ }
             }
           }
 

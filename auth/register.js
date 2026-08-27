@@ -27,7 +27,11 @@ const toUserFriendlyRegisterError = (error) => {
 /**
  * Get dashboard URL based on role
  */
-const getDashboardUrl = (role) => {
+const getDashboardUrl = (rawRole) => {
+  let role = rawRole;
+  if (role === "Admin" || role === "owner" || role === "admin" || role === "Owner") {
+    role = ROLES.OWNER;
+  }
   switch (role) {
     case ROLES.OWNER:    return "/admin/dashboard.html";
     case ROLES.MANAGER:  return "/manager/dashboard.html";

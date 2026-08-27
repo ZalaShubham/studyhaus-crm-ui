@@ -502,7 +502,33 @@ export const initSeatMapUI = async (mode, containerId) => {
     document.getElementById("filter-seat-modal").close();
     renderSeatMap();
   };
+  
   let currentSelectedSeat = null;
+
+  // Create modal dynamically if it doesn't exist
+  if (!document.getElementById("seat-action-modal")) {
+    const modalHtml = `
+      <div id="seat-action-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; width:360px; border-radius:12px; padding:1.5rem; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h3 id="seat-modal-title" style="margin:0; font-size:18px; color:#0f172a;">Seat Action</h3>
+            <button id="btn-close-seat-modal" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+          </div>
+          <div id="seat-modal-options" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
+          <div id="seat-modal-assign-form" style="display:none; flex-direction:column; gap:0.75rem;">
+            <label style="font-size:13px; font-weight:600; color:#475569;">Student Email / ID / Name</label>
+            <input type="text" id="seat-assign-input" placeholder="Enter details..." style="padding:10px; border:1px solid #e2e8f0; border-radius:8px;" />
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+              <button id="btn-cancel-assign" class="btn btn-ghost">Cancel</button>
+              <button id="btn-confirm-assign" class="btn btn-primary">Assign</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+
   const seatModal = document.getElementById("seat-action-modal");
   const modalTitle = document.getElementById("seat-modal-title");
   const optionsDiv = document.getElementById("seat-modal-options");

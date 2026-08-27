@@ -88,8 +88,8 @@ export const initStudentPortalUI = () => {
     btn.textContent = "Processing...";
     btn.disabled = true;
     const res = await checkIn(currentStudent, selectedSeat);
-    if (!res.success) window.showToast(window.t ? window.t('Check-In Failed: ') || "Check-In Failed: " : "Check-In Failed: " + res.error, "error");
-    else window.showToast(window.t ? window.t('Checked in successfully!') || "Checked in successfully!" : "Checked in successfully!", "success");
+    if (!res.success) window.showToast((window.t ? window.t('Check-In Failed: ') : "Check-In Failed: ") + res.error, "error");
+    else window.showToast(window.t ? window.t('Checked in successfully!') : "Checked in successfully!", "success");
     
     if (document.getElementById("btn-checkin")) {
       btn.textContent = "Check-In Now";
@@ -97,19 +97,96 @@ export const initStudentPortalUI = () => {
     }
   };
 
-  window.handleCheckOut = async (attendanceId, checkInTimestamp) => {
-    const btn = document.getElementById("btn-checkout");
-    btn.textContent = "Processing...";
-    btn.disabled = true;
-    const res = await checkOut(attendanceId, checkInTimestamp);
-    if (!res.success) {
-      window.showToast(window.t ? window.t('Check-Out Failed: ') || "Check-Out Failed: " : "Check-Out Failed: " + res.error, "error");
-      if (document.getElementById("btn-checkout")) {
-        btn.textContent = "Check-Out Now";
-        btn.disabled = false;
+  // Handle Check-out
+  window.handleCheckOut = async (attendanceId) => {
+    const btn = document.getElementById("btn-checkout-top");
+    if(btn) { btn.innerHTML = "Checking out..."; btn.disabled = true; }
+
+    try {
+      const res = await checkOut(attendanceId);
+      if (!res.success) {
+        window.showToast((window.t ? window.t('Check-Out Failed: ') : "Check-Out Failed: ") + res.error, "error");
+        if(btn) { btn.innerHTML = "Check-Out Now"; btn.disabled = false; }
+      } else {
+        window.showToast(window.t ? window.t('Checked out successfully!') : "Checked out successfully!", "success");
+        // Reload is handled by listener mostly, but just in case
+        setTimeout(() => window.location.reload(), 1000);
       }
-    } else {
-      window.showToast(window.t ? window.t('Checked out successfully!') || "Checked out successfully!" : "Checked out successfully!", "success");
+    } catch(e) {
+      window.showToast((window.t ? window.t('Check-Out Failed: ') : "Check-Out Failed: ") + e.message, "error");
+      if(btn) { btn.innerHTML = "Check-Out Now"; btn.disabled = false; }
+    }
+  };
+
+  // Generate PDF wrapper
+  window.generateMyAttendancePDF = async () => {
+    if (!currentAttendance || currentAttendance.length === 0) return;
+    const res = await generateAttendancePDF(currentAttendance, currentStudent.name, window.t);
+    if (!res.success) window.showToast((window.t ? window.t('Failed to generate PDF: ') : "Failed to generate PDF: ") + res.error, "error");
+  };
+
+  window.generateMyPaymentsPDF = async () => {
+    if (!currentPayments || currentPayments.length === 0) return;
+    const res = await import("./pdfService.js").then(m => m.generatePaymentPDF(currentPayments, currentStudent.name, window.t));
+    if (!res.success) window.showToast((window.t ? window.t('Failed to generate PDF: ') : "Failed to generate PDF: ") + res.error, "error");
+  };
+
+  // --- Complaints Logic ---
+  window.showNewComplaintModal = () => {
+    document.getElementById("new-complaint-modal").showModal();
+  };
+  
+  window.submitNewComplaint = async () => {
+    const title = document.getElementById("complaint-title").value;
+    const desc = document.getElementById("complaint-desc").value;
+    if (!title || !desc) return window.showToast(window.t ? window.t('Please fill all fields.') : "Please fill all fields.", "warning");
+    
+    const btn = document.getElementById("btn-submit-complaint");
+    btn.innerHTML = "Submitting...";
+    btn.disabled = true;
+
+    try {
+      const res = await submitComplaint(currentStudent.id, currentStudent.name, title, desc);
+      if (res.success) {
+        window.showToast(window.t ? window.t('Complaint Submitted Successfully!') : "Complaint Submitted Successfully!", "success");
+        document.getElementById("new-complaint-modal").close();
+      } else {
+        window.showToast((window.t ? window.t('Failed: ') : "Failed: ") + res.error, "error");
+      }
+    } catch(e) {
+      window.showToast((window.t ? window.t('Failed: ') : "Failed: ") + e.message, "error");
+    } finally {
+      btn.innerHTML = "Submit Complaint";
+      btn.disabled = false;
+    }
+  };
+
+  // --- Payment Submission Logic ---
+  window.showNewPaymentModal = () => {
+    document.getElementById("new-payment-modal").showModal();
+  };
+
+  window.submitNewPaymentRequest = async () => {
+    const txnId = document.getElementById("pay-req-txnid").value;
+    if (!txnId) return window.showToast(window.t ? window.t('Please enter the Transaction ID.') : "Please enter the Transaction ID.", "error");
+
+    const btn = document.getElementById("btn-submit-payment-req");
+    btn.innerHTML = "Submitting...";
+    btn.disabled = true;
+
+    try {
+      const res = await submitPaymentRequest(currentStudent.id, currentStudent.name, currentStudent.planName, txnId);
+      if (res.success) {
+        window.showToast(window.t ? window.t('Payment Request Submitted Successfully!') : "Payment Request Submitted Successfully!", "success");
+        document.getElementById("new-payment-modal").close();
+      } else {
+        window.showToast((window.t ? window.t('Failed: ') : "Failed: ") + res.error, "error");
+      }
+    } catch (e) {
+      window.showToast((window.t ? window.t('Failed: ') : "Failed: ") + e.message, "error");
+    } finally {
+      btn.innerHTML = "Submit Request";
+      btn.disabled = false;
     }
   };
 
@@ -406,12 +483,7 @@ const renderPortal = () => {
         return window.showToast(window.t ? window.t('Please select a seat from the Seat Map.') || "Please select a seat from the Seat Map." : "Please select a seat from the Seat Map.", "error");
       }
 
-      if (window.getSelectedDocumentFiles) {
-        const files = window.getSelectedDocumentFiles();
-        if (!files.aadhaarFront || !files.aadhaarBack || !files.selfie) {
-          return window.showToast(window.t ? window.t('Please upload Aadhaar Front, Back, and your Photo.') || "Please upload Aadhaar Front, Back, and your Photo." : "Please upload Aadhaar Front, Back, and your Photo.", "error");
-        }
-      }
+      // Document uploads are now optional
 
       const btnSubmit = document.getElementById("btn-submit-admission");
       const originalText = btnSubmit.innerHTML;
@@ -545,7 +617,7 @@ const renderPortal = () => {
             document.getElementById("payment-modal").close();
             window.location.reload(); // reload to show pending or active state
           } else {
-            window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
+              window.showToast((window.t ? window.t('Error: ') : "Error: ") + res.error, "error");
             document.getElementById("payment-modal").close();
             if (paymentMethod === "Paid") {
               const btn = document.getElementById("btn-modal-paid");
@@ -559,7 +631,7 @@ const renderPortal = () => {
           }
         }
       } catch (err) {
-        window.showToast(window.t ? window.t('An unexpected error occurred: ') || "An unexpected error occurred: " : "An unexpected error occurred: " + err.message, "error");
+        window.showToast((window.t ? window.t('An unexpected error occurred: ') : "An unexpected error occurred: ") + err.message, "error");
         if (paymentMethod === "Paid") {
           const btn = document.getElementById("btn-modal-paid");
           if(btn) { btn.innerHTML = "Mark as Paid & Submit"; btn.disabled = false; }
@@ -664,7 +736,7 @@ const renderPortal = () => {
                document.getElementById("pending-payment-modal").close();
                window.location.reload();
            } else {
-               window.showToast(window.t ? window.t('Error: ') || "Error: " : "Error: " + res.error, "error");
+               window.showToast((window.t ? window.t('Error: ') : "Error: ") + res.error, "error");
                btn.innerHTML = "Mark as Paid & Submit";
                btn.disabled = false;
            }
@@ -682,6 +754,34 @@ const renderPortal = () => {
   } else {
     // Normal active student dashboard
     
+    // Clean up Settings page for students (Hide admin-only controls)
+    const settingsPage = document.getElementById("page-settings");
+    if (settingsPage) {
+      const saveBtn = settingsPage.querySelector(".btn-primary");
+      if (saveBtn) saveBtn.style.display = "none";
+      
+      const adminCards = settingsPage.querySelectorAll(".settings-card");
+      adminCards.forEach(card => {
+        const title = card.querySelector(".settings-section-title");
+        if (title && title.innerText.includes("Reading Space Info")) {
+          card.style.display = "none";
+        }
+      });
+      
+      const toggles = settingsPage.querySelector(".settings-toggle-list");
+      if (toggles) toggles.style.display = "none";
+      
+      // Auto-save language on change for students
+      const langSelect = document.getElementById("setting-language");
+      if (langSelect) {
+        langSelect.addEventListener("change", (e) => {
+          import('./translationService.js').then(({ setLanguage }) => {
+            setLanguage(e.target.value);
+          });
+        });
+      }
+    }
+
     // Restore sidebars for active students
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     navItems.forEach(item => {

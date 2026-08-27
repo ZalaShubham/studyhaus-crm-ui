@@ -303,4 +303,53 @@ const renderPaymentAdminTable = () => {
   });
 
   tbody.innerHTML = html;
-};
+  }; // End of render function
+
+  // Export functions
+  window.handlePaymentExport = async (format) => {
+    try {
+      const { exportToCSV, exportToExcel, exportToPDF } = await import("./exportService.js");
+      
+      // Filter Data same as render logic
+      let filtered = allPayments;
+      if (currentFilters.status !== "All") {
+        filtered = filtered.filter(r => r.status === currentFilters.status);
+      }
+      if (currentFilters.search.trim() !== "") {
+        filtered = filtered.filter(r => {
+          const name = (r.studentName || "").toLowerCase();
+          const txn = (r.transactionId || "").toLowerCase();
+          return name.includes(currentFilters.search) || txn.includes(currentFilters.search);
+        });
+      }
+
+      const rows = filtered.map(r => {
+        const isPending = r.status === "pending";
+        const statusText = isPending ? "Pending" : (r.status === "approved" ? "Paid" : "Rejected");
+        const date = (() => {
+          const raw = r.date || r.paymentDate || (r.createdAt && r.createdAt.seconds ? r.createdAt.seconds * 1000 : null);
+          if (!raw) return "N/A";
+          const d = new Date(raw);
+          return isNaN(d.getTime()) ? "N/A" : d.toISOString().split('T')[0];
+        })();
+
+        return {
+          "Transaction ID": r.transactionId || "RC-N/A",
+          "Name": r.studentName || "Unknown",
+          "Plan": r.planName || "Unknown Plan",
+          "Method": r.paymentMethod || "Cash",
+          "Amount": r.amount,
+          "Date": date,
+          "Status": statusText
+        };
+      });
+
+      const filename = `payments_export_${new Date().toISOString().split('T')[0]}`;
+      if (format === 'csv') exportToCSV(filename, rows);
+      else if (format === 'excel') await exportToExcel(filename, rows);
+      else if (format === 'pdf') await exportToPDF(filename, 'Payments Report', rows);
+    } catch (err) {
+      console.error("Export Error:", err);
+      if (typeof showToast === 'function') showToast("Export failed: " + err.message, "error");
+    }
+  };

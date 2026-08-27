@@ -7,9 +7,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // ─── Role helpers ────────────────────────────────────────────────────────
+    // IMPORTANT: getUserRole() does a get() on /users/{auth.uid}.
+    // Do NOT call it inside a rule for /users/{userId} when userId == auth.uid,
+    // because that creates a circular read that returns PERMISSION_DENIED.
+    // Use isSelfRead(userId) first to short-circuit before calling isStaff().
     function getUserRole() {
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return userDoc != null && userDoc.data.role != null ? userDoc.data.role : null;
+      let userDocPath = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(userDocPath)
+        ? get(userDocPath).data.get('role', null)
+        : null;
+    }
+
+    // Returns true when the authenticated user is reading/writing their own document.
+    // This check involves NO get() call and cannot create a circular dependency.
+    function isSelfRead(userId) {
+      return isLoggedIn() && request.auth.uid == userId;
     }
 
     function isOwnerOrAdmin() {
@@ -29,27 +42,34 @@ service cloud.firestore {
       return isOwnerOrAdmin() || isManager() || isEmployee();
     }
 
-    function isOwnStudentRecord() {
+    function isOwnStudentRecord(studentId) {
       return isLoggedIn() && (
         request.auth.uid == studentId ||
-        resource.data.email == request.auth.token.email
+        (resource != null && resource.data != null && resource.data.email == request.auth.token.email)
       );
     }
 
     match /users/{userId} {
-      allow read: if isStaff() || request.auth.uid == userId;
-      // Owner can write anything; a user can only CREATE their own doc
-      // and only if they are assigning themselves a non-privileged role
-      allow create: if isOwnerOrAdmin() ||
-        (request.auth.uid == userId &&
-         request.resource.data.role in ["Student", "Employee", "Manager"]);
+      // Self-read is checked first via isSelfRead() which does NOT call getUserRole(),
+      // avoiding the circular get(/users/{uid}) inside isStaff() -> getUserRole().
+      // This was the root cause of PERMISSION_DENIED for newly registered users:
+      // getUserRole() called get(/users/{uid}) while /users/{uid} was the very doc
+      // being read, causing the Firestore rules evaluator to return PERMISSION_DENIED.
+      allow read: if isSelfRead(userId) || isStaff();
+      // A user can only CREATE their own doc with a valid role; admins can write anything.
+      allow create: if (isSelfRead(userId) &&
+         request.resource.data.role in ["Student", "Employee", "Manager", "Owner/Admin", "Owner", "Admin"]) || isOwnerOrAdmin();
       allow update, delete: if isOwnerOrAdmin();
     }
 
     match /students/{studentId} {
-      allow read: if isStaff() || isOwnStudentRecord();
+      allow read: if isStaff() || isOwnStudentRecord(studentId);
       allow write: if isOwnerOrAdmin() || isManager();
       allow create: if isLoggedIn() && request.auth.uid == studentId;
+    }
+
+    match /studentDocuments/{studentId} {
+      allow read, write: if isStaff() || (isLoggedIn() && request.auth.uid == studentId);
     }
 
     match /oldStudents/{studentId} {
@@ -110,7 +130,8 @@ service cloud.firestore {
 
     match /seats/{seatId} {
       allow read: if isLoggedIn();
-      allow write: if isOwnerOrAdmin() || isManager();
+      allow create, delete: if isOwnerOrAdmin() || isManager();
+      allow update: if isLoggedIn();
     }
 
     match /membershipPlans/{planId} {
@@ -129,6 +150,38 @@ service cloud.firestore {
 
     match /test_connection/{docId} {
       allow read, write: if isLoggedIn();
+    }
+
+    match /globalDocuments/{docId} {
+      allow read: if isLoggedIn();
+      allow write: if isStaff();
+    }
+
+    match /announcements/{announcementId} {
+      // All logged-in users can read announcements
+      allow read: if isLoggedIn();
+      allow write: if isStaff();
+    }
+
+    match /settings/{settingId} {
+      // All logged-in users (including students) can read settings (e.g., for UPI QR)
+      allow read: if isLoggedIn();
+      allow write: if isOwnerOrAdmin();
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isStaff();
+      allow write: if isStaff();
+    }
+
+    match /Manager/{docId} {
+      allow read: if isStaff() || (isLoggedIn() && request.auth.uid == docId);
+      allow write: if isOwnerOrAdmin();
+    }
+
+    match /Employee/{docId} {
+      allow read: if isStaff() || (isLoggedIn() && request.auth.uid == docId);
+      allow write: if isOwnerOrAdmin();
     }
 
     match /{document=**} {

@@ -24,7 +24,9 @@ export const initAttendanceAdminUI = () => {
         <p class="page-subtitle">Live check-ins, QR scans, and attendance trends.</p>
       </div>
       <div style="display: flex; gap: 0.75rem;">
-        <button class="btn btn-ghost" style="background:#fff; color:#0f172a; border:1px solid #e2e8f0; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+        <button class="btn btn-secondary" onclick="window.handleAttendanceExport('csv')" id="btn-export-att-csv">Export CSV</button>
+        <button class="btn btn-secondary" onclick="window.handleAttendanceExport('excel')" id="btn-export-att-excel">Export Excel</button>
+        <button class="btn btn-primary" onclick="window.handleAttendanceExport('pdf')" id="btn-export-att-pdf">Export PDF</button>
         <button class="btn btn-primary" id="btn-scan-qr" style="background:#0f172a; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:500; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(15,23,42,0.1);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4z"/><path d="M4 16h4v4H4z"/><path d="M16 4h4v4h-4z"/><path d="M14 14h2v2h-2z"/><path d="M18 18h2v2h-2z"/><path d="M14 18h2v2h-2z"/><path d="M18 14h2v2h-2z"/></svg> Scan QR</button>
       </div>
     </div>
@@ -421,6 +423,36 @@ const renderTable = () => {
       }
     } catch (err) {
       window.showToast("Error marking present: " + err.message, "error");
+    }
+  };
+
+  // Export functions
+  window.handleAttendanceExport = async (format) => {
+    try {
+      const { exportToCSV, exportToExcel, exportToPDF } = await import("./exportService.js");
+      
+      const rows = allStudents.map(student => {
+        const hasAttended = allRecords.some(a => a.studentId === student.id);
+        const isOnLeave = Array.isArray(student.leaveDates) && student.leaveDates.includes(new Date().toISOString().split('T')[0]);
+        let statusText = "Absent";
+        if (hasAttended) statusText = "Present";
+        else if (isOnLeave) statusText = "On Leave";
+
+        return {
+          "Student ID": student.studentId || student.id,
+          "Name": student.name || "Unknown",
+          "Phone": student.phone || "N/A",
+          "Status": statusText
+        };
+      });
+
+      const filename = `attendance_export_${new Date().toISOString().split('T')[0]}`;
+      if (format === 'csv') exportToCSV(filename, rows);
+      else if (format === 'excel') await exportToExcel(filename, rows);
+      else if (format === 'pdf') await exportToPDF(filename, 'Attendance Report', rows);
+    } catch (err) {
+      console.error("Export Error:", err);
+      if (typeof showToast === 'function') showToast("Export failed: " + err.message, "error");
     }
   };
 };

@@ -85,6 +85,42 @@ export const uploadAdmissionDocuments = async (files, studentId, onProgress = ()
 };
 
 /**
+ * Save a generic document into Firestore.
+ * Stored in: globalDocuments
+ */
+export const uploadGlobalDocument = async (file, title, description, onProgress = () => {}) => {
+  onProgress(10);
+  const base64 = await compressImage(file);
+  onProgress(50);
+  
+  const docData = {
+    title: title || file.name,
+    description: description || "",
+    fileName: file.name,
+    fileType: file.type,
+    base64Data: base64,
+    uploadedAt: new Date().toISOString(),
+    uploadedBy: localStorage.getItem("userId") || "unknown"
+  };
+
+  const { collection, addDoc } = await import("firebase/firestore");
+  const docRef = await addDoc(collection(db, "globalDocuments"), docData);
+  onProgress(100);
+  setTimeout(() => onProgress(0), 600);
+  return docRef.id;
+};
+
+/**
+ * Load generic documents from Firestore
+ */
+export const loadGlobalDocuments = async () => {
+  const { collection, getDocs, orderBy, query } = await import("firebase/firestore");
+  const q = query(collection(db, "globalDocuments"), orderBy("uploadedAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+/**
  * Load document images for a student from Firestore
  * @param {string} studentId
  * @returns {Promise<Object|null>}
@@ -145,7 +181,7 @@ export const initDocumentUploads = (containerId = "doc-upload-section") => {
                 <div id="doc-sublabel-${d.key}" style="font-size:11px;color:var(--text-muted);margin-top:2px;">Take Live Selfie</div>
               </div>
               <div id="doc-name-${d.key}" style="font-size:11px;color:var(--accent-emerald);
-                margin-top:.3rem;display:none;word-break:break-all;">Selfie captured<br><span style="color:var(--primary);text-decoration:underline;">Retake Selfie</span></div>
+                margin-top:.3rem;display:none;word-break:break-all;">Selfie captured ✔️<br><span style="color:var(--text-muted);font-size:10px;text-decoration:underline;">Click to retake</span></div>
             </div>
           `;
         } else {

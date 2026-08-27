@@ -55,6 +55,7 @@ export const updateAdmissionPayment = async (admissionId, transactionId, payment
  */
 export const submitAdmission = async (formData, isStudent) => {
   try {
+    formData.isStudentSubmission = isStudent;
     await validateStudentData(formData);
     
     // Add timestamps and role

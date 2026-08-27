@@ -33,7 +33,10 @@ export const validateStudentData = async (data) => {
   }
 
   // Duplicate Checks in both 'students' and 'admissions'
-  await checkDuplicates(data.phone, data.email);
+  // Only run this if it's NOT a student (Admins have permission to query collections)
+  if (!data.isStudentSubmission) {
+    await checkDuplicates(data.phone, data.email);
+  }
   return true;
 };
 

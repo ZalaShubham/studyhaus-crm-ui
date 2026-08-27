@@ -40,6 +40,11 @@ window.renderRenewalHistory = renderRenewalHistory;
 window.openReportViewer = openReportViewer;
 window.closeReportViewer = closeReportViewer;
 
+// Expose Document Upload logic globally
+import { uploadGlobalDocument, loadGlobalDocuments } from "./services/documentUploadService.js";
+window.uploadGlobalDocument = uploadGlobalDocument;
+window.loadGlobalDocuments = loadGlobalDocuments;
+
 // Initialize Authentication Guard
 initAuthGuard();
 

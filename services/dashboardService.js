@@ -31,7 +31,11 @@ const updateElement = (id, value) => {
  */
 export const initDashboardListeners = () => {
   // Only init if we're on a page with dashboard metrics
-  if (!document.getElementById("metric-earnings-today")) return;
+  // Check for ANY dashboard metric to prevent running on login/register
+  if (!document.querySelector("[id^='metric-']")) return;
+
+  const role = localStorage.getItem("userRole");
+  if (role === "Student") return; // Students do not have permission to read global metrics
 
   console.log("Initializing live dashboard listeners...");
 

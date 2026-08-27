@@ -1,4 +1,4 @@
-import { collection, addDoc, updateDoc, doc, query, where, onSnapshot, serverTimestamp, getDocs, getDoc, orderBy } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, query, where, onSnapshot, serverTimestamp, getDocs, getDoc, orderBy, writeBatch } from "firebase/firestore";
 import { db } from "../firebase/firebase.js";
 
 // Helper to get today's date string YYYY-MM-DD
@@ -101,8 +101,11 @@ export const checkIn = async (student, selectedSeatNumber = null) => {
       throw new Error("This seat is reserved for someone else.");
     }
 
+    const batch = writeBatch(db);
     const now = new Date();
-    await addDoc(collection(db, "attendance"), {
+    const attendanceRef = doc(collection(db, "attendance"));
+    
+    batch.set(attendanceRef, {
       studentId: student.id,
       studentName: student.name,
       seatNumber: finalSeat, // The actual seat they are taking
@@ -116,10 +119,12 @@ export const checkIn = async (student, selectedSeatNumber = null) => {
     });
 
     // Update Seat to Occupied
-    await updateDoc(seatDoc.ref, {
+    batch.update(seatDoc.ref, {
       status: "Occupied",
       lastUpdated: serverTimestamp()
     });
+
+    await batch.commit();
 
     return { success: true };
   } catch (error) {
@@ -143,7 +148,9 @@ export const checkOut = async (attendanceId, checkInTimestamp) => {
     if (durationHours < 0) durationHours = 0;
     durationHours = Math.round(durationHours * 100) / 100;
 
-    await updateDoc(docRef, {
+    const batch = writeBatch(db);
+
+    batch.update(docRef, {
       checkOut: checkOutTime,
       duration: durationHours,
       status: "Completed",
@@ -162,12 +169,14 @@ export const checkOut = async (attendanceId, checkInTimestamp) => {
         let newStatus = "Available";
         if (sData.assignedStudentId) newStatus = "Reserved";
 
-        await updateDoc(seatDoc.ref, {
+        batch.update(seatDoc.ref, {
           status: newStatus,
           lastUpdated: serverTimestamp()
         });
       }
     }
+
+    await batch.commit();
 
     return { success: true };
   } catch (error) {

@@ -13,23 +13,22 @@ export const listenToStudentPortalData = (onDataUpdate, onError) => {
     if (user && user.email) {
 
       // 1. Try the students collection first (added by admin via Admissions)
-      const q = query(collection(db, "students"), where("email", "==", user.email));
-
-      onSnapshot(q, async (snapshot) => {
-        if (!snapshot.empty) {
+      // Since student documents use the user.uid as their ID, we can do a direct getDoc
+      const studentDocRef = doc(db, "students", user.uid);
+      
+      onSnapshot(studentDocRef, async (studentDoc) => {
+        if (studentDoc.exists()) {
           // Found in students collection — full profile available
-          const studentDoc = snapshot.docs[0];
           onDataUpdate({ id: studentDoc.id, ...studentDoc.data() });
           return;
         }
 
         // 2. Fallback: check the users collection (registered via register.html)
         try {
-          const usersQ = query(collection(db, "users"), where("email", "==", user.email));
-          const usersSnap = await getDocs(usersQ);
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
 
-          if (!usersSnap.empty) {
-            const userDoc = usersSnap.docs[0];
+          if (userDoc.exists()) {
             const userData = userDoc.data();
             const admRef = doc(db, "admissions", user.uid);
             const admSnap = await getDoc(admRef);
