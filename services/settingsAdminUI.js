@@ -37,6 +37,14 @@ export const initSettingsAdminUI = async () => {
     console.error("Failed to load settings:", error);
   }
 
+  if (langSelect) {
+    langSelect.addEventListener('change', (e) => {
+      import('./translationService.js').then(({ setLanguage }) => {
+        setLanguage(e.target.value);
+      });
+    });
+  }
+
   // Handle file upload preview
   let uploadedBase64 = null;
   if (qrUpload && qrPreview) {

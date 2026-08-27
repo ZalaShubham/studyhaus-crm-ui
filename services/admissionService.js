@@ -86,7 +86,8 @@ export const submitAdmission = async (formData, isStudent) => {
       // Admin Admission
       formData.approvalStatus = "Approved";
       formData.status = "Active";
-      await addDoc(collection(db, "students"), formData);
+      const studentRef = await addDoc(collection(db, "students"), formData);
+      return { success: true, studentId: studentRef.id };
     }
     
     return { success: true };
@@ -237,13 +238,19 @@ export const initAdmissionsUI = async () => {
         const s = doc.data();
         if (s.seatNumber && String(s.seatNumber).trim() !== "" && String(s.seatNumber) !== "undefined") {
           const seatStr = String(s.seatNumber).trim();
-          if (/^[AB]/i.test(seatStr)) {
-            validSeats.push(seatStr);
+          const match = seatStr.match(/^([AB])(\d+)$/i);
+          if (match) {
+            const prefix = match[1].toUpperCase();
+            const number = Number(match[2]);
+            const maxNumber = prefix === "A" ? 68 : 40;
+            if (number >= 1 && number <= maxNumber) {
+              validSeats.push(`${prefix}${String(number).padStart(2, "0")}`);
+            }
           }
         }
       });
       
-      validSeats.sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+      validSeats = [...new Set(validSeats)].sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
       
       let html = `<option value=''>${validSeats.length} available</option>`;
       validSeats.forEach(seat => {
@@ -439,6 +446,20 @@ export const initAdmissionsUI = async () => {
       
       const planId = planEl.value;
       const plan = availablePlansList.find(p => p.id === planId);
+      const selectedSeatNumber = seatEl?.value || "";
+
+      let selectedSeat = null;
+      if (selectedSeatNumber) {
+        const availableSeats = await getDocs(query(collection(db, "seats"), where("status", "==", "Available")));
+        selectedSeat = availableSeats.docs.find(seatDoc => {
+          const seatValue = String(seatDoc.data().seatNumber || "").match(/^([AB])(\d+)$/i);
+          if (!seatValue) return false;
+          return `${seatValue[1].toUpperCase()}${String(Number(seatValue[2])).padStart(2, "0")}` === selectedSeatNumber;
+        });
+        if (!selectedSeat) {
+          throw new Error("That seat is no longer available. Please choose another seat.");
+        }
+      }
 
       const data = {
         name: document.getElementById("adm-name").value,
@@ -461,7 +482,8 @@ export const initAdmissionsUI = async () => {
         })(),
         planId: planId,
         planName: plan ? plan.planName : "",
-        seatAssigned: seatEl.value || "",
+        seatAssigned: selectedSeatNumber,
+        seatNumber: selectedSeatNumber,
         paymentMethod: isAdminOrManager ? (overridePaymentMethod || "Admin Created") : "Pending",
         termsAccepted: true
       };
@@ -478,6 +500,15 @@ export const initAdmissionsUI = async () => {
                 window.showToast("Admission request submitted and is Pending Approval!", "success");
             }
         } else {
+            if (selectedSeat) {
+              await updateDoc(doc(db, "seats", selectedSeat.id), {
+                status: "Occupied",
+                assignedStudentId: res.studentId,
+                assignedStudentName: data.name,
+                planType: data.planName,
+                lastUpdated: serverTimestamp()
+              });
+            }
             window.showToast("Student successfully admitted as Active!", "success");
         }
         window.resetAdmission();

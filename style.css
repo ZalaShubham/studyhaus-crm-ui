@@ -2203,6 +2203,14 @@ input:focus, select:focus, textarea:focus, button:focus, *:focus, *:focus-visibl
   border: 1px solid var(--border) !important;
 }
 
+.topbar-search input {
+  color: #0f172a !important;
+}
+
+.topbar-search input::placeholder {
+  color: #64748b;
+}
+
 /* User Dropdown */
 .topbar-user {
   position: relative;

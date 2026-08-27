@@ -49,7 +49,7 @@ function navigate(page) {
   // SPA Authorization check
   const role = localStorage.getItem("userRole");
   if (role === "Employee") {
-    const restrictedPages = ["admissions", "expenses", "analytics", "reports", "settings", "staff", "old-students", "message-logs", "memberships"];
+    const restrictedPages = ["admissions", "documents", "expenses", "analytics", "reports", "settings", "staff", "old-students", "message-logs", "memberships"];
     if (restrictedPages.includes(page)) {
       if (typeof showToast === 'function') showToast("Access Denied: You do not have permission to view this page.", "error");
       return;
