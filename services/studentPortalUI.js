@@ -206,47 +206,59 @@ export const initStudentPortalUI = () => {
   };
 
   window.calculatePaymentAmount = () => {
-    const months = parseInt(document.getElementById("payment-months").value) || 1;
-    let basePrice = 0;
-    if (currentStudent.planName.toLowerCase().includes("regular")) basePrice = 1000;
-    else if (currentStudent.planName.toLowerCase().includes("rotational")) basePrice = 800;
-    else if (currentStudent.planName.toLowerCase().includes("night")) basePrice = 700;
-    else basePrice = 1000;
+    if (!currentStudent) return;
+    const { monthsOwed, nextStartStr, nextEndStr } = computeUnpaidMonths(currentStudent.paymentDueDate);
+    const months = monthsOwed > 0 ? 1 : (parseInt(document.getElementById("payment-months")?.value) || 1);
+
+    const planName = (currentStudent.planName || '').toLowerCase();
+    let basePrice = 1000;
+    if (planName.includes("rotational")) basePrice = 800;
+    else if (planName.includes("night")) basePrice = 700;
 
     const total = basePrice * months;
-    document.getElementById("payment-amount-display").innerText = `₹${total}`;
-    document.getElementById("payment-amount").value = total;
+    const amountDisplay = document.getElementById("payment-amount-display");
+    const amountInput = document.getElementById("payment-amount");
+    if (amountDisplay) amountDisplay.innerText = `₹${total}`;
+    if (amountInput) amountInput.value = total;
 
-    let startDate = new Date(); // Fallback to today
-    if (currentStudent.paymentDueDate) {
-      const parsedDate = new Date(currentStudent.paymentDueDate);
-      if (!isNaN(parsedDate.getTime())) {
-        startDate = parsedDate;
+    const startEl = document.getElementById("payment-start-date");
+    const endEl = document.getElementById("payment-end-date");
+    if (monthsOwed > 0) {
+      if (startEl) startEl.innerText = nextStartStr;
+      if (endEl) endEl.innerText = nextEndStr;
+    } else {
+      let startDate = new Date();
+      if (currentStudent.paymentDueDate) {
+        const parsed = new Date(currentStudent.paymentDueDate);
+        if (!isNaN(parsed.getTime())) startDate = parsed;
       }
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + months);
+      if (startEl) startEl.innerText = startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      if (endEl) endEl.innerText = endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     }
-    
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + months);
-    document.getElementById("payment-end-date").innerText = endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   window.handlePaymentSubmit = async () => {
     const btn = document.getElementById("btn-submit-payment");
     const txnId = document.getElementById("payment-txnid").value;
-    const months = document.getElementById("payment-months").value;
-    const amount = document.getElementById("payment-amount").value;
 
     if (!txnId) return window.showToast(window.t ? window.t('Please enter the Transaction ID.') || "Please enter the Transaction ID." : "Please enter the Transaction ID.", "error");
+
+    const { monthsOwed, nextMonthLabel } = computeUnpaidMonths(currentStudent?.paymentDueDate);
+    const months = monthsOwed > 0 ? 1 : (parseInt(document.getElementById("payment-months")?.value) || 1);
+    const amount = document.getElementById("payment-amount").value;
+    const monthLabel = monthsOwed > 0 ? nextMonthLabel : null;
 
     btn.innerHTML = "Submitting...";
     btn.disabled = true;
 
-    const res = await submitPaymentRequest(currentStudent, txnId, months, amount);
+    const res = await submitPaymentRequest(currentStudent, txnId, months, amount, monthLabel);
     if (res.success) {
       window.showToast(window.t ? window.t('Payment Request Submitted Successfully!') || "Payment Request Submitted Successfully!" : "Payment Request Submitted Successfully!", "success");
       document.getElementById("payment-txnid").value = "";
     } else {
-      window.showToast(window.t ? window.t('Failed: ') || "Failed: " : "Failed: " + res.error, "error");
+      window.showToast("Failed: " + res.error, "error");
     }
 
     btn.innerHTML = "Submit Payment Request";
@@ -867,6 +879,9 @@ const renderPortal = () => {
     `;
   }
 
+  // Compute unpaid months before building the payment form
+  const { monthsOwed: _monthsOwed, nextMonthLabel: _nextMonthLabel, nextStartStr: _nextStartStr, nextEndStr: _nextEndStr } = computeUnpaidMonths(s.paymentDueDate);
+
   // 2. PAYMENTS PAGE
   document.getElementById("page-student-payments").innerHTML = `
     <div class="page-header">
@@ -885,6 +900,16 @@ const renderPortal = () => {
             <h3 style="margin: 0; font-size: 1.25rem;">Renew Subscription</h3>
           </div>
 
+          ${_monthsOwed > 0 ? `
+          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+              <div style="font-weight: 700; color: #92400e; font-size: 0.9rem; margin-bottom: 4px;">⚠ ${_monthsOwed} Unpaid Month${_monthsOwed > 1 ? 's' : ''} Detected</div>
+              <div style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">Your fees are overdue. You must clear them <strong>one month at a time</strong>, starting from the oldest. Currently paying for: <strong>${_nextMonthLabel}</strong>.</div>
+            </div>
+          </div>
+          ` : ''}
+
           <div style="display:flex; gap: 2rem; align-items:flex-start; flex-wrap: wrap;">
             <!-- LEFT SIDE: Form & Details -->
             <div style="flex: 1; min-width: 350px;">
@@ -899,32 +924,44 @@ const renderPortal = () => {
                 </div>
               </div>
 
-              <!-- Current Expiry Block -->
-              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="#64748b" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <!-- Subscription Status -->
+              <div style="background: #f1f5f9; border: 1px solid ${_monthsOwed > 0 ? '#fca5a5' : '#e2e8f0'}; border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="${_monthsOwed > 0 ? '#dc2626' : '#64748b'}" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <div>
-                  <div style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Current Subscription Ends</div>
-                  <div style="font-size: 1rem; font-weight: 600; color: #334155;">${s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</div>
+                  <div style="font-size: 0.75rem; font-weight: 600; color: ${_monthsOwed > 0 ? '#dc2626' : '#64748b'}; text-transform: uppercase;">Current Subscription Ends</div>
+                  <div style="font-size: 1rem; font-weight: 600; color: ${_monthsOwed > 0 ? '#dc2626' : '#334155'}; display: flex; align-items: center; gap: 8px;">
+                    ${s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                    ${_monthsOwed > 0 ? `<span style="font-size:0.75rem; padding:2px 8px; background:#fee2e2; color:#dc2626; border-radius:999px; font-weight:500;">Overdue</span>` : ''}
+                  </div>
                 </div>
               </div>
 
-              <!-- NEW DATES BLOCK -->
+              <!-- Payment Period -->
               <div style="margin-bottom: 1.5rem;">
-                <label style="font-size: 0.75rem; font-weight: 600; color: #ef4444; text-transform: uppercase; margin-bottom: 0.5rem; display: block;">Dates *</label>
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-size: 0.75rem; font-weight: 600; color: ${_monthsOwed > 0 ? '#dc2626' : '#16a34a'}; text-transform: uppercase; margin-bottom: 0.5rem; display: block;">Payment Period</label>
+                <div style="background: ${_monthsOwed > 0 ? '#fff7ed' : '#f0fdf4'}; border: 1px solid ${_monthsOwed > 0 ? '#fed7aa' : '#bbf7d0'}; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
                   <div style="text-align: center; flex:1;">
-                    <div style="font-size: 0.75rem; font-weight: 600; color: #16a34a; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> START</div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #15803d; margin-top: 6px;" id="payment-start-date">${s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Today'}</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: ${_monthsOwed > 0 ? '#ea580c' : '#16a34a'};">▶ START</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: ${_monthsOwed > 0 ? '#c2410c' : '#15803d'}; margin-top: 6px;" id="payment-start-date">${_monthsOwed > 0 ? _nextStartStr : (s.paymentDueDate ? new Date(s.paymentDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Today')}</div>
                   </div>
-                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="#86efac" stroke-width="2" fill="none" style="margin: 0 1rem;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  <div style="color: ${_monthsOwed > 0 ? '#fdba74' : '#86efac'}; font-size: 1.5rem; margin: 0 1rem; user-select: none;">→</div>
                   <div style="text-align: center; flex:1;">
-                    <div style="font-size: 0.75rem; font-weight: 600; color: #16a34a; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> END</div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #15803d; margin-top: 6px;" id="payment-end-date">--</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: ${_monthsOwed > 0 ? '#ea580c' : '#16a34a'};">■ END</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: ${_monthsOwed > 0 ? '#c2410c' : '#15803d'}; margin-top: 6px;" id="payment-end-date">${_monthsOwed > 0 ? _nextEndStr : '--'}</div>
                   </div>
                 </div>
               </div>
 
               <form onsubmit="event.preventDefault(); window.handlePaymentSubmit();" class="form-grid" style="gap: 1.5rem;">
+                ${_monthsOwed > 0 ? `
+                <div class="form-group">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: #92400e; text-transform: uppercase;">Paying For (Locked)</label>
+                  <div style="padding: 10px 14px; border-radius: 8px; border: 1px solid #f59e0b; background: #fef3c7; color: #92400e; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                    🔒 ${_nextMonthLabel}
+                  </div>
+                  <input type="hidden" id="payment-months" value="1" />
+                </div>
+                ` : `
                 <div class="form-group">
                   <label style="font-size: 0.75rem; font-weight: 600; color: #ef4444; text-transform: uppercase;">Duration *</label>
                   <select id="payment-months" onchange="window.calculatePaymentAmount()" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline:none; background: var(--bg-card);">
@@ -934,6 +971,7 @@ const renderPortal = () => {
                     <option value="6">6 Months</option>
                   </select>
                 </div>
+                `}
                 <div class="form-group">
                   <label style="font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Amount (₹)</label>
                   <div id="payment-amount-display" style="font-size: 1.25rem; font-weight: 700; color: #334155; padding: 6px 0;">₹--</div>
@@ -947,7 +985,7 @@ const renderPortal = () => {
                   <button type="button" class="btn btn-ghost" style="flex: 1; background: #f1f5f9; color: #475569;" onclick="document.getElementById('payment-txnid').value=''">✕ Cancel</button>
                   <button type="submit" id="btn-submit-payment" class="btn btn-primary" style="flex: 2; background: #22c55e; border-color: #22c55e; color: #fff;">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                    Submit Renewal Request
+                    ${_monthsOwed > 0 ? `Pay for ${_nextMonthLabel}` : 'Submit Renewal Request'}
                   </button>
                 </div>
               </form>
@@ -1068,6 +1106,50 @@ const renderPortal = () => {
   });
 
   setTimeout(() => { if (window.calculatePaymentAmount) window.calculatePaymentAmount(); }, 50);
+};
+
+/**
+ * Computes how many months of fees are unpaid and details of the oldest owed month.
+ * If paymentDueDate is in the past, the student owes months from the day after dueDate up to today.
+ * Each call to this enforces sequential payment: student must pay the oldest month first.
+ */
+const computeUnpaidMonths = (paymentDueDateStr) => {
+  if (!paymentDueDateStr) return { monthsOwed: 0, nextMonthLabel: '', nextStartStr: 'Today', nextEndStr: '--' };
+  const dueDate = new Date(paymentDueDateStr);
+  if (isNaN(dueDate.getTime())) return { monthsOwed: 0, nextMonthLabel: '', nextStartStr: 'Today', nextEndStr: '--' };
+  dueDate.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (dueDate >= today) {
+    // Student is up to date — no owed months
+    return {
+      monthsOwed: 0,
+      nextMonthLabel: '',
+      nextStartStr: dueDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      nextEndStr: '--'
+    };
+  }
+
+  // Due date is in the past — compute how many full billing months have elapsed
+  const firstUnpaid = new Date(dueDate);
+  firstUnpaid.setDate(firstUnpaid.getDate() + 1); // Day after last paid day
+
+  let monthsOwed = 0;
+  let checkDate = new Date(firstUnpaid);
+  while (checkDate <= today) {
+    monthsOwed++;
+    checkDate.setMonth(checkDate.getMonth() + 1);
+  }
+
+  // Label and date strings for the first owed payment period
+  const nextMonthLabel = firstUnpaid.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const nextStartStr = firstUnpaid.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const nextEnd = new Date(dueDate);
+  nextEnd.setMonth(nextEnd.getMonth() + 1);
+  const nextEndStr = nextEnd.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  return { monthsOwed, nextMonthLabel, nextStartStr, nextEndStr };
 };
 
 const calculateDaysRemaining = (dueDateStr) => {

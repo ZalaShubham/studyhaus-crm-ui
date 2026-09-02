@@ -6,12 +6,13 @@ import { validateTransactionId } from "./paymentValidation.js";
 // STUDENT PAYMENT ACTIONS
 // ===============================================
 
-export const submitPaymentRequest = async (student, transactionId, renewalMonths, amount) => {
+export const submitPaymentRequest = async (student, transactionId, renewalMonths, amount, monthLabel = null) => {
   try {
-    await validateTransactionId(transactionId);
-    
-    // Add pending payment document
-    await addDoc(collection(db, "payments"), {
+    if (!transactionId || transactionId.trim() === "") {
+      throw new Error("Transaction ID is required.");
+    }
+
+    const paymentData = {
       studentId: student.id,
       studentName: student.name,
       planName: student.planName,
@@ -20,15 +21,22 @@ export const submitPaymentRequest = async (student, transactionId, renewalMonths
       transactionId: transactionId.trim(),
       status: "pending", // "pending", "approved", "rejected"
       dueDateStr: student.paymentDueDate || "", // Reference for dashboard
-      date: new Date().toISOString(), // Standard date format for query
+      date: new Date().toISOString(),
       createdAt: serverTimestamp()
-    });
+    };
+
+    // Store which specific month is being paid (for sequential overdue payments)
+    if (monthLabel) paymentData.monthLabel = monthLabel; // e.g. "June 2026"
+
+    await addDoc(collection(db, "payments"), paymentData);
     
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
+
+
 
 export const listenToMyPayments = (studentId, onUpdate) => {
   if (!studentId) return () => {};
