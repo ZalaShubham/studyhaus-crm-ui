@@ -71,7 +71,7 @@ const getDefaultRoute = (rawRole) => {
 export const enforceModulePermissions = (role) => {
   // Select all navigation items that have a data-page attribute
   const navItems = document.querySelectorAll('[data-page]');
-  
+
   navItems.forEach(item => {
     const moduleName = item.getAttribute('data-page');
     if (!hasPermission(role, moduleName)) {

@@ -103,64 +103,79 @@ export const initSeatMapUI = async (mode, containerId) => {
         `;
       };
 
-      const renderSignupColHtml = (arr) => {
+      const renderSignupCustomColHtml = (arr) => {
         let colHtml = `<div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">`;
-        arr.forEach(num => { colHtml += renderSignupSeatCard(num); });
+        arr.forEach(num => { 
+          if(num === null) {
+            colHtml += `<div style="height: 46px; width: 100%;"></div>`;
+          } else {
+            colHtml += renderSignupSeatCard(num); 
+          }
+        });
         colHtml += `</div>`;
         return colHtml;
       };
 
+      const groundCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(n => 'A' + n);
+      const groundCol2 = [null, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 67, 23, 22, 21, 20, 19].map(n => n ? 'A' + n : null);
+      const groundCol3 = [null, 35, 36, null, 37, 38, 39, 40, 41, 42, null, 43, 68, 44, 45, 46, 47, 48].map(n => n ? 'A' + n : null);
+      const groundCol4 = [66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49].map(n => 'A' + n);
+
+      const firstCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, null].map(n => n ? 'B' + n : null);
+      const firstCol2 = [null, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11].map(n => n ? 'B' + n : null);
+      const firstCol3 = [null, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map(n => n ? 'B' + n : null);
+      const firstCol4 = [40, 39, 38, 37, 36, 35, 34, 33, 32, 31, null].map(n => n ? 'B' + n : null);
+
       let html = "";
       if (signupCurrentFloor === "First Floor") {
         html = `
-          <div style="background: #fff; padding: 2rem 1rem 2rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; margin-bottom: 1rem; overflow-x: auto;">
+          <div style="background: #fff; padding: 2rem 1rem 4rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; margin-bottom: 1rem; overflow-x: auto;">
             <!-- Door -->
             <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.25rem 1.5rem; border-radius: 0 0 8px 8px; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
               DOOR
             </div>
             
             <div style="display: flex; gap: 0.75rem; justify-content: center; min-width: max-content; width: 100%;">
-              ${renderSignupColHtml(generateRange('B', 1, 10))}
-              ${renderSignupColHtml(generateRange('B', 20, 11))}
-              
-              <!-- Middle aisle -->
-              <div style="width: 20px; flex-shrink: 0;"></div>
-
-              ${renderSignupColHtml(generateRange('B', 21, 30))}
-              ${renderSignupColHtml(generateRange('B', 40, 31))}
+              ${renderSignupCustomColHtml(firstCol1)}
+              ${renderSignupCustomColHtml(firstCol2)}
+              ${renderSignupCustomColHtml(firstCol3)}
+              ${renderSignupCustomColHtml(firstCol4)}
             </div>
 
             <!-- Toilets -->
             <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
               <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
-                TOILET
+                TOILET-1
               </div>
               <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
-                TOILET
+                TOILET-2
               </div>
             </div>
           </div>
         `;
       } else if (signupCurrentFloor === "Ground Floor") {
         html = `
-          <div style="background: #fff; padding: 2rem 1rem 1rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; overflow-x: auto;">
+          <div style="background: #fff; padding: 2rem 1rem 4rem 1rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0; overflow-x: auto;">
             <!-- Door -->
             <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.25rem 1.5rem; border-radius: 0 0 8px 8px; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
               DOOR
             </div>
             
             <div style="display: flex; gap: 0.75rem; justify-content: center; min-width: max-content; width: 100%; align-items: flex-start;">
-              ${renderSignupColHtml(generateRange('A', 1, 18))}
-              ${renderSignupColHtml(generateRange('A', 34, 19))}
-              
-              <!-- Middle section with seats 67 and 68 -->
-              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 50px; flex-shrink: 0; align-self: center;">
-                 ${renderSignupSeatCard('A67')}
-                 ${renderSignupSeatCard('A68')}
-              </div>
+              ${renderSignupCustomColHtml(groundCol1)}
+              ${renderSignupCustomColHtml(groundCol2)}
+              ${renderSignupCustomColHtml(groundCol3)}
+              ${renderSignupCustomColHtml(groundCol4)}
+            </div>
 
-              ${renderSignupColHtml(generateRange('A', 35, 48))}
-              ${renderSignupColHtml(generateRange('A', 66, 49))}
+            <!-- Toilets -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
+              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+                TOILET-1
+              </div>
+              <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.25rem 1.5rem; border-radius: 8px 8px 0 0; font-weight: 700; color: #475569; letter-spacing: 1px; font-size: 11px;">
+                TOILET-2
+              </div>
             </div>
           </div>
         `;
@@ -783,65 +798,80 @@ const updateSeatAnalysis = (seats) => {
       `;
     };
 
-    const renderColHtml = (arr) => {
+    const renderCustomColHtml = (arr) => {
       let colHtml = `<div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">`;
-      arr.forEach(num => { colHtml += renderSeatCard(num); });
+      arr.forEach(num => { 
+        if(num === null) {
+          colHtml += `<div style="height: 50px; width: 100%;"></div>`;
+        } else {
+          colHtml += renderSeatCard(num); 
+        }
+      });
       colHtml += `</div>`;
       return colHtml;
     };
+
+    const groundCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(n => 'A' + n);
+    const groundCol2 = [null, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 67, 23, 22, 21, 20, 19].map(n => n ? 'A' + n : null);
+    const groundCol3 = [null, 35, 36, null, 37, 38, 39, 40, 41, 42, null, 43, 68, 44, 45, 46, 47, 48].map(n => n ? 'A' + n : null);
+    const groundCol4 = [66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49].map(n => 'A' + n);
+
+    const firstCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, null].map(n => n ? 'B' + n : null);
+    const firstCol2 = [null, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11].map(n => n ? 'B' + n : null);
+    const firstCol3 = [null, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map(n => n ? 'B' + n : null);
+    const firstCol4 = [40, 39, 38, 37, 36, 35, 34, 33, 32, 31, null].map(n => n ? 'B' + n : null);
 
     let html = "";
 
     if (currentFilters.floor === "First Floor") {
       html = `
-        <div style="background: #fff; padding: 3rem 2rem 3rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+        <div style="background: #fff; padding: 3rem 2rem 4rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
           <!-- Door -->
           <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             DOOR
           </div>
           
           <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 800px; margin: 0 auto;">
-            ${renderColHtml(generateRange('B', 1, 10))}
-            ${renderColHtml(generateRange('B', 20, 11))}
-            
-            <!-- Middle aisle -->
-            <div style="width: 40px; flex-shrink: 0;"></div>
-
-            ${renderColHtml(generateRange('B', 21, 30))}
-            ${renderColHtml(generateRange('B', 40, 31))}
+            ${renderCustomColHtml(firstCol1)}
+            ${renderCustomColHtml(firstCol2)}
+            ${renderCustomColHtml(firstCol3)}
+            ${renderCustomColHtml(firstCol4)}
           </div>
 
           <!-- Toilets -->
           <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
             <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
-              TOILET
+              TOILET-1
             </div>
             <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
-              TOILET
+              TOILET-2
             </div>
           </div>
         </div>
       `;
     } else if (currentFilters.floor === "Ground Floor") {
       html = `
-        <div style="background: #fff; padding: 3rem 2rem 2rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
+        <div style="background: #fff; padding: 3rem 2rem 4rem 2rem; border-radius: 12px; position: relative; border: 1px solid #e2e8f0;">
           <!-- Door -->
           <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: #f1f5f9; border: 1px solid #e2e8f0; border-top: none; padding: 0.5rem 2.5rem; border-radius: 0 0 12px 12px; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             DOOR
           </div>
           
           <div style="display: flex; gap: 1.5rem; justify-content: center; max-width: 900px; margin: 0 auto; align-items: flex-start;">
-            ${renderColHtml(generateRange('A', 1, 18))}
-            ${renderColHtml(generateRange('A', 34, 19))}
-            
-            <!-- Middle section with seats 67 and 68 -->
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 80px; flex-shrink: 0; align-self: center;">
-               ${renderSeatCard('A67')}
-               ${renderSeatCard('A68')}
-            </div>
+            ${renderCustomColHtml(groundCol1)}
+            ${renderCustomColHtml(groundCol2)}
+            ${renderCustomColHtml(groundCol3)}
+            ${renderCustomColHtml(groundCol4)}
+          </div>
 
-            ${renderColHtml(generateRange('A', 35, 48))}
-            ${renderColHtml(generateRange('A', 66, 49))}
+          <!-- Toilets -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none;">
+            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
+              TOILET-1
+            </div>
+            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; padding: 0.5rem 2.5rem; border-radius: 12px 12px 0 0; font-weight: 700; color: #475569; letter-spacing: 2px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05);">
+              TOILET-2
+            </div>
           </div>
         </div>
       `;

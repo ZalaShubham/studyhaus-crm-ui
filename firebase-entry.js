@@ -18,6 +18,7 @@ import { initMessageLogAdminUI } from "./services/messageLogAdminUI.js";
 import { initOldStudentAdminUI } from "./services/oldStudentAdminUI.js";
 import { initDashboardReminders } from "./services/dashboardReminderUI.js";
 import { initRenewalAdminUI, renderRenewalForm, renderRenewalHistory } from "./services/renewalAdminUI.js";
+import { websiteAdminUI } from "./services/websiteAdminUI.js";
 import { openReportViewer, closeReportViewer } from "./services/reportAdminUI.js";
 import { initAnnouncementAdminUI } from "./services/announcementAdminUI.js";
 import { initStaffAdminUI } from "./services/staffAdminUI.js";
@@ -96,6 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initTasksAdminUI();
     // Initialize Settings Admin UI
     initSettingsAdminUI();
+    // Initialize Website CMS Module
+    websiteAdminUI.init();
   }
 });
 
