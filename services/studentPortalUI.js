@@ -71,30 +71,50 @@ export const initStudentPortalUI = () => {
     portalSection.innerHTML = `<div style="padding: 2rem; color: var(--danger); text-align: center;">${errorMsg}</div>`;
   });
 
-  // Actions
   window.handleCheckIn = async () => {
-    const defaultSeat = currentStudent.seatNumber || "";
-    let selectedSeat = await window.showCustomPrompt(
-      "Seat Required",
-      "Please enter the Seat Number you are occupying today (e.g., A01):",
-      "Check-In",
-      false,
-      defaultSeat
-    );
-    if (!selectedSeat) return; // cancelled
-    selectedSeat = selectedSeat.trim().toUpperCase();
-
-    const btn = document.getElementById("btn-checkin");
-    btn.textContent = "Processing...";
-    btn.disabled = true;
-    const res = await checkIn(currentStudent, selectedSeat);
-    if (!res.success) window.showToast((window.t ? window.t('Check-In Failed: ') : "Check-In Failed: ") + res.error, "error");
-    else window.showToast(window.t ? window.t('Checked in successfully!') : "Checked in successfully!", "success");
+    const modal = document.getElementById("checkin-seat-modal");
+    if (!modal) return;
     
-    if (document.getElementById("btn-checkin")) {
-      btn.textContent = "Check-In Now";
-      btn.disabled = false;
+    // Clear previous selection
+    const numInput = document.getElementById("selectedSeatNumber");
+    const idInput = document.getElementById("selectedSeatId");
+    if (numInput) numInput.value = "";
+    if (idInput) idInput.value = "";
+    const label = document.getElementById("signup-selected-label");
+    if (label) label.innerHTML = "Select a Seat";
+
+    // Show modal and initialize seat map
+    modal.showModal();
+    import("./seatMapUI.js").then(({ initSeatMapUI }) => {
+      initSeatMapUI("signup", "checkin-seat-selection-section");
+    });
+  };
+
+  window.confirmCheckIn = async () => {
+    const selectedSeatId = document.getElementById("selectedSeatId")?.value;
+    const selectedSeatNumber = document.getElementById("selectedSeatNumber")?.value;
+
+    if (!selectedSeatId || !selectedSeatNumber) {
+      window.showToast("Please select a seat from the map to check in.", "warning");
+      return;
     }
+
+    const btn = document.getElementById("btn-confirm-checkin");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Processing...";
+    btn.disabled = true;
+
+    const res = await checkIn(currentStudent, selectedSeatNumber);
+    if (!res.success) {
+      window.showToast((window.t ? window.t('Check-In Failed: ') : "Check-In Failed: ") + res.error, "error");
+    } else {
+      window.showToast(window.t ? window.t('Checked in successfully!') : "Checked in successfully!", "success");
+      const modal = document.getElementById("checkin-seat-modal");
+      if (modal) modal.close();
+    }
+    
+    btn.innerHTML = originalText;
+    btn.disabled = false;
   };
 
   // Handle Check-out
@@ -381,10 +401,10 @@ const renderPortal = () => {
         <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
           <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.name || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.phone || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.name || sessionStorage.getItem('pendingName') || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.phone || sessionStorage.getItem('pendingPhone') || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);" value="${s.email || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);" value="${s.email || sessionStorage.getItem('pendingEmail') || ''}" readonly /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth <span style="color:#e53e3e;">*</span></label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.dob || ''}" required /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender <span style="color:#e53e3e;">*</span></label>
                 <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);">
@@ -474,6 +494,16 @@ const renderPortal = () => {
           let html = "<option value=''>Choose plan</option>";
           plans.forEach(p => { html += `<option value="${p.id}">${p.planName} - ₹${p.price}</option>`; });
           planSelect.innerHTML = html;
+          
+          const savedPlan = sessionStorage.getItem('pendingPlan');
+          if (savedPlan) {
+            // Find a plan where planName includes savedPlan or matches it roughly
+            const matchedPlan = plans.find(p => p.planName.toLowerCase().includes(savedPlan.toLowerCase()) || savedPlan.toLowerCase().includes(p.planName.toLowerCase()));
+            if (matchedPlan) {
+              planSelect.value = matchedPlan.id;
+              window.updateSummary();
+            }
+          }
         }
       });
     });
@@ -876,6 +906,20 @@ const renderPortal = () => {
           </div>
         </div>
       </div>
+      
+      <!-- Check-In Seat Map Modal -->
+      <dialog id="checkin-seat-modal" class="card" style="border:none; border-radius:12px; padding:0; box-shadow:0 10px 30px rgba(0,0,0,0.5); background: var(--bg-card); color: var(--text-primary); max-width: 800px; margin: auto;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--borderBright); display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 1.1rem; font-weight: 600; margin: 0;">Select Your Seat</h2>
+          <button onclick="document.getElementById('checkin-seat-modal').close()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        <div style="padding: 1.5rem;">
+          <div id="checkin-seat-selection-section" style="margin-bottom: 1rem; border: 1px solid var(--border-bright); border-radius: 12px; padding: 1rem; overflow-y:auto; max-height: 60vh;"></div>
+          <input type="hidden" id="selectedSeatNumber" />
+          <input type="hidden" id="selectedSeatId" />
+          <button class="btn btn-primary" id="btn-confirm-checkin" onclick="window.confirmCheckIn()" style="width: 100%;">Confirm Check-In</button>
+        </div>
+      </dialog>
     `;
   }
 

@@ -128,6 +128,23 @@
     const loader = document.getElementById("global-loader");
     const submitBtn = document.getElementById("submit-btn");
 
+    // Pre-fill fields from URL parameters (e.g. from website booking form)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('name')) {
+      document.getElementById('fullName').value = urlParams.get('name');
+      sessionStorage.setItem('pendingName', urlParams.get('name'));
+    }
+    if (urlParams.has('email')) {
+      document.getElementById('email').value = urlParams.get('email');
+      sessionStorage.setItem('pendingEmail', urlParams.get('email'));
+    }
+    if (urlParams.has('phone')) {
+      sessionStorage.setItem('pendingPhone', urlParams.get('phone'));
+    }
+    if (urlParams.has('plan')) {
+      sessionStorage.setItem('pendingPlan', urlParams.get('plan'));
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       errorDiv.style.display = "none";

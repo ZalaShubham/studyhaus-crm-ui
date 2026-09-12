@@ -197,7 +197,7 @@ const renderLiveMap = () => {
 
     if (!seatExists) {
       return `
-        <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; height:90px; display:grid; place-items:center; color:#94a3b8; font-size:13px;">
+        <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; height:70px; display:grid; place-items:center; color:#94a3b8; font-size:13px;">
           ${seatNumStr}
         </div>
       `;
@@ -218,49 +218,49 @@ const renderLiveMap = () => {
       const avatarColor = colors[initial.charCodeAt(0) % colors.length];
 
       // Check-in time badge
-      let checkInBadge = '';
+      let checkInTime = '';
       if (att.checkIn) {
         const t = new Date(att.checkIn);
         const hh = String(t.getHours()).padStart(2,'0');
         const mm = String(t.getMinutes()).padStart(2,'0');
-        checkInBadge = `<div style="font-size:9px; color:#dc2626; font-weight:500; letter-spacing:0.3px; text-align:center;">${hh}:${mm}</div>`;
+        checkInTime = `${hh}:${mm}`;
       }
 
       // Use real photo if available, else initial avatar
       const photoUrl = studentPhotos[att.studentId];
       const avatarHtml = photoUrl
         ? `<img src="${photoUrl}" alt="${name}"
-            style="width:38px; height:38px; border-radius:50%; object-fit:cover;
-                   border:2px solid #fca5a5; flex-shrink:0;"
+            style="width:28px; height:28px; border-radius:50%; object-fit:cover;
+                   border:1.5px solid #fca5a5; flex-shrink:0;"
             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-           <div style="display:none; width:38px; height:38px; border-radius:50%; background:${avatarColor};
-                       color:#fff; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0;">${initial}</div>`
-        : `<div style="width:38px; height:38px; border-radius:50%; background:${avatarColor};
+           <div style="display:none; width:28px; height:28px; border-radius:50%; background:${avatarColor};
+                       color:#fff; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">${initial}</div>`
+        : `<div style="width:28px; height:28px; border-radius:50%; background:${avatarColor};
                        color:#fff; display:flex; align-items:center; justify-content:center;
-                       font-size:15px; font-weight:700; flex-shrink:0;">${initial}</div>`;
+                       font-size:12px; font-weight:700; flex-shrink:0;">${initial}</div>`;
 
       return `
         <div style="background:#fef2f2; border:1.5px solid #fecaca; color:#991b1b; border-radius:10px;
-                 width:100%; height:90px; box-sizing:border-box;
+                 width:100%; height:70px; box-sizing:border-box;
                  display:flex; flex-direction:column; align-items:center;
-                 justify-content:center; gap:3px; cursor:default; overflow:hidden; padding:6px;
-                 box-shadow:0 1px 3px rgba(239,68,68,0.12);">
-          <div style="font-size:10px; font-weight:700; color:#dc2626; line-height:1; text-align:center;">${seatNumStr}</div>
-          <div style="display:flex; align-items:center; justify-content:center; position:relative;">
+                 justify-content:center; gap:2px; cursor:default; overflow:hidden; padding:4px;
+                 box-shadow:0 1px 3px rgba(239,68,68,0.12); position:relative;">
+          <div style="position:absolute; top:4px; left:4px; font-size:9px; font-weight:700; color:#dc2626; line-height:1;">${seatNumStr}</div>
+          <div style="display:flex; align-items:center; justify-content:center; position:relative; margin-top:6px;">
             ${avatarHtml}
-            <div style="position:absolute; bottom:-1px; right:-2px; width:11px; height:11px;
-                        background:#22c55e; border-radius:50%; border:1.5px solid #fff;"></div>
+            <div style="position:absolute; bottom:-1px; right:-2px; width:9px; height:9px;
+                        background:#22c55e; border-radius:50%; border:1px solid #fff;"></div>
           </div>
-          <div style="font-size:10px; font-weight:600; color:#991b1b; max-width:78px; white-space:nowrap;
-                      overflow:hidden; text-overflow:ellipsis; line-height:1; text-align:center;">${firstName}</div>
-          ${checkInBadge}
+          <div style="font-size:9px; font-weight:600; color:#991b1b; max-width:100%; white-space:nowrap;
+                      overflow:hidden; text-overflow:ellipsis; line-height:1; text-align:center;" title="${firstName}">${firstName}</div>
+          ${checkInTime ? `<div style="position:absolute; bottom:4px; right:4px; font-size:8px; color:#dc2626; font-weight:500;">${checkInTime}</div>` : ''}
         </div>
       `;
     } else {
       // VACANT — clean green card, number perfectly centered
       return `
         <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:10px;
-                    width:100%; height:90px; box-sizing:border-box;
+                    width:100%; height:70px; box-sizing:border-box;
                     display:grid; place-items:center; cursor:default;">
           <div style="font-size:15px; font-weight:600;">${seatNumStr}</div>
         </div>
@@ -272,45 +272,60 @@ const renderLiveMap = () => {
   };
 
 
-  const renderColHtml = (arr) => {
-    // No align-items here — default is 'stretch', so every card fills the full column width.
-    // This ensures seat numbers are always centered inside a consistent-width card.
+  const renderCustomColHtml = (arr) => {
     let html = `<div style="display:flex; flex-direction:column; gap:0.5rem; flex:1; min-width:0;">`;
-    arr.forEach(n => { html += renderSeatCard(n); });
+    arr.forEach(n => { 
+      if (n === null) {
+        html += `<div style="height:70px; width:100%;"></div>`;
+      } else {
+        html += renderSeatCard(n); 
+      }
+    });
     html += `</div>`;
     return html;
   };
 
-  // ── Floor layouts — identical column structure to regular Seat Map ──
+  const groundCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(n => 'A' + n);
+  const groundCol2 = [null, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 67, 23, 22, 21, 20, 19].map(n => n ? 'A' + n : null);
+  const groundCol3 = [null, 35, 36, null, 37, 38, 39, 40, 41, 42, null, 43, 68, 44, 45, 46, 47, 48].map(n => n ? 'A' + n : null);
+  const groundCol4 = [66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49].map(n => 'A' + n);
+
+  const firstCol1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, null].map(n => n ? 'B' + n : null);
+  const firstCol2 = [null, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11].map(n => n ? 'B' + n : null);
+  const firstCol3 = [null, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map(n => n ? 'B' + n : null);
+  const firstCol4 = [40, 39, 38, 37, 36, 35, 34, 33, 32, 31, null].map(n => n ? 'B' + n : null);
+
   let html = '';
 
   if (currentFloor === 'First Floor') {
     html = `
-      <div style="background:#fff; padding:3rem 2rem 3rem 2rem; border-radius:12px; position:relative; border:1px solid #e2e8f0; min-width:800px;">
-        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); background:#f1f5f9; border:1px solid #e2e8f0; border-top:none; padding:0.5rem 2.5rem; border-radius:0 0 12px 12px; font-weight:700; color:#475569; letter-spacing:2px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">DOOR</div>
-        <div style="display:flex; gap:1.5rem; justify-content:center; max-width:800px; margin:0 auto;">
-          ${renderColHtml(generateRange('B', 1, 10))}
-          ${renderColHtml(generateRange('B', 20, 11))}
-          <div style="width:40px; flex-shrink:0;"></div>
-          ${renderColHtml(generateRange('B', 21, 30))}
-          ${renderColHtml(generateRange('B', 40, 31))}
+      <div style="background:#fff; padding:2rem 1rem 4rem 1rem; border-radius:12px; position:relative; border:1px solid #e2e8f0; min-width:800px; overflow-x:auto;">
+        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); background:#f1f5f9; border:1px solid #e2e8f0; border-top:none; padding:0.25rem 1.5rem; border-radius:0 0 8px 8px; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">DOOR</div>
+        <div style="display:flex; gap:1.5rem; justify-content:center; max-width:800px; margin:0 auto; align-items:flex-start;">
+          ${renderCustomColHtml(firstCol1)}
+          ${renderCustomColHtml(firstCol2)}
+          ${renderCustomColHtml(firstCol3)}
+          ${renderCustomColHtml(firstCol4)}
+        </div>
+        <div style="position:absolute; bottom:0; left:0; right:0; display:flex; justify-content:space-around; pointer-events:none;">
+          <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-bottom:none; padding:0.25rem 1.5rem; border-radius:8px 8px 0 0; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">TOILET-1</div>
+          <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-bottom:none; padding:0.25rem 1.5rem; border-radius:8px 8px 0 0; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">TOILET-2</div>
         </div>
       </div>
     `;
   } else {
-    // Ground Floor — exact same column ranges as regular Seat Map
     html = `
-      <div style="background:#fff; padding:3rem 2rem 2rem 2rem; border-radius:12px; position:relative; border:1px solid #e2e8f0; min-width:900px;">
-        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); background:#f1f5f9; border:1px solid #e2e8f0; border-top:none; padding:0.5rem 2.5rem; border-radius:0 0 12px 12px; font-weight:700; color:#475569; letter-spacing:2px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">DOOR</div>
+      <div style="background:#fff; padding:2rem 1rem 4rem 1rem; border-radius:12px; position:relative; border:1px solid #e2e8f0; min-width:900px; overflow-x:auto;">
+        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); background:#f1f5f9; border:1px solid #e2e8f0; border-top:none; padding:0.25rem 1.5rem; border-radius:0 0 8px 8px; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">DOOR</div>
         <div style="display:flex; gap:1.5rem; justify-content:center; max-width:900px; margin:0 auto; align-items:flex-start;">
-          ${renderColHtml(generateRange('A', 1, 18))}
-          ${renderColHtml(generateRange('A', 34, 19))}
-          <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; width:80px; flex-shrink:0; align-self:center;">
-            ${renderSeatCard('A67')}
-            ${renderSeatCard('A68')}
-          </div>
-          ${renderColHtml(generateRange('A', 35, 48))}
-          ${renderColHtml(generateRange('A', 66, 49))}
+          ${renderCustomColHtml(groundCol1)}
+          ${renderCustomColHtml(groundCol2)}
+          ${renderCustomColHtml(groundCol3)}
+          ${renderCustomColHtml(groundCol4)}
+        </div>
+        <div style="position:absolute; bottom:0; left:0; right:0; display:flex; justify-content:space-around; pointer-events:none;">
+          <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-bottom:none; padding:0.25rem 1.5rem; border-radius:8px 8px 0 0; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">TOILET-1</div>
+          <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-bottom:none; padding:0.25rem 1.5rem; border-radius:8px 8px 0 0; font-weight:700; color:#475569; letter-spacing:1px; font-size:11px;">TOILET-2</div>
         </div>
       </div>
     `;

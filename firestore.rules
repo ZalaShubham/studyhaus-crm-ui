@@ -80,6 +80,7 @@ service cloud.firestore {
     match /admissions/{admissionId} {
       allow read, write: if isStaff();
       allow read, write: if isLoggedIn() && request.auth.uid == admissionId;
+      allow create: if request.resource.data.source == "Website";
     }
 
     match /payments/{paymentId} {
