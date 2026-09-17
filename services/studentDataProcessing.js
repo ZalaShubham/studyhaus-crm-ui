@@ -40,9 +40,11 @@ export const sortStudents = (students, sortBy, sortOrder) => {
     let valB = b[sortBy] || "";
 
     // Convert dates
-    if (sortBy === "createdAt" || sortBy === "renewalDate") {
-      valA = valA.toDate ? valA.toDate().getTime() : 0;
-      valB = valB.toDate ? valB.toDate().getTime() : 0;
+    if (sortBy === "createdAt" || sortBy === "renewalDate" || sortBy === "paymentDueDate" || sortBy === "plannedExitDate") {
+      valA = (valA && typeof valA.toDate === 'function') ? valA.toDate().getTime() : (valA ? new Date(valA).getTime() : 0);
+      valB = (valB && typeof valB.toDate === 'function') ? valB.toDate().getTime() : (valB ? new Date(valB).getTime() : 0);
+      if (isNaN(valA)) valA = 0;
+      if (isNaN(valB)) valB = 0;
     }
 
     if (valA < valB) return sortOrder === "asc" ? -1 : 1;

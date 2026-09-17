@@ -89,6 +89,7 @@ body.light-mode {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  user-select: none;
 }
 
 .table-theme td {

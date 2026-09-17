@@ -141,6 +141,21 @@ const renderTable = () => {
                       : s.status === "Pending" || s.approvalStatus === "Pending" ? `<span class="badge badge-pending">Pending</span>`
                       : `<span class="badge badge-overdue">${s.status}</span>`;
 
+    let planHtml = `<span style="white-space: normal;">${s.planName || "None"}</span>`;
+    const priceMatch = s.planName ? s.planName.match(/(.*?)( - | · | )₹(\d+.*)/) : null;
+    if (priceMatch) {
+      planHtml = `<div style="line-height: 1.4;">
+                    <div>${priceMatch[1].trim()}</div>
+                    <div style="font-size: 0.85em; color: var(--text-muted);">₹${priceMatch[3]}</div>
+                  </div>`;
+    } else if (s.planName) {
+      planHtml = `<div style="line-height: 1.4;">${s.planName}</div>`;
+    }
+
+    let remarksHtml = s.remarks && s.remarks !== "-" ? `<div style="line-height: 1.4;">${s.remarks}</div>` : "-";
+    let nameHtml = s.name ? `<div class="name" style="line-height: 1.3;">${s.name}</div>` : `<div class="name">Unknown</div>`;
+
+
     let leavingDateHtml = `<span style="color:var(--text-muted);">N/A</span>`;
     if (s.plannedExitDate) {
       const exitD = new Date(s.plannedExitDate);
@@ -158,29 +173,39 @@ const renderTable = () => {
 
     html += `
       <tr style="cursor:pointer;" onclick="window.openStudentProfile('${s.id}')">
-        <td>
-          <div class="student-cell">
-            <div class="avatar-sm" style="background:var(--primary)">${initials}</div>
+        <td style="vertical-align: top; padding-top: 1rem; max-width: 220px; white-space: normal; word-wrap: break-word;">
+          <div class="student-cell" style="align-items: flex-start;">
+            <div class="avatar-sm" style="background:var(--primary); margin-top: 2px;">${initials}</div>
             <div>
-              <div class="name">${s.name || "Unknown"}</div>
-              <div class="sub-text">${s.phone || "No Phone"}</div>
+              ${nameHtml}
+              <div class="sub-text" style="margin-top: 2px;">${s.phone || "No Phone"}</div>
             </div>
           </div>
         </td>
-        <td>${s.seatNumber || "Unassigned"}</td>
-        <td>${s.planName || "None"}</td>
-        <td>${s.createdAt?.toDate ? new Date(s.createdAt.toDate()).toLocaleDateString() : 'N/A'}</td>
-        <td>${s.paymentDueDate || "N/A"}</td>
-        <td>${leavingDateHtml}</td>
-        <td>${s.remarks || "-"}</td>
-        <td>${statusBadge}</td>
-        <td><button class="icon-btn-sm" onclick="event.stopPropagation(); window.openStudentProfile('${s.id}')">⋯</button></td>
+        <td style="vertical-align: top; padding-top: 1.1rem; white-space: nowrap;">${s.seatNumber || "Unassigned"}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; max-width: 180px; white-space: normal; word-wrap: break-word;">${planHtml}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; white-space: nowrap;">${s.createdAt?.toDate ? new Date(s.createdAt.toDate()).toLocaleDateString() : 'N/A'}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; white-space: nowrap;">${s.paymentDueDate || "N/A"}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; white-space: nowrap;">${leavingDateHtml}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; max-width: 180px; white-space: normal; word-wrap: break-word;">${remarksHtml}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem; white-space: nowrap;">${statusBadge}</td>
+        <td style="vertical-align: top; padding-top: 1.1rem;"><button class="icon-btn-sm" onclick="event.stopPropagation(); window.openStudentProfile('${s.id}')">⋯</button></td>
       </tr>
     `;
   });
 
   tableBody.innerHTML = html;
   updatePaginationUI(total);
+
+  // Update sorting indicators
+  const ths = document.querySelectorAll("#page-students .data-table th[onclick]");
+  ths.forEach(th => {
+    let text = th.textContent.replace(/\s*[↑↓↕]\s*$/, '').trim();
+    const isSorted = th.getAttribute('onclick').includes(`'${currentSort.by}'`);
+    const arrow = isSorted ? (currentSort.order === 'asc' ? '↑' : '↓') : '↕';
+    th.style.color = isSorted ? "var(--text-primary)" : "var(--text-muted)";
+    th.innerHTML = `<div style="display: flex; align-items: center; gap: 4px; white-space: nowrap;"><span>${text}</span><span>${arrow}</span></div>`;
+  });
 };
 
 const updateCounters = (dataset) => {

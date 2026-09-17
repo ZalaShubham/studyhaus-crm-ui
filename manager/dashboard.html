@@ -370,22 +370,24 @@
                 <button class="filter-tab">Pending</button>
               </div>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="cursor:pointer;" onclick="window.setSort('name')">Student ↕</th>
-                  <th style="cursor:pointer;" onclick="window.setSort('seatNumber')">Seat ↕</th>
-                  <th style="cursor:pointer;" onclick="window.setSort('planName')">Plan ↕</th>
-                  <th style="cursor:pointer;" onclick="window.setSort('createdAt')">Joined ↕</th>
-                  <th style="cursor:pointer;" onclick="window.setSort('paymentDueDate')">Due Date ↕</th>
-                  <th style="cursor:pointer;" onclick="window.setSort('status')">Status ↕</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="students-table-body">
-                <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
-              </tbody>
-            </table>
+            <div class="table-container">
+              <table class="data-table" style="table-layout: fixed; min-width: 900px;">
+                <thead>
+                  <tr>
+                    <th style="cursor:pointer; width: 220px;" onclick="window.setSort('name')">Student ↕</th>
+                    <th style="cursor:pointer; width: 100px;" onclick="window.setSort('seatNumber')">Seat ↕</th>
+                    <th style="cursor:pointer; width: 150px;" onclick="window.setSort('planName')">Plan ↕</th>
+                    <th style="cursor:pointer; width: 120px;" onclick="window.setSort('createdAt')">Joined ↕</th>
+                    <th style="cursor:pointer; width: 120px;" onclick="window.setSort('paymentDueDate')">Due Date ↕</th>
+                    <th style="cursor:pointer; width: 100px;" onclick="window.setSort('status')">Status ↕</th>
+                    <th style="width: 50px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="students-table-body">
+                  <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
             
             <div style="padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border);">
               <div id="pagination-info" style="color: var(--text-muted); font-size: 0.85rem;">Showing 0-0 of 0 students</div>
