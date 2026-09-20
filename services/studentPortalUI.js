@@ -401,10 +401,10 @@ const renderPortal = () => {
         <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
           <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.name || sessionStorage.getItem('pendingName') || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.phone || sessionStorage.getItem('pendingPhone') || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${sessionStorage.getItem('pendingName') || s.name || ''}" /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${sessionStorage.getItem('pendingPhone') || s.phone || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Parent mobile</label><input type="tel" pattern="[0-9]{10}" id="adm-parent-phone" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.parentPhone || ''}" /></div>
-              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);" value="${s.email || sessionStorage.getItem('pendingEmail') || ''}" readonly /></div>
+              <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Email <span style="color:#e53e3e;">*</span></label><input type="email" id="adm-email" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);" value="${sessionStorage.getItem('pendingEmail') || s.email || ''}" readonly /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Date of birth <span style="color:#e53e3e;">*</span></label><input type="date" id="adm-dob" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.dob || ''}" required /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Gender <span style="color:#e53e3e;">*</span></label>
                 <select id="adm-gender" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);">
@@ -413,7 +413,7 @@ const renderPortal = () => {
               </div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">College / Institute</label><input type="text" id="adm-college" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.college || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Course</label><input type="text" id="adm-course" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${s.course || ''}" /></div>
-              <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Address</label><textarea id="adm-address" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">${s.address || ''}</textarea></div>
+              <div class="form-group" style="grid-column: 1 / -1; margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Remarks / Exam Goal</label><textarea id="adm-remarks" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">${sessionStorage.getItem('pendingMessage') || s.remarks || ''}</textarea></div>
               <div class="form-group" style="margin:0; grid-column: 1 / -1;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Membership plan <span style="color:#e53e3e;">*</span></label>
                 <select id="adm-plan" required onchange="window.updateSummary()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);">
                   <option value="">Choose plan (Loading...)</option>
@@ -492,7 +492,7 @@ const renderPortal = () => {
         const planSelect = document.getElementById("adm-plan");
         if (planSelect) {
           let html = "<option value=''>Choose plan</option>";
-          plans.forEach(p => { html += `<option value="${p.id}">${p.planName} - ₹${p.price}</option>`; });
+          plans.forEach(p => { html += `<option value="${p.id}">${(p.planName || '').toLowerCase()} - ₹${p.price}</option>`; });
           planSelect.innerHTML = html;
           
           const savedPlan = sessionStorage.getItem('pendingPlan');
@@ -853,7 +853,7 @@ const renderPortal = () => {
           <div class="metric-icon violet" style="border-radius: 50%; font-weight: bold;">${initials}</div>
           <div>
             <div class="metric-label" data-i18n="studentPortal.plan">${window.t ? window.t('studentPortal.plan') : 'Membership Plan'}</div>
-            <div class="metric-value" style="font-size: 1.1rem;"><span data-i18n="studentPortal.none" style="display:${s.planName ? 'none' : 'inline'}">None</span><span style="display:${s.planName ? 'inline' : 'none'}">${s.planName || ''}</span></div>
+            <div class="metric-value" style="font-size: 1.1rem;"><span data-i18n="studentPortal.none" style="display:${s.planName ? 'none' : 'inline'}">None</span><span style="display:${s.planName ? 'inline' : 'none'}">${(s.planName || '').toLowerCase()}</span></div>
           </div>
         </div>
         <div class="metric-card" style="align-items: center;">

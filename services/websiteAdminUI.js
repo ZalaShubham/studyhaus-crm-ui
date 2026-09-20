@@ -34,8 +34,11 @@ export const websiteAdminUI = {
   },
 
   render() {
+    const headlineEl = document.getElementById("website-headline");
+    if (!headlineEl) return;
+
     // Render text
-    document.getElementById("website-headline").value = this.data.headline || "";
+    headlineEl.value = this.data.headline || "";
     document.getElementById("website-subheadline").value = this.data.subheadline || "";
     document.getElementById("website-about").value = this.data.about || "";
 

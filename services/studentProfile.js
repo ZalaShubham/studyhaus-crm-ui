@@ -248,31 +248,63 @@ const renderProfileModal = (s, role) => {
   });
 
   modal.innerHTML = `
-    <div style="padding: 1.5rem; max-width: 600px; max-height: 85vh; overflow-y: auto;">
+    <style>
+      @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .sp-modal-content {
+        animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .sp-tab {
+        transition: all 0.2s ease;
+        border-radius: 6px 6px 0 0;
+      }
+      .sp-tab:hover:not(.active) {
+        background-color: var(--bg-hover, #f1f5f9);
+      }
+      .sp-action-btn {
+        transition: all 0.2s ease;
+      }
+      .sp-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+      #student-profile-modal .form-group input, 
+      #student-profile-modal .form-group select {
+        transition: all 0.2s ease;
+      }
+      #student-profile-modal .form-group input:focus, 
+      #student-profile-modal .form-group select:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+    </style>
+    <div class="sp-modal-content" style="padding: 1.5rem; max-width: 600px; max-height: 85vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h2 style="margin: 0;">Student Profile</h2>
-        <button class="btn btn-ghost" onclick="window.closeStudentProfile()" style="padding: 0.25rem 0.5rem;">✕</button>
+        <button class="btn btn-ghost" onclick="window.closeStudentProfile()" style="padding: 0.25rem 0.5rem; transition: transform 0.2s ease;" onmouseover="this.style.transform='rotate(90deg)'" onmouseout="this.style.transform='none'">✕</button>
       </div>
       
       <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
-        <div id="sp-avatar-${s.id}" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: white; display:flex; align-items:center; justify-content:center; font-size: 24px; font-weight: bold; overflow: hidden;">
+        <div id="sp-avatar-${s.id}" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: white; display:flex; align-items:center; justify-content:center; font-size: 24px; font-weight: bold; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
           ${s.name ? s.name.substring(0, 2).toUpperCase() : "ST"}
         </div>
         <div>
           <h3 style="margin: 0; font-size: 1.25rem;">${s.name}</h3>
           <div style="color: var(--text-muted);">${s.studentId || "No ID"} · ${s.status}</div>
           <div style="margin-top: 0.5rem; display:flex; gap: 0.5rem;">
-            <a href="tel:${s.phone}" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; text-decoration: none;">Call</a>
-            <button type="button" class="btn" style="background: #25D366; color: white; border: none; padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.triggerWhatsAppModal('${s.id}')">WhatsApp</button>
-            ${canEdit ? `<button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.handleConvertToOld('${s.id}', '${s.name}')">Convert to Old</button>` : ""}
-            ${canEdit ? `<button type="button" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.openRenewalModal('${s.id}')">Renew</button>` : ""}
+            <a href="tel:${s.phone}" class="btn btn-primary sp-action-btn" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; text-decoration: none;">Call</a>
+            <button type="button" class="btn sp-action-btn" style="background: #25D366; color: white; border: none; padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.triggerWhatsAppModal('${s.id}')">WhatsApp</button>
+            ${canEdit ? `<button type="button" class="btn btn-secondary sp-action-btn" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.handleConvertToOld('${s.id}', '${s.name}')">Convert to Old</button>` : ""}
+            ${canEdit ? `<button type="button" class="btn btn-primary sp-action-btn" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" onclick="window.openRenewalModal('${s.id}')">Renew</button>` : ""}
           </div>
         </div>
       </div>
 
       <div class="tabs" style="display:flex; gap:1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;">
-        <div class="tab active" style="padding:0.5rem 1rem; border-bottom: 2px solid var(--primary); cursor:pointer;" onclick="window.switchStudentProfileTab('details', this)">Details</div>
-        <div class="tab" style="padding:0.5rem 1rem; cursor:pointer;" onclick="window.switchStudentProfileTab('history', this); window.loadRenewalHistory('${s.id}')">Renewal History</div>
+        <div class="tab active sp-tab" style="padding:0.5rem 1rem; border-bottom: 2px solid var(--primary); cursor:pointer;" onclick="window.switchStudentProfileTab('details', this)">Details</div>
+        <div class="tab sp-tab" style="padding:0.5rem 1rem; cursor:pointer;" onclick="window.switchStudentProfileTab('history', this); window.loadRenewalHistory('${s.id}')">Renewal History</div>
       </div>
 
       <div id="sp-tab-details">

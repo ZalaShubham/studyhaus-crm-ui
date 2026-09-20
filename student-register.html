@@ -144,6 +144,9 @@
     if (urlParams.has('plan')) {
       sessionStorage.setItem('pendingPlan', urlParams.get('plan'));
     }
+    if (urlParams.has('message')) {
+      sessionStorage.setItem('pendingMessage', urlParams.get('message'));
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
