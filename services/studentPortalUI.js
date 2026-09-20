@@ -400,7 +400,7 @@ const renderPortal = () => {
       </div>
       <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
         <div class="card" style="flex: 1; padding: 2rem; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0;">
-          <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal();">
+          <form id="admission-form" onsubmit="event.preventDefault(); window.showPaymentModal(); return false;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Full name <span style="color:#e53e3e;">*</span></label><input type="text" id="adm-name" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${sessionStorage.getItem('pendingName') || s.name || ''}" /></div>
               <div class="form-group" style="margin:0;"><label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Mobile <span style="color:#e53e3e;">*</span></label><input type="tel" pattern="[0-9]{10}" id="adm-phone" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);" value="${sessionStorage.getItem('pendingPhone') || s.phone || ''}" /></div>
@@ -522,7 +522,7 @@ const renderPortal = () => {
     // Add logic for modal flow
     window.showPaymentModal = async () => {
       const selectedSeatId = document.getElementById("selectedSeatId")?.value;
-      if (!selectedSeatId) {
+      if (!selectedSeatId && !s.seatNumber) {
         return window.showToast(window.t ? window.t('Please select a seat from the Seat Map.') || "Please select a seat from the Seat Map." : "Please select a seat from the Seat Map.", "error");
       }
 
@@ -534,9 +534,11 @@ const renderPortal = () => {
       btnSubmit.disabled = true;
 
       try {
-        const { assignSeat } = await import("./seatService.js");
-        const studentName = document.getElementById("adm-name").value || "New Student";
-        await assignSeat(selectedSeatId, { id: s.id, name: studentName });
+        if (selectedSeatId) {
+          const { assignSeat } = await import("./seatService.js");
+          const studentName = document.getElementById("adm-name").value || "New Student";
+          await assignSeat(selectedSeatId, { id: s.id, name: studentName });
+        }
       } catch (e) {
         btnSubmit.innerHTML = originalText;
         btnSubmit.disabled = false;
