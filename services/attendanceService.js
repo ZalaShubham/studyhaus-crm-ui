@@ -93,7 +93,7 @@ export const checkIn = async (student, selectedSeatNumber = null) => {
     const seatDoc = seatSnap.docs[0];
     const seatData = seatDoc.data();
     
-    if (seatData.status === "Occupied") throw new Error("Seat is already occupied.");
+    if (seatData.status === "Occupied" && seatData.assignedStudentId !== student.id) throw new Error("Seat is already occupied.");
     if (seatData.status === "Maintenance" || seatData.status === "Inactive") throw new Error("Seat is not usable.");
     
     // For fixed, check if it belongs to them (unless they are rotational choosing a general seat)

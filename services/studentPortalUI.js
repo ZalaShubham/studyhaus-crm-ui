@@ -72,6 +72,26 @@ export const initStudentPortalUI = () => {
   });
 
   window.handleCheckIn = async () => {
+    const isRotational = (currentStudent.planName || "").toLowerCase().includes("rotational");
+    
+    // If student has a fixed seat and is not on a rotational plan, check them in directly!
+    if (currentStudent.seatNumber && !isRotational) {
+      const ev = window.event;
+      const btn = ev ? (ev.target.closest ? ev.target.closest('.btn') : null) : null;
+      const originalText = btn ? btn.innerHTML : "Check In";
+      if (btn) { btn.innerHTML = "Processing..."; btn.disabled = true; }
+      
+      const res = await checkIn(currentStudent, currentStudent.seatNumber);
+      if (!res.success) {
+        window.showToast((window.t ? window.t('Check-In Failed: ') : "Check-In Failed: ") + res.error, "error");
+      } else {
+        window.showToast(window.t ? window.t('Checked in successfully!') : "Checked in successfully!", "success");
+      }
+      
+      if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+      return;
+    }
+
     const modal = document.getElementById("checkin-seat-modal");
     if (!modal) return;
     
