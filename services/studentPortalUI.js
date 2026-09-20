@@ -388,8 +388,9 @@ const renderPortal = () => {
   }
 
   // 1. DASHBOARD PAGE (Overview)
-  if (s._isNewUser) {
-    // New user -> Show admission form
+  const hasPendingAdmission = sessionStorage.getItem('pendingName') || sessionStorage.getItem('pendingPlan');
+  if (s._isNewUser || hasPendingAdmission) {
+    // New user or came from website -> Show admission form
     portalSection.innerHTML = `
       <div class="page-header" style="margin-bottom: 1.5rem;">
         <div>
@@ -657,6 +658,11 @@ const renderPortal = () => {
               window.showToast(window.t ? window.t('Admission request submitted successfully and is Pending Approval!') || "Admission request submitted successfully and is Pending Approval!" : "Admission request submitted successfully and is Pending Approval!", "success");
             }
             document.getElementById("payment-modal").close();
+            sessionStorage.removeItem('pendingName');
+            sessionStorage.removeItem('pendingPhone');
+            sessionStorage.removeItem('pendingEmail');
+            sessionStorage.removeItem('pendingPlan');
+            sessionStorage.removeItem('pendingMessage');
             window.location.reload(); // reload to show pending or active state
           } else {
               window.showToast((window.t ? window.t('Error: ') : "Error: ") + res.error, "error");
