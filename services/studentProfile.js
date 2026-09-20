@@ -291,6 +291,27 @@ const renderProfileModal = (s, role) => {
               <input type="email" id="edit-email" value="${s.email || ''}" ${!canEdit ? 'disabled' : ''} />
             </div>
             <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" id="edit-dob" value="${s.dob || ''}" ${!canEdit ? 'disabled' : ''} />
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="edit-gender" ${!canEdit ? 'disabled' : ''}>
+                <option value="">Select</option>
+                <option value="Male" ${s.gender === 'Male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${s.gender === 'Female' ? 'selected' : ''}>Female</option>
+                <option value="Other" ${s.gender === 'Other' ? 'selected' : ''}>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>College / Institute</label>
+              <input type="text" id="edit-college" value="${s.college || ''}" ${!canEdit ? 'disabled' : ''} />
+            </div>
+            <div class="form-group">
+              <label>Course</label>
+              <input type="text" id="edit-course" value="${s.course || ''}" ${!canEdit ? 'disabled' : ''} />
+            </div>
+            <div class="form-group">
               <label>Address</label>
               <input type="text" id="edit-address" value="${s.address || ''}" ${!canEdit ? 'disabled' : ''} />
             </div>
@@ -396,6 +417,10 @@ window.submitStudentEdit = async (id) => {
       name: document.getElementById("edit-name").value,
       phone: document.getElementById("edit-phone").value,
       email: document.getElementById("edit-email").value,
+      dob: document.getElementById("edit-dob").value,
+      gender: document.getElementById("edit-gender").value,
+      college: document.getElementById("edit-college").value,
+      course: document.getElementById("edit-course").value,
       address: document.getElementById("edit-address").value,
       parentPhone: document.getElementById("edit-emergency").value,
       // The following are disabled for Managers, so if disabled, they don't change in the DOM but we grab the value anyway (it hasn't changed)
